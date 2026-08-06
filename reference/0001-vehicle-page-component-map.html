@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reference — Vehicle page component map</title>
+    <link rel="stylesheet" href="../assets/lesson.css" />
+  </head>
+  <body>
+    <article class="lesson">
+      <header class="lesson-header">
+        <p class="lesson-eyebrow">Reference 0001</p>
+        <h1>Vehicle page component map</h1>
+        <p class="lede">
+          Compressed view of how the Almosafer-style results UI splits into React
+          components. Revisit while building.
+        </p>
+      </header>
+
+      <figure class="figure">
+        <img
+          src="../assets/vehicle-results-target.png"
+          alt="Target vehicle results page"
+        />
+        <figcaption>Mission target UI.</figcaption>
+      </figure>
+
+      <h2>Tree</h2>
+      <div class="component-map">
+        <div class="node"><strong>ResultsPage</strong></div>
+        <div class="node indent-1"><strong>SiteHeader</strong> — brand, currency, language, auth (out of scope polish)</div>
+        <div class="node indent-1"><strong>SearchSummary</strong> — route · datetime · passengers · “Book another ride”</div>
+        <div class="node indent-1"><strong>FiltersPanel</strong></div>
+        <div class="node indent-2"><strong>FilterToggle</strong> — Free Cancellation</div>
+        <div class="node indent-2"><strong>FilterChip</strong> — services / class / type</div>
+        <div class="node indent-2"><strong>PriceRange</strong></div>
+        <div class="node indent-2"><strong>LuggageStepper</strong></div>
+        <div class="node indent-1"><strong>ResultsList</strong></div>
+        <div class="node indent-2"><strong>SortSelect</strong></div>
+        <div class="node indent-2"><strong>VehicleCard</strong> × N</div>
+        <div class="node indent-2" style="margin-left: 3.75rem">
+          image · title · models · capacity · features · price · <strong>BookNowButton</strong>
+        </div>
+      </div>
+
+      <h2>Split heuristics</h2>
+      <ul>
+        <li><strong>Repeats with different data</strong> → one component (<code>VehicleCard</code>, <code>FilterChip</code>)</li>
+        <li><strong>Independent interaction</strong> → own component (<code>LuggageStepper</code>, <code>FilterToggle</code>)</li>
+        <li><strong>Page layout regions</strong> → container components (<code>FiltersPanel</code>, <code>ResultsList</code>)</li>
+      </ul>
+
+      <p>
+        From lesson:
+        <a href="../lessons/0001-see-the-page-as-components.html"
+          >0001 — See the page as components</a
+        >.
+      </p>
+
+      <p class="ask-teacher">
+        Want to revise a name or split? Ask in chat — the map should stay aligned with
+        how you think about the page.
+      </p>
+    </article>
+  </body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lesson 0001 — See the page as components</title>
+    <link rel="stylesheet" href="../assets/lesson.css" />
+  </head>
+  <body>
+    <article class="lesson">
+      <header class="lesson-header">
+        <p class="lesson-eyebrow">Lesson 0001 · React foundations</p>
+        <h1>See the vehicle page as components</h1>
+        <p class="lede">
+          Before Next.js, TypeScript, or Emotion: learn to carve your booking UI into
+          reusable pieces. That carving skill is what React is built around.
+        </p>
+      </header>
+
+      <p class="mission-tie">
+        Mission tie-in: you will build
+        <a href="../assets/vehicle-results-target.png">this results page</a>.
+        Today you only learn to <em>name the pieces</em> — the same pieces you will later
+        implement as React components.
+      </p>
+
+      <h2>What a component is</h2>
+      <p>
+        Official React docs:
+        <a href="https://react.dev/learn/your-first-component"
+          >a component is a piece of the UI with its own logic and appearance</a
+        >
+        — as small as a button, or as large as a page. In code, it is a
+        <strong>JavaScript function whose name starts with a capital letter</strong>
+        and that returns markup
+        (<a href="https://react.dev/learn/writing-markup-with-jsx">JSX</a>).
+      </p>
+
+      <pre><code>function BookNowButton() {
+  return &lt;button type="button"&gt;Book now&lt;/button&gt;;
+}</code></pre>
+
+      <p>
+        You then <em>nest</em> components the way you nest HTML tags
+        (<a href="https://react.dev/learn">react.dev/learn</a>):
+      </p>
+
+      <pre><code>function VehicleCard() {
+  return (
+    &lt;article&gt;
+      &lt;h2&gt;Standard Sedan&lt;/h2&gt;
+      &lt;BookNowButton /&gt;
+    &lt;/article&gt;
+  );
+}</code></pre>
+
+      <div class="callout">
+        <strong>Rule to remember.</strong>
+        Lowercase names are treated as HTML tags (<code>button</code>). Capitalised
+        names are your components (<code>BookNowButton</code>). That capital letter is
+        not style — React depends on it.
+      </div>
+
+      <h2>Your target, cut into pieces</h2>
+      <figure class="figure">
+        <img
+          src="../assets/vehicle-results-target.png"
+          alt="Almosafer-style vehicle results: filters on the left, vehicle cards on the right"
+        />
+        <figcaption>
+          Reference UI. Mentally label regions — those labels become component names.
+        </figcaption>
+      </figure>
+
+      <p>
+        A useful first split for this page (cheat sheet:
+        <a href="../reference/0001-vehicle-page-component-map.html"
+          >vehicle page component map</a
+        >):
+      </p>
+
+      <div class="component-map" aria-label="Suggested component tree">
+        <div class="node"><strong>ResultsPage</strong> — owns the whole view</div>
+        <div class="node indent-1"><strong>SearchSummary</strong> — route, date, passengers</div>
+        <div class="node indent-1"><strong>FiltersPanel</strong> — left column</div>
+        <div class="node indent-2"><strong>FilterToggle</strong> — Free Cancellation</div>
+        <div class="node indent-2"><strong>FilterChip</strong> — Meet &amp; Greet, Luxury, SUV…</div>
+        <div class="node indent-2"><strong>PriceRange</strong> — min/max slider</div>
+        <div class="node indent-2"><strong>LuggageStepper</strong> — − / count / +</div>
+        <div class="node indent-1"><strong>ResultsList</strong> — sort + cards</div>
+        <div class="node indent-2"><strong>SortSelect</strong> — Lowest price</div>
+        <div class="node indent-2">
+          <strong>VehicleCard</strong> — image, title, capacity, features, price,
+          Book now
+        </div>
+      </div>
+
+      <p>
+        Notice <code>VehicleCard</code> appears six times in the screenshot with
+        different data. That repetition is the signal: one component, many instances.
+        Filters reuse <code>FilterChip</code> the same way.
+      </p>
+
+      <h2>Skill check</h2>
+      <p>
+        Answer from memory — do not scroll up. Feedback is immediate; wrong answers
+        still teach.
+      </p>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Yes — a VehicleCard is the reusable unit you will stamp out for each ride."
+        data-bad="Re-read the component map. Prefer a reusable middle-sized piece over a tiny leaf or the whole chrome."
+      >
+        <h3>Check 1</h3>
+        <p class="prompt">
+          For the booking results UI, which should you treat as one reusable component
+          first?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">
+            One vehicle result card
+          </button>
+          <button type="button" class="choice" data-index="1">
+            Only the price number
+          </button>
+          <button type="button" class="choice" data-index="2">
+            Just page background hue
+          </button>
+          <button type="button" class="choice" data-index="3">
+            Whole browser tab chrome
+          </button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Correct — those live inside each card. Filters and header chrome belong elsewhere."
+        data-bad="Think about what repeats once per vehicle. Filters and the site header are siblings of the list, not children of a card."
+      >
+        <h3>Check 2</h3>
+        <p class="prompt">Which pieces belong inside one VehicleCard?</p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">
+            Image, title, price, Book
+          </button>
+          <button type="button" class="choice" data-index="1">
+            Filters, chips, slider, steps
+          </button>
+          <button type="button" class="choice" data-index="2">
+            Logo, USD, phone, Sign-in
+          </button>
+          <button type="button" class="choice" data-index="3">
+            Route, date, guests, rewrite
+          </button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="1"
+        data-ok="Right — React reserves lowercase for DOM tags; your components must start with a capital."
+        data-bad="Remember the capital-letter rule from react.dev. Only one of these is a valid component function name."
+      >
+        <h3>Check 3</h3>
+        <p class="prompt">Which function name would React treat as a component?</p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">
+            function vehicleCard() {}
+          </button>
+          <button type="button" class="choice" data-index="1">
+            function VehicleCard() {}
+          </button>
+          <button type="button" class="choice" data-index="2">
+            function vehicle_card() {}
+          </button>
+          <button type="button" class="choice" data-index="3">
+            function vehiclecard() {}
+          </button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <aside class="primary-source">
+        <h2>Primary source (read next)</h2>
+        <p>
+          Work through
+          <a href="https://react.dev/learn/your-first-component"
+            >Your First Component</a
+          >
+          on react.dev — including the small in-page challenges. It is the canonical
+          text this lesson compresses. Then glance at the nesting example on
+          <a href="https://react.dev/learn">Quick Start</a>.
+        </p>
+      </aside>
+
+      <p class="ask-teacher">
+        Unclear on anything? Ask me in chat — I’m your teacher for this mission. Good
+        follow-ups: “Is SearchSummary too big?”, “Should Book now be its own
+        component?”, or “Show me VehicleCard in JSX with fake data.”
+      </p>
+
+      <footer class="lesson-footer">
+        Next up (when you’re ready): props — how one VehicleCard shows “Standard Sedan /
+        USD 39” and another shows “Luxury Sedan / USD 168”.
+      </footer>
+    </article>
+    <script src="../assets/quiz.js"></script>
+  </body>
+</html>
