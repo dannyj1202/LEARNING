@@ -51,9 +51,9 @@ To find out where you are at any time:
 
 ---
 
-## The plan — 10 sessions, ~3h each
+## The plan — ~11 sessions, ~3h each
 
-Lesson `0001` exists today. The rest is the expected arc, **not a contract** — the teacher re-plans from how you actually do. If a lesson takes two sessions, that's information, not failure.
+Lesson `0001` exists today. The rest is the expected arc, **not a contract** — the teacher re-plans from how you actually do. If a lesson takes two sessions, that's information, not failure. Lesson **08** is deliberately a pair (**08a** + **08b**).
 
 | #   | Lesson                       | You'll be able to                                                  |
 | --- | ---------------------------- | ------------------------------------------------------------------ |
@@ -64,20 +64,23 @@ Lesson `0001` exists today. The rest is the expected arc, **not a contract** —
 | 05  | Lists and keys               | **Checkpoint (end wk 1)** — the whole list renders from data       |
 | 06  | Emotion                      | Style card, chips and Book button to match the screenshot          |
 | 07  | `useState`                   | Make the filter sidebar respond to clicks                          |
-| 08  | Lifting state up             | **The pivotal one** — filters actually filter, sort actually sorts |
+| 08a | Lifting state up             | **The pivotal one** — filters actually filter, sort actually sorts |
+| 08b | Same problem, MobX store     | **Sub-lesson** — move filter/sort into a MobX store; same UI, no lift |
 | 09  | `useEffect` and edge states  | Loading, empty, no-match-for-these-filters                         |
 | 10  | Next.js routing              | **Checkpoint (end wk 2)** — it's a real page, demo it              |
 
 ### Two checkpoints
 
 - **End of week 1 (after 05)** — demo the list rendering from mock data, walk through your component tree. What's being checked is whether you can _justify the split_, not whether it looks good.
-- **End of week 2 (after 10)** — demo filters filtering and sort sorting, then name three App-Router-only things that wouldn't work in the Rides repo. That second half is what proves the learning transferred.
+- **End of week 2 (after 10)** — demo filters filtering and sort sorting (React lift **and** MobX store), then name three App-Router-only things that wouldn't work in the Rides repo. That second half is what proves the learning transferred.
 
-### Lesson 08 deserves a warning
+### Lesson 08 deserves a warning (and a MobX twin)
 
-It's the one worth slowing down on. Filter state can't live in the sidebar — the results list needs it too — so it moves up to the common parent and the visible list becomes _derived_ rather than stored.
+**08a** is the one worth slowing down on. Filter state can't live in the sidebar — the results list needs it too — so it moves up to the common parent and the visible list becomes _derived_ rather than stored. Official path: [Sharing State Between Components](https://react.dev/learn/sharing-state-between-components) on react.dev.
 
-That's also the exact problem the real Rides codebase solves with an SDK store instead. Two correct answers to one question, at different scales. Ask for the hour with Ali on this lesson; it's the fastest onboarding in the whole plan.
+**08b** does the same page again with [MobX](https://mobx.js.org/) (`makeAutoObservable` + `observer` from `mobx-react-lite`): filter/sort live in a store; components read them; the filtered list is a `computed`. No prop-drilling from a lifted parent.
+
+Same question, two answers — React lift for local page ownership, MobX store for the shape Rides uses (`transport-filter.store.ts` + hooks). Do **08a before 08b**. Ask for the hour with Ali on this pair; it's the fastest onboarding in the whole plan.
 
 ---
 
@@ -90,7 +93,7 @@ The reference screenshot **is** our production search-results page. That's delib
 | Carving the page into components | `app-mweb/containers/SearchResultsPage/` vs `app-common/components/*`         |
 | Props into a `VehicleCard`       | `app-common/components/InfoRow/` — the 3-file folder convention               |
 | Rendering a list from mock data  | `sdk/src/factories/transport-result.factory.ts`                               |
-| "Where does filter state live?"  | `sdk/src/stores/api/transport-filter.store.ts` + `hooks/useStateOfFilters.ts` |
+| "Where does filter state live?" (08a lift / 08b MobX) | `sdk/src/stores/api/transport-filter.store.ts` + `hooks/useStateOfFilters.ts` |
 | Emotion styled components        | `app-common/components/RouteSearchWidget/RouteSearchWidget.styled.tsx`        |
 | Sort dropdown / price slider     | `hooks/useStateOfSort.ts` · `app-common/components/PriceFilter/`              |
 
@@ -115,9 +118,9 @@ Roughly 80% of what you learn here is just React and moves over untouched. Two t
 
 > Rule of thumb: if something you read or an AI generates mentions `app/`, `'use client'`, or `next/navigation`, it is **not** about our repo. Public docs now default to App Router, so this will happen constantly.
 
-**2. Local `useState` is right here. In Rides that state often belongs in an SDK store.**
+**2. Local `useState` / lifting is right here. In Rides that state often belongs in an SDK store (MobX-shaped).**
 
-Ephemeral, one-component UI state stays local even in the real repo (`useStepper.ts`, `useSearchFlightDrawer.ts`). Shared, persisted, or server-derived state goes to the SDK. Being able to argue which is which is worth more than either answer.
+Ephemeral, one-component UI state stays local even in the real repo (`useStepper.ts`, `useSearchFlightDrawer.ts`). Shared, persisted, or server-derived state goes to the SDK. Lesson **08b** is deliberately the bridge: same filters/sort behaviour as **08a**, but owned by a MobX store so the Rides files stop looking alien. Being able to argue which approach fits which problem is worth more than either answer alone.
 
 ---
 

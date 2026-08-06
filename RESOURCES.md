@@ -10,6 +10,14 @@
   How parents configure children with data. Use for: VehicleCard title/price/features from mock data.
 - [React: Rendering Lists](https://react.dev/learn/rendering-lists)
   Mapping arrays to components with keys. Use for: rendering the list of vehicles from data.
+- [React: Sharing State Between Components (lifting state up)](https://react.dev/learn/sharing-state-between-components)
+  Official lift pattern — common parent owns state; children get value + setters via props; filtered results are derived. Use for: lesson **08a** (filters + sort).
+- [MobX: Introduction / concepts](https://mobx.js.org/README.html)
+  Official overview: `observable`, `computed`, `action`, and why reactions re-run. Use for: mental model before coding **08b**.
+- [MobX: React integration](https://mobx.js.org/react-integration.html)
+  Official guide to wrapping components with `observer` (`mobx-react-lite`) and reading observables. Use for: wiring filter/sort UI in **08b**.
+- [MobX: Computed values](https://mobx.js.org/computeds.html)
+  Derived, cached values from observables. Use for: `visibleVehicles` from filter + sort state (parallel to deriving a list after lift in **08a**).
 - [Next.js 16: Installation / Getting Started](https://nextjs.org/docs/app/getting-started/installation)
   Official App Router + TypeScript scaffold (`create-next-app`). Use for: spinning up the mission project.
 - [Next.js 16 announcement](https://nextjs.org/blog/next-16)
