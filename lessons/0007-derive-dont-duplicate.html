@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lesson 0007 — Derive, don't duplicate</title>
+    <link rel="stylesheet" href="../assets/lesson.css" />
+  </head>
+  <body>
+    <article class="lesson">
+      <header class="lesson-header">
+        <p class="lesson-eyebrow">Lesson 0007 · TypeScript depth</p>
+        <h1>Derive, don't duplicate</h1>
+        <p class="lede">
+          You can already read the types in this repo. Depth is a different
+          skill: <em>writing</em> a type without slowing down. The shortcut is
+          that most types here aren't written from scratch at all — they're
+          derived from a type that already exists. Four helpers cover nearly
+          every case.
+        </p>
+      </header>
+
+      <p class="mission-tie">
+        Mission tie-in: the card's goal is "typing doesn't slow you down." The
+        thing that slows people down is hand-writing a near-duplicate of a type
+        that's already there, then keeping the copy in sync forever. Every
+        pattern below exists to avoid that — and each one is measured from your
+        actual repo, not from the docs.
+      </p>
+
+      <h2>The one idea</h2>
+      <div class="callout">
+        <strong>If you're copy-pasting a type and changing a field or two, stop
+        and derive it instead.</strong>
+        A derived type stays linked to its source: when the base type gains a
+        field, your derived type gains it for free. A copy silently drifts, and
+        nothing tells you.
+        <em>(Field Guide §3.7 — "Reach for these utility types <em>before</em>
+        hand-writing a near-duplicate interface.")</em>
+      </div>
+
+      <h2>1. <code>Partial&lt;T&gt;</code> — everything optional</h2>
+      <p>
+        <strong>7 of the 8 API stores</strong> in
+        <code>packages/sdk/src/stores/api/</code> open with the identical three
+        lines. It's the strongest convention in the SDK:
+      </p>
+      <pre><code>type InitialState = Partial&lt;{
+  data: RawGetAirportSearchResponse;
+  API_STATE: APIState;
+}&gt;;</code></pre>
+      <p>
+        A store gets constructed with whatever the caller happens to know —
+        usually nothing (<code>{}</code>). <code>Partial</code> says "all of
+        these fields, all optional" in one word, and still checks the type of
+        any field that <em>is</em> supplied. Writing two <code>?</code>s by hand
+        would work; it just stops working the moment a third field appears.
+      </p>
+
+      <h2>2. <code>Omit&lt;T, K&gt;</code> and <code>Pick&lt;T, K&gt;</code> — a subset</h2>
+      <p>
+        <code>Omit</code> is everything except the named keys;
+        <code>Pick</code> is only the named keys. The repo uses
+        <code>Omit</code> to build its <strong><code>UI*</code> type
+        family</strong> — the API shape, re-expressed for display:
+      </p>
+      <pre><code>// the API's shape
+export interface DiscountType {
+  type: string;
+  value: number;      // ← a number, from the API
+}
+
+// the display shape: same thing, but value is already formatted
+export interface UIDiscountType extends Omit&lt;DiscountType, 'value'&gt; {
+  value: string | number;
+}</code></pre>
+      <p>
+        Read that as <em>"everything <code>DiscountType</code> has except
+        <code>value</code>, plus my own <code>value</code>."</em> Same trick,
+        one level up, at
+        <code>transport-search.types.ts:118</code>:
+        <code>UITransportVehicleResult extends Omit&lt;TransportVehicleResult,
+        'priceDetail'&gt;</code> swaps a single nested field and inherits the
+        other dozen untouched.
+      </p>
+      <div class="callout">
+        <strong>This is the App-types vs SDK-types boundary the card mentions,
+        made concrete.</strong>
+        Domain types (what the API returns) live in the SDK.
+        <code>UI*</code> types are the same data after formatting — prices
+        become strings, a <code>hasDiscount</code> flag gets added. Deriving
+        rather than copying is what keeps the two provably in step.
+      </div>
+
+      <h2>3. <code>Record&lt;K, V&gt;</code> — a lookup table</h2>
+      <p>
+        <code>Record&lt;string, string&gt;</code> means "an object with string
+        keys, whose values are all strings." 26 uses across the SDK. What's
+        worth noticing is the <em>value</em> type they chose:
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Spelling</th><th>Uses in the repo</th><th>Verdict</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>Record&lt;string, unknown&gt;</code></td>
+              <td>14</td>
+              <td>Safe. You must narrow before touching a value.</td>
+            </tr>
+            <tr>
+              <td><code>Record&lt;string, string&gt;</code></td>
+              <td>10</td>
+              <td>Safe and specific — best when it's true.</td>
+            </tr>
+            <tr class="kept">
+              <td><code>Record&lt;string, any&gt;</code></td>
+              <td>2</td>
+              <td>A hole in the net. Fair review comment.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        <code>any</code> switches off checking entirely — you can call anything
+        on it and TypeScript won't blink. <code>unknown</code> forces you to
+        check first. The Field Guide calls this
+        <em>"the most important distinction in the language" (§2.4)</em>, and
+        your repo lands on the right side of it 24 times out of 26.
+      </p>
+
+      <h2>4. The pattern that isn't in the cheatsheet</h2>
+      <p>
+        This is the repo-specific one, and the reason the card asks you to write
+        an addendum. From
+        <code>TypedSearchInputField.tsx</code> — the whole file:
+      </p>
+      <pre><code>type CellProps = Parameters&lt;typeof Cell&gt;[0];
+
+export type Props = Omit&lt;CellProps, 'primaryText'&gt; &amp; {
+  primaryText?: ReactNode;
+};
+
+export default function TypedSearchInputField({ primaryText, ...rest }: Props): JSX.Element {
+  return &lt;Cell {...rest} primaryText={primaryText as CellProps['primaryText']} /&gt;;
+}</code></pre>
+      <p>Three separate moves, worth naming individually:</p>
+      <ul>
+        <li>
+          <code>Parameters&lt;typeof Cell&gt;[0]</code> — grab a component's
+          props type <em>from the component itself</em>, when the library
+          doesn't export it. <code>Parameters&lt;…&gt;</code> gives the argument
+          list as a tuple; <code>[0]</code> takes the first.
+        </li>
+        <li>
+          <code>Omit&lt;…&gt; &amp; { … }</code> — subtract the field you need
+          to change, then intersect (<code>&amp;</code> = "and also") your own
+          version back on. This is how you override one field of a type you
+          don't control.
+        </li>
+        <li>
+          <code>primaryText as CellProps['primaryText']</code> — an assertion,
+          confined to one line. <code>T['key']</code> is an
+          <strong>indexed access type</strong>: "whatever type
+          <code>CellProps</code> gives that key."
+        </li>
+      </ul>
+      <p>
+        Read the file's own comment for the reasoning:
+        <em>"Rather than scattering <code>@ts-ignore</code> at every call site,
+        this wrapper accepts a typed <code>primaryText: ReactNode</code> and
+        applies the assertion to the DS type exactly once, here."</em> That is
+        the good use of an escape hatch — one place, documented, with a wrapper
+        around it. Worth stealing.
+      </p>
+
+      <h2>Two checks, then the real work</h2>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — the derived type is linked to its source, so it picks up the new field automatically. The hand-written copy just silently falls behind, and nothing warns you."
+        data-bad="Think about what happens six months later when someone adds a field to the base type. Which version finds out about it?"
+      >
+        <h3>Check 1</h3>
+        <p class="prompt">
+          Someone adds a field to <code>TransportVehicleResult</code>. What
+          happens to <code>UITransportVehicleResult</code>?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">It gains the field automatically</button>
+          <button type="button" class="choice" data-index="1">It breaks until manually updated</button>
+          <button type="button" class="choice" data-index="2">Nothing, they are unrelated</button>
+          <button type="button" class="choice" data-index="3">It errors on the Omit call</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Correct — unknown refuses to be used until you narrow it, which is exactly what you want for data whose shape you can't vouch for. any would let the same line through and fail at runtime."
+        data-bad="One of these two turns checking off entirely and lets you call any method you like; the other makes you prove what you have first. Which one is safe for data you haven't inspected?"
+      >
+        <h3>Check 2</h3>
+        <p class="prompt">
+          A payload field holds arbitrary JSON from a partner API. Which type is
+          the right call?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">Record&lt;string, unknown&gt;</button>
+          <button type="button" class="choice" data-index="1">Record&lt;string, any&gt;</button>
+          <button type="button" class="choice" data-index="2">Record&lt;any, unknown&gt;</button>
+          <button type="button" class="choice" data-index="3">Record&lt;string, object&gt;</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <h2>Now type it yourself — without me</h2>
+      <div class="callout">
+        <strong>The task card is explicit: "Attempt typing without AI first."</strong>
+        So this part is yours alone. I've set up three exercises that grade
+        themselves, which means you get the feedback loop without me seeing the
+        attempt.
+      </div>
+      <pre><code>cd ~/Desktop/learning/exercises/0001-type-the-props
+./check.sh</code></pre>
+      <p>
+        Three files, each with the type deleted and the evidence left in place:
+        <strong>01</strong> is <code>MultiSelectFilter</code>'s props (the
+        component your card names), <strong>02</strong> is the
+        <code>Omit &amp; </code> override pattern above, <strong>03</strong> is
+        the store's <code>Partial</code> state. Fill in each
+        <code>type … = never;</code> and re-run.
+      </p>
+      <p>
+        The grader runs the work repo's own TypeScript, with the same
+        <code>strict: false</code> the repo really compiles under. It fails a
+        type that's too <em>loose</em> just as loudly as one that's too tight,
+        so passing means the type is genuinely right — not merely accepted.
+        When all three pass, come back and we'll write the repo-specific note
+        together; that's the card's second deliverable, and this time the words
+        should be yours.
+      </p>
+
+      <aside class="primary-source">
+        <h2>Primary source (read next)</h2>
+        <p>
+          Read §3.7 (The Utility Types You'll Actually Use Every Week) and §2.4
+          (<code>unknown</code> vs <code>any</code>) of your
+          <a
+            href="file:///Users/daniel.varghese/Desktop/Almosafer/Almosafer/07%20Learning%20Block/Study/TypeScript%20Field%20Guide.md"
+            >TypeScript Field Guide</a
+          >
+          before attempting the exercises — §3.7 is the whole toolkit on one
+          page. The card also names the
+          <a href="https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/basic_type_example"
+            >React TypeScript Cheatsheet</a
+          >; read it <em>after</em> your attempt, so the comparison is real.
+        </p>
+      </aside>
+
+      <p class="ask-teacher">
+        Stuck for more than ten minutes on one exercise? Ask me — but ask for a
+        <em>hint</em>, not the answer, and the grader stays honest. Good asks:
+        "which utility type family should exercise 2 be in?", "what does
+        TS2578 mean here?", or "why won't <code>&amp;</code> work when I've
+        already got the field?"
+      </p>
+
+      <footer class="lesson-footer">
+        Reference:
+        <a href="../notes/ts-glossary.html">TypeScript Field Notes</a> ·
+        previous:
+        <a href="0006-read-a-real-types-file.html">Read a real .types.ts file</a>.
+        Next: <code>useState</code> on the mission project — and the
+        <em>state</em> half of this card's "props/state typed correctly."
+      </footer>
+    </article>
+    <script src="../assets/quiz.js"></script>
+  </body>
+</html>

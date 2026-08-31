@@ -1,0 +1,1771 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learning TypeScript, React &amp; Next.js — a staged path</title>
+<style>
+:root{
+  color-scheme: light;
+  --plane:#f9f9f7; --surface:#fcfcfb; --surface-2:#f2f2ee; --surface-3:#e9e8e3;
+  --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --ring:rgba(11,11,11,.10);
+  --lang:#2a78d6; --react:#1baf7a; --fw:#eb6834; --craft:#898781; --mentor:#8a5cf6;
+  --warn:#fab219; --good:#0ca30c; --crit:#d03b3b;
+  --shadow:0 1px 2px rgba(11,11,11,.05), 0 10px 30px rgba(11,11,11,.07);
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --plane:#0d0d0d; --surface:#1a1a19; --surface-2:#232322; --surface-3:#2c2c2a;
+  --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,.10);
+  --lang:#3987e5; --react:#199e70; --fw:#d95926; --craft:#898781; --mentor:#a684ff;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+body{
+  background:var(--plane);color:var(--ink);
+  font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+code,kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+code{font-size:.9em;background:var(--surface-2);padding:.12em .36em;border-radius:5px}
+kbd{font-size:.78em;background:var(--surface-2);border:1px solid var(--ring);
+  border-bottom-width:2px;border-radius:5px;padding:.12em .42em}
+a{color:var(--lang);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--lang) 35%,transparent)}
+a:hover{border-bottom-color:var(--lang)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--lang);outline-offset:3px}
+
+/* ---------------- stage ---------------- */
+.deck{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:0}
+.slide{
+  position:absolute;inset:0;display:none;
+  padding:clamp(28px,4.4vh,60px) clamp(28px,5vw,96px) 74px;
+  overflow:auto;
+}
+.slide.on{display:block;animation:in .26s cubic-bezier(.2,.7,.2,1)}
+@keyframes in{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+.inner{max-width:1180px;margin:0 auto;height:100%;display:flex;flex-direction:column;justify-content:center}
+.slide.tall .inner{justify-content:flex-start;padding-top:1vh}
+
+/* eyebrow / titles */
+.eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:clamp(8px,1.7vh,14px);flex-wrap:wrap}
+.tag{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 9px;border-radius:6px;background:var(--surface-2);color:var(--ink-2);
+  box-shadow:inset 0 0 0 1px var(--ring)}
+.tag.lang{background:color-mix(in srgb,var(--lang) 15%,var(--surface));color:var(--ink);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--lang) 45%,transparent)}
+.tag.react{background:color-mix(in srgb,var(--react) 15%,var(--surface));color:var(--ink);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--react) 45%,transparent)}
+.tag.fw{background:color-mix(in srgb,var(--fw) 15%,var(--surface));color:var(--ink);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--fw) 45%,transparent)}
+.tag.time{background:none;box-shadow:none;color:var(--muted);letter-spacing:.06em;padding-left:0}
+.tag.mentor{background:color-mix(in srgb,var(--mentor) 15%,var(--surface));color:var(--ink);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--mentor) 45%,transparent)}
+.tag.prog{font-variant-numeric:tabular-nums}
+h1{font-size:clamp(30px,4.6vw,56px);line-height:1.06;letter-spacing:-.03em;margin:0 0 18px}
+h2{font-size:clamp(23px,2.9vw,36px);line-height:1.12;letter-spacing:-.024em;margin:0 0 8px}
+.sub{font-size:clamp(15px,1.35vw,19px);color:var(--ink-2);margin:0 0 26px;max-width:66ch;line-height:1.5}
+h3{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);
+  margin:0 0 9px;font-weight:700}
+
+/* ---------------- primitives ---------------- */
+.cols{display:grid;gap:clamp(14px,1.7vw,26px)}
+.c2{grid-template-columns:1fr 1fr}
+.c3{grid-template-columns:repeat(3,1fr)}
+.c4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--surface);border:1px solid var(--grid);border-radius:13px;
+  padding:16px 18px;box-shadow:var(--shadow)}
+.card.flat{box-shadow:none;background:var(--surface-2);border-color:transparent}
+.card h4{margin:0 0 7px;font-size:15.5px;letter-spacing:-.012em;display:flex;align-items:center;gap:8px}
+.card p{margin:0;color:var(--ink-2);font-size:13.6px;line-height:1.5}
+.card ul{margin:7px 0 0;padding-left:17px;color:var(--ink-2);font-size:13.6px;line-height:1.55}
+.card li{margin-bottom:4px}
+.dot{width:9px;height:9px;border-radius:99px;flex:none;box-shadow:0 0 0 1px var(--ring)}
+
+ul.plain{list-style:none;margin:0;padding:0}
+ul.plain li{position:relative;padding-left:20px;margin-bottom:9px;color:var(--ink-2);font-size:14.6px;line-height:1.5}
+ul.plain li::before{content:'';position:absolute;left:2px;top:.6em;width:7px;height:7px;
+  border-radius:99px;background:var(--axis)}
+ul.plain li b,ul.plain li strong{color:var(--ink)}
+ul.check li::before{content:'✓';background:none;left:0;top:0;width:auto;height:auto;
+  color:var(--good);font-weight:700}
+ul.no li::before{content:'✕';background:none;left:0;top:0;width:auto;height:auto;
+  color:var(--crit);font-weight:700}
+
+pre{background:var(--surface-2);border:1px solid var(--grid);border-radius:11px;
+  padding:13px 15px;overflow:auto;margin:0;font-size:12.6px;line-height:1.62}
+pre code{background:none;padding:0;font-size:inherit}
+.cm{color:var(--muted)}
+.kw{color:var(--lang)}
+.st{color:var(--react)}
+.ty{color:var(--fw)}
+
+.note{display:flex;gap:11px;padding:13px 15px;border-radius:11px;font-size:13.8px;
+  line-height:1.5;color:var(--ink-2);background:color-mix(in srgb,var(--warn) 12%,var(--surface));
+  border:1px solid color-mix(in srgb,var(--warn) 32%,transparent)}
+.note b{color:var(--ink)}
+.note .ic{font-size:15px;line-height:1.3}
+.note.info{background:color-mix(in srgb,var(--lang) 9%,var(--surface));
+  border-color:color-mix(in srgb,var(--lang) 28%,transparent)}
+
+/* roadmap */
+/* The roadmap is the one slide with ten rows, so it scales with viewport height
+   instead of using fixed padding -- otherwise it overflows on a laptop screen. */
+.road{display:flex;flex-direction:column;gap:clamp(4px,.62vh,8px)}
+.step{display:grid;grid-template-columns:26px 1fr auto;gap:13px;align-items:center;
+  background:var(--surface);border:1px solid var(--grid);border-radius:10px;
+  padding:clamp(6px,1vh,11px) 14px;
+  border-left:4px solid var(--axis)}
+.step.lang{border-left-color:var(--lang)}
+.step.react{border-left-color:var(--react)}
+.step.fw{border-left-color:var(--fw)}
+.step.craft{border-left-color:var(--craft)}
+.step.mentor{border-left-color:var(--mentor)}
+.step .n{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:700}
+.step .t{font-size:clamp(13.2px,1.72vh,14.6px);font-weight:600;letter-spacing:-.012em;line-height:1.32}
+.step .t span{display:block;font-weight:400;font-size:clamp(11.6px,1.5vh,12.8px);
+  color:var(--ink-2);letter-spacing:0;line-height:1.36}
+.step .h{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+table.t{width:100%;border-collapse:collapse;font-size:13.6px}
+table.t th,table.t td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--grid);vertical-align:top}
+table.t th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+table.t td{color:var(--ink-2)}
+table.t td b{color:var(--ink)}
+table.t tr:last-child td{border-bottom:0}
+
+.ladder{display:flex;flex-direction:column;gap:9px;counter-reset:l}
+.rung{display:flex;gap:14px;align-items:flex-start;background:var(--surface);
+  border:1px solid var(--grid);border-radius:11px;padding:12px 15px}
+.rung::before{counter-increment:l;content:counter(l);flex:none;width:24px;height:24px;
+  border-radius:99px;background:var(--surface-3);color:var(--ink);font-size:12px;font-weight:700;
+  display:grid;place-items:center;margin-top:1px}
+.rung div{min-width:0}
+.rung b{font-size:14.4px;letter-spacing:-.012em}
+.rung p{margin:2px 0 0;font-size:13.2px;color:var(--ink-2);line-height:1.5}
+
+.reslist{display:grid;grid-template-columns:1fr 1fr;gap:8px 22px}
+.res{display:flex;gap:9px;align-items:baseline;font-size:13.8px;padding:5px 0;
+  border-bottom:1px dashed var(--grid)}
+.res .nm{font-weight:600;white-space:nowrap}
+.res .ds{color:var(--ink-2);font-size:12.8px;min-width:0}
+.res .free{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--good);
+  font-weight:700;white-space:nowrap;margin-left:auto}
+
+/* ---------------- chrome ---------------- */
+.chrome{position:fixed;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;
+  gap:14px;padding:0 clamp(18px,3vw,34px);background:var(--surface);
+  border-top:1px solid var(--grid);z-index:50}
+.bar{position:fixed;top:0;left:0;height:3px;background:var(--lang);z-index:60;
+  transition:width .26s cubic-bezier(.2,.7,.2,1)}
+.ttl{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;flex:1;min-width:0}
+.nav{display:flex;align-items:center;gap:6px}
+.nav button{background:var(--surface-2);border:1px solid var(--ring);border-radius:8px;
+  width:32px;height:32px;display:grid;place-items:center;font-size:14px;line-height:1}
+.nav button:hover:not(:disabled){border-color:var(--axis)}
+.nav button:disabled{opacity:.35;cursor:default}
+.count{font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums;
+  background:var(--surface-2);border:1px solid var(--ring);border-radius:8px;padding:6px 11px;
+  white-space:nowrap;min-width:64px}
+.hint{font-size:11.5px;color:var(--muted);white-space:nowrap}
+@media (max-width:760px){.hint{display:none}}
+
+/* overview grid */
+.ov{position:fixed;inset:0;background:var(--plane);z-index:70;overflow:auto;
+  padding:26px clamp(18px,3vw,34px) 80px;display:none}
+.ov.on{display:block}
+.ov h2{margin:0 0 18px;font-size:22px}
+.ovgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.ovc{text-align:left;background:var(--surface);border:1px solid var(--grid);border-radius:11px;
+  padding:12px 14px;border-left:4px solid var(--axis);min-height:78px}
+.ovc:hover{border-color:var(--axis)}
+.ovc.lang{border-left-color:var(--lang)} .ovc.react{border-left-color:var(--react)}
+.ovc.fw{border-left-color:var(--fw)} .ovc.craft{border-left-color:var(--craft)}
+.ovc.mentor{border-left-color:var(--mentor)}
+
+/* checklists */
+.tasks-head{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--mentor);
+  font-weight:700;margin:16px 0 6px}
+.tasks-head:first-child{margin-top:0}
+ul.tasks{list-style:none;margin:0 0 4px;padding:0;columns:2;column-gap:26px}
+ul.tasks li{margin-bottom:5px;break-inside:avoid}
+ul.tasks label{display:flex;align-items:flex-start;gap:7px;font-size:12.6px;line-height:1.4;
+  color:var(--ink-2);cursor:pointer}
+ul.tasks input[type="checkbox"]{margin-top:2.5px;flex:none;width:13px;height:13px;
+  accent-color:var(--mentor)}
+ul.tasks li.done label{color:var(--muted);text-decoration:line-through}
+.checklist-card{background:var(--surface);border:1px solid var(--grid);border-radius:13px;
+  padding:14px 18px 16px;box-shadow:var(--shadow)}
+.ovc .i{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ovc .n{font-size:14px;font-weight:600;letter-spacing:-.012em;margin-top:3px;line-height:1.3}
+
+@media print{
+  @page{size:A4 landscape;margin:0}
+  html,body{overflow:visible;height:auto;background:#fff}
+  .chrome,.bar,.ov{display:none!important}
+  /* On screen the deck is a fixed flex row of absolutely-positioned slides.
+     Both have to be undone, or every slide becomes a narrow column on page one. */
+  .deck{position:static;display:block;inset:auto}
+  .slide{display:block!important;position:static;inset:auto;width:100%;
+    break-after:page;page-break-after:always;
+    min-height:auto;padding:12mm 13mm;overflow:visible}
+  .slide:last-child{break-after:auto;page-break-after:auto}
+  .slide .inner{height:auto;justify-content:flex-start;max-width:none}
+  .card,.step,.rung,.note{box-shadow:none;break-inside:avoid}
+  h1{font-size:30pt} h2{font-size:19pt}
+  .sub{font-size:11pt;max-width:none}
+  .card p,.card ul,ul.plain li,table.t,.note,.rung p{font-size:9.5pt}
+  pre{font-size:7.6pt}
+  a{color:inherit}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="bar" id="bar" style="width:0"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 ============================================================ -->
+<section class="slide on" data-track="craft" data-title="Title">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag">Learning path · August 2026</span></div>
+  <h1>TypeScript, React &amp; Next.js<br>without the tutorial spiral</h1>
+  <p class="sub">A staged path with an order that matters, honest time costs, a checkpoint at
+  every stage, and the traps that cost people months. Ten stages, roughly 200–350 focused hours
+  from "I know some JavaScript" to "I can ship in a production codebase."
+  Run it as a <b>5-week sprint</b> (≈200 h) or an <b>8-week deep dive</b> (≈320 h) — both
+  scheduled week by week from slide 4.</p>
+  <div class="cols c4">
+    <div class="card flat"><h4><span class="dot" style="background:var(--lang)"></span>Language</h4>
+      <p>JavaScript &amp; TypeScript. The part everyone skips and everyone pays for.</p></div>
+    <div class="card flat"><h4><span class="dot" style="background:var(--react)"></span>React</h4>
+      <p>A mental model, not an API surface. Learn the model and the API follows.</p></div>
+    <div class="card flat"><h4><span class="dot" style="background:var(--fw)"></span>Framework</h4>
+      <p>Next.js: routing, rendering, data. Where most real decisions live.</p></div>
+    <div class="card flat"><h4><span class="dot" style="background:var(--craft)"></span>Craft</h4>
+      <p>Testing, accessibility, performance. What separates working from shippable.</p></div>
+  </div>
+  <p style="margin-top:24px;font-size:12.5px;color:var(--muted)">
+    <kbd>→</kbd> next · <kbd>←</kbd> back · <kbd>O</kbd> overview · <kbd>D</kbd> dark · <kbd>P</kbd> print
+  </p>
+ </div>
+</section>
+
+<!-- 2 ============================================================ -->
+<section class="slide" data-track="craft" data-title="How to use this">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag">Before you start</span></div>
+  <h2>Three rules that decide whether this works</h2>
+  <p class="sub">The path below is ordinary. Almost everyone who fails at this fails on
+  these three things, not on the content.</p>
+  <div class="cols c3">
+    <div class="card">
+      <h4>1 · Build, don't watch</h4>
+      <p>Reading and watching feel like progress and aren't. Target roughly
+      <b>one third input, two thirds building</b>. If you finish a stage with nothing you
+      can open in a browser, you haven't finished it.</p>
+    </div>
+    <div class="card">
+      <h4>2 · Respect the order</h4>
+      <p>Each stage assumes the one before. Skipping to React with shaky JavaScript is the
+      single most common cause of "React is confusing" — the confusion is usually about
+      references, closures or async, not React.</p>
+    </div>
+    <div class="card">
+      <h4>3 · Read primary sources</h4>
+      <p>The official docs for all three are genuinely excellent now, which was not true a
+      few years ago. A course is a supplement to <code>react.dev</code> and
+      <code>nextjs.org/docs</code>, not a replacement.</p>
+    </div>
+  </div>
+  <div class="note info" style="margin-top:22px">
+    <span class="ic">◆</span>
+    <span><b>On the hour estimates.</b> They assume focused, hands-on time and prior
+    programming experience of some kind. Treat them as relative weights, not a schedule —
+    a complete beginner should expect to roughly double them, and nobody's numbers are
+    anyone else's.</span>
+  </div>
+ </div>
+</section>
+
+<!-- 2b ============================================================ -->
+<section class="slide" data-track="mentor" data-title="Mentor track — overview">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag mentor">Assigned by mentor</span><span class="tag time">freeCodeCamp · 4 weeks</span></div>
+  <h2>The freeCodeCamp bootstrap</h2>
+  <p class="sub">Your mentor's path uses freeCodeCamp to take you from basic programming to a
+  junior frontend developer in four weeks, then this deck's stages carry you the rest of the way.
+  The order across everything is <b>JavaScript → TypeScript → React → Next.js</b>.</p>
+  <div class="cols c4">
+    <div class="card flat"><h4><span class="dot" style="background:var(--mentor)"></span>W1</h4>
+      <p>HTML &amp; CSS. Responsive design, flexbox, one landing-page project.</p></div>
+    <div class="card flat"><h4><span class="dot" style="background:var(--mentor)"></span>W2</h4>
+      <p>JavaScript. Variables through functional programming, one algorithm project.</p></div>
+    <div class="card flat"><h4><span class="dot" style="background:var(--lang)"></span>bridge</h4>
+      <p>This deck's Stage 01–02: TypeScript fundamentals and depth, before React.</p></div>
+    <div class="card flat"><h4><span class="dot" style="background:var(--mentor)"></span>W3–4</h4>
+      <p>React — JSX, props, state, lifecycle, conditional rendering, one app project.</p></div>
+  </div>
+  <div class="note info" style="margin-top:20px">
+    <span class="ic">◆</span>
+    <span><b>Why TypeScript sits between W2 and W3–4.</b> freeCodeCamp's React curriculum is
+    written in plain JS. Take the TypeScript detour (this deck's Stage 01–02, ~35–60 h) right
+    after W2 so you write W3–4's React components typed from the first line, not retrofitted
+    later. After the React project, continue into this deck's Stage 05 onward for Next.js.</span>
+  </div>
+  <p style="margin-top:18px;font-size:12.5px;color:var(--muted)">
+    Checkboxes on the next slides are session-only — they reset on reload, so tick as you go
+    rather than relying on them as a permanent record. Log real progress in your Friction Log
+    and freeCodeCamp profile.</p>
+ </div>
+</section>
+
+<!-- 2c ============================================================ -->
+<section class="slide" data-track="mentor" data-title="First steps">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag mentor">Day 1</span><span class="tag time">before Week 1 starts</span></div>
+  <h2>First steps</h2>
+  <p class="sub">Three things to do before you write any code, so your mentor can see progress
+  without asking.</p>
+  <div class="cols c3">
+    <div class="card">
+      <h4>1 · Create your freeCodeCamp account</h4>
+      <p>Sign up at <b>freecodecamp.org</b> and share your profile link with your mentor so
+      progress is visible on their side, not just reported by you.</p>
+    </div>
+    <div class="card">
+      <h4>2 · Learn CodePen</h4>
+      <p>Open <b>codepen.io</b>, create a pen, and get comfortable with the HTML/CSS/JS panes.
+      You'll use it for snippets and exercises throughout Weeks 1–2.</p>
+    </div>
+    <div class="card">
+      <h4>3 · Bookmark the references</h4>
+      <p><b>javascript.info</b> and <b>MDN Web Docs</b> — go here when a freeCodeCamp
+      explanation is too short. Same habit this deck asks for elsewhere: primary sources
+      over secondary ones.</p>
+    </div>
+  </div>
+  <div class="note" style="margin-top:20px">
+    <span class="ic">◆</span>
+    <span><b>Scope reminder.</b> Only the checklist items on the next slides are required.
+    freeCodeCamp's full course has thousands of hours in it — doing extra is fine if you have
+    time, but don't let it push out Weeks 3–4 or the TypeScript bridge.</span>
+  </div>
+ </div>
+</section>
+
+<!-- 2d ============================================================ -->
+<section class="slide tall" data-track="mentor" data-title="Week 1 — HTML elements &amp; Basic CSS">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag mentor">Week 1 · Responsive Web Design</span><span class="tag time prog" data-prog="w1a">0 / 37 done</span></div>
+  <h2>HTML elements &amp; Basic CSS</h2>
+  <p class="sub">From <code>freecodecamp.org/learn/responsive-web-design</code>. Tick items off as
+  you complete them on freeCodeCamp itself — this list just mirrors your mentor's outline.</p>
+  <div class="checklist-card" data-prog-group="w1a">
+    <div class="tasks-head">HTML basics</div>
+    <ul class="tasks">
+      <li><label><input type="checkbox"><span>Say Hello to HTML Elements</span></label></li>
+      <li><label><input type="checkbox"><span>Headline with the h2 Element</span></label></li>
+      <li><label><input type="checkbox"><span>Inform with the Paragraph Element</span></label></li>
+      <li><label><input type="checkbox"><span>Add Images to Your Website</span></label></li>
+      <li><label><input type="checkbox"><span>Link to External Pages with Anchor Elements</span></label></li>
+      <li><label><input type="checkbox"><span>Turn an Image into a Link</span></label></li>
+      <li><label><input type="checkbox"><span>Create a Bulleted Unordered List</span></label></li>
+      <li><label><input type="checkbox"><span>Create a Text Field</span></label></li>
+      <li><label><input type="checkbox"><span>Add Placeholder Text to a Text Field</span></label></li>
+      <li><label><input type="checkbox"><span>Create a Form Element</span></label></li>
+      <li><label><input type="checkbox"><span>Add a Submit Button to a Form</span></label></li>
+      <li><label><input type="checkbox"><span>Use HTML5 to Require a Field</span></label></li>
+      <li><label><input type="checkbox"><span>Create a Set of Radio Buttons</span></label></li>
+      <li><label><input type="checkbox"><span>Create a Set of Checkboxes</span></label></li>
+      <li><label><input type="checkbox"><span>Use the value attribute with Radio Buttons and Checkboxes</span></label></li>
+      <li><label><input type="checkbox"><span>Check Radio Buttons and Checkboxes by Default</span></label></li>
+      <li><label><input type="checkbox"><span>Nest Many Elements within a Single div Element</span></label></li>
+      <li><label><input type="checkbox"><span>Declare the Doctype of an HTML Document</span></label></li>
+      <li><label><input type="checkbox"><span>Define the Head and Body of an HTML Document</span></label></li>
+    </ul>
+    <div class="tasks-head">Basic CSS</div>
+    <ul class="tasks">
+      <li><label><input type="checkbox"><span>Use a CSS Class to Style an Element</span></label></li>
+      <li><label><input type="checkbox"><span>Style Multiple Elements with a CSS Class</span></label></li>
+      <li><label><input type="checkbox"><span>Size Your Images</span></label></li>
+      <li><label><input type="checkbox"><span>Give a Background Color to a div Element</span></label></li>
+      <li><label><input type="checkbox"><span>Set the id of an Element</span></label></li>
+      <li><label><input type="checkbox"><span>Use an id Attribute to Style an Element</span></label></li>
+      <li><label><input type="checkbox"><span>Adjust the Padding of an Element</span></label></li>
+      <li><label><input type="checkbox"><span>Adjust the Margin of an Element</span></label></li>
+      <li><label><input type="checkbox"><span>Add a Negative Margin to an Element</span></label></li>
+      <li><label><input type="checkbox"><span>Use Attribute Selectors to Style Elements</span></label></li>
+      <li><label><input type="checkbox"><span>Understand Absolute versus Relative Units</span></label></li>
+      <li><label><input type="checkbox"><span>Style the HTML Body Element</span></label></li>
+      <li><label><input type="checkbox"><span>Inherit Styles from the Body Element</span></label></li>
+      <li><label><input type="checkbox"><span>Prioritize One Style Over Another</span></label></li>
+      <li><label><input type="checkbox"><span>Override Styles in Subsequent CSS</span></label></li>
+      <li><label><input type="checkbox"><span>Override Class Declarations with Inline Styles</span></label></li>
+      <li><label><input type="checkbox"><span>Override All Other Styles by using Important</span></label></li>
+      <li><label><input type="checkbox"><span>Use a media query to change a variable</span></label></li>
+    </ul>
+  </div>
+ </div>
+</section>
+
+<!-- 2e ============================================================ -->
+<section class="slide tall" data-track="mentor" data-title="Week 1 — Visual design, flexbox &amp; project">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag mentor">Week 1 · Responsive Web Design</span><span class="tag time prog" data-prog="w1b">0 / 21 done</span></div>
+  <h2>Applied visual design, flexbox &amp; the project</h2>
+  <p class="sub">Same course, continuing on. Flexbox is the part most people underrate — it's
+  what makes stage 07 (styling, later in this deck) click faster.</p>
+  <div class="checklist-card" data-prog-group="w1b">
+    <div class="tasks-head">Applied visual design &amp; RWD principles</div>
+    <ul class="tasks">
+      <li><label><input type="checkbox"><span>Create Visual Balance Using the text-align Property</span></label></li>
+      <li><label><input type="checkbox"><span>Adjust the Width of an Element Using the width Property</span></label></li>
+      <li><label><input type="checkbox"><span>Adjust the Height of an Element Using the height Property</span></label></li>
+      <li><label><input type="checkbox"><span>Use the strong Tag to Make Text Bold</span></label></li>
+      <li><label><input type="checkbox"><span>Change an Element's Relative Position</span></label></li>
+      <li><label><input type="checkbox"><span>Move a Relatively Positioned Element with CSS Offsets</span></label></li>
+      <li><label><input type="checkbox"><span>Lock an Element to its Parent with Absolute Positioning</span></label></li>
+      <li><label><input type="checkbox"><span>Lock an Element to the Browser Window with Fixed Positioning</span></label></li>
+      <li><label><input type="checkbox"><span>Create a Media Query</span></label></li>
+    </ul>
+    <div class="tasks-head">CSS Flexbox</div>
+    <ul class="tasks">
+      <li><label><input type="checkbox"><span>Use display: flex to Position Two Boxes</span></label></li>
+      <li><label><input type="checkbox"><span>Add Flex Superpowers to the Tweet Embed</span></label></li>
+      <li><label><input type="checkbox"><span>Use the flex-direction Property to Make a Row</span></label></li>
+      <li><label><input type="checkbox"><span>Apply the flex-direction Property to Create Rows in the Tweet Embed</span></label></li>
+      <li><label><input type="checkbox"><span>Use the flex-direction Property to Make a Column</span></label></li>
+      <li><label><input type="checkbox"><span>Apply the flex-direction Property to Create a Column in the Tweet Embed</span></label></li>
+      <li><label><input type="checkbox"><span>Align Elements Using the justify-content Property</span></label></li>
+      <li><label><input type="checkbox"><span>Use the justify-content Property in the Tweet Embed</span></label></li>
+      <li><label><input type="checkbox"><span>Align Elements Using the align-items Property</span></label></li>
+      <li><label><input type="checkbox"><span>Use the align-items Property in the Tweet Embed</span></label></li>
+      <li><label><input type="checkbox"><span>Use the flex-wrap Property to Wrap a Row or Column</span></label></li>
+    </ul>
+    <div class="tasks-head">Project</div>
+    <ul class="tasks" style="columns:1">
+      <li><label><input type="checkbox"><span><b>Build a Product Landing Page</b> — ships responsive layout + flexbox in one deliverable</span></label></li>
+    </ul>
+  </div>
+ </div>
+</section>
+
+<!-- 2f ============================================================ -->
+<section class="slide tall" data-track="mentor" data-title="Week 2 — JavaScript basics">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag mentor">Week 2 · JS Algorithms &amp; Data Structures</span><span class="tag time prog" data-prog="w2a">0 / 45 done</span></div>
+  <h2>JavaScript: variables through conditionals</h2>
+  <p class="sub">From <code>freecodecamp.org/learn/javascript-algorithms-and-data-structures</code>.
+  Cross-reference <b>javascript.info</b> and <b>MDN</b> whenever an explanation feels thin —
+  that habit is most of what separates this from a tutorial spiral.</p>
+  <div class="checklist-card" data-prog-group="w2a">
+    <div class="tasks-head">Variables, strings &amp; arrays (→ Word Blanks, Shopping List)</div>
+    <ul class="tasks">
+      <li><label><input type="checkbox"><span>Comment Your JavaScript Code</span></label></li>
+      <li><label><input type="checkbox"><span>Declare JavaScript Variables</span></label></li>
+      <li><label><input type="checkbox"><span>Storing Values with the Assignment Operator</span></label></li>
+      <li><label><input type="checkbox"><span>Assigning the Value of One Variable to Another</span></label></li>
+      <li><label><input type="checkbox"><span>Initializing Variables with the Assignment Operator</span></label></li>
+      <li><label><input type="checkbox"><span>Understanding Uninitialized Variables</span></label></li>
+      <li><label><input type="checkbox"><span>Understanding Case Sensitivity in Variables</span></label></li>
+      <li><label><input type="checkbox"><span>Add Two Numbers with JavaScript</span></label></li>
+      <li><label><input type="checkbox"><span>Declare String Variables</span></label></li>
+      <li><label><input type="checkbox"><span>Escaping Literal Quotes in Strings</span></label></li>
+      <li><label><input type="checkbox"><span>Quoting Strings with Single Quotes</span></label></li>
+      <li><label><input type="checkbox"><span>Escape Sequences in Strings</span></label></li>
+      <li><label><input type="checkbox"><span>Concatenating Strings with Plus Operator</span></label></li>
+      <li><label><input type="checkbox"><span>Appending Variables to Strings</span></label></li>
+      <li><label><input type="checkbox"><span>Find the Length of a String</span></label></li>
+      <li><label><input type="checkbox"><span>Understand String Immutability</span></label></li>
+      <li><label><input type="checkbox"><span><b>Word Blanks</b> (checkpoint)</span></label></li>
+      <li><label><input type="checkbox"><span>Store Multiple Values in one Variable using JavaScript Arrays</span></label></li>
+      <li><label><input type="checkbox"><span>Nest one Array within Another Array</span></label></li>
+      <li><label><input type="checkbox"><span>Access Array Data with Indexes</span></label></li>
+      <li><label><input type="checkbox"><span>Modify Array Data With Indexes</span></label></li>
+      <li><label><input type="checkbox"><span>Manipulate Arrays With push()</span></label></li>
+      <li><label><input type="checkbox"><span><b>Shopping List</b> (checkpoint)</span></label></li>
+    </ul>
+    <div class="tasks-head">Functions &amp; scope (→ Stand in Line)</div>
+    <ul class="tasks">
+      <li><label><input type="checkbox"><span>Write Reusable JavaScript with Functions</span></label></li>
+      <li><label><input type="checkbox"><span>Passing Values to Functions with Arguments</span></label></li>
+      <li><label><input type="checkbox"><span>Global Scope and Functions</span></label></li>
+      <li><label><input type="checkbox"><span>Local Scope and Functions</span></label></li>
+      <li><label><input type="checkbox"><span>Global vs. Local Scope in Functions</span></label></li>
+      <li><label><input type="checkbox"><span>Return a Value from a Function with Return</span></label></li>
+      <li><label><input type="checkbox"><span>Understanding Undefined Value returned from a Function</span></label></li>
+      <li><label><input type="checkbox"><span>Assignment with a Returned Value</span></label></li>
+      <li><label><input type="checkbox"><span><b>Stand in Line</b> (checkpoint)</span></label></li>
+    </ul>
+    <div class="tasks-head">Conditionals (→ Golf Code)</div>
+    <ul class="tasks">
+      <li><label><input type="checkbox"><span>Understanding Boolean Values</span></label></li>
+      <li><label><input type="checkbox"><span>Use Conditional Logic with If Statements</span></label></li>
+      <li><label><input type="checkbox"><span>Comparison with the Equality Operator</span></label></li>
+      <li><label><input type="checkbox"><span>Comparison with the Strict Equality Operator</span></label></li>
+      <li><label><input type="checkbox"><span>Practice comparing different values</span></label></li>
+      <li><label><input type="checkbox"><span>Comparison with the Inequality Operator</span></label></li>
+      <li><label><input type="checkbox"><span>Comparison with the Strict Inequality Operator</span></label></li>
+      <li><label><input type="checkbox"><span>Comparison with the Greater Than Operator</span></label></li>
+      <li><label><input type="checkbox"><span>Introducing Else Statements</span></label></li>
+      <li><label><input type="checkbox"><span>Introducing Else If Statements</span></label></li>
+      <li><label><input type="checkbox"><span>Logical Order in If Else Statements</span></label></li>
+      <li><label><input type="checkbox"><span>Chaining If Else Statements</span></label></li>
+      <li><label><input type="checkbox"><span><b>Golf Code</b> (checkpoint)</span></label></li>
+    </ul>
+  </div>
+ </div>
+</section>
+
+<!-- 2g ============================================================ -->
+<section class="slide tall" data-track="mentor" data-title="Week 2 — objects, loops &amp; functional programming">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag mentor">Week 2 · JS Algorithms &amp; Data Structures</span><span class="tag time prog" data-prog="w2b">0 / 38 done</span></div>
+  <h2>Switch, objects, loops &amp; functional programming</h2>
+  <p class="sub">The functional-programming section at the end matters more than its size
+  suggests — <code>map</code>/<code>filter</code> here is the same tool the React stages
+  later in this deck lean on constantly.</p>
+  <div class="checklist-card" data-prog-group="w2b">
+    <div class="tasks-head">Switch statements (→ Counting Cards)</div>
+    <ul class="tasks">
+      <li><label><input type="checkbox"><span>Selecting from Many Options with Switch Statements</span></label></li>
+      <li><label><input type="checkbox"><span>Adding a Default Option in Switch Statements</span></label></li>
+      <li><label><input type="checkbox"><span>Multiple Identical Options in Switch Statements</span></label></li>
+      <li><label><input type="checkbox"><span>Replacing If Else Chains with Switch</span></label></li>
+      <li><label><input type="checkbox"><span>Returning Boolean Values from Functions</span></label></li>
+      <li><label><input type="checkbox"><span>Return Early Pattern for Functions</span></label></li>
+      <li><label><input type="checkbox"><span><b>Counting Cards</b> (checkpoint)</span></label></li>
+    </ul>
+    <div class="tasks-head">Objects (→ Record Collection)</div>
+    <ul class="tasks">
+      <li><label><input type="checkbox"><span>Build JavaScript Objects</span></label></li>
+      <li><label><input type="checkbox"><span>Accessing Object Properties with Dot Notation</span></label></li>
+      <li><label><input type="checkbox"><span>Accessing Object Properties with Bracket Notation</span></label></li>
+      <li><label><input type="checkbox"><span>Accessing Object Properties with Variables</span></label></li>
+      <li><label><input type="checkbox"><span>Updating Object Properties</span></label></li>
+      <li><label><input type="checkbox"><span>Add New Properties to a JavaScript Object</span></label></li>
+      <li><label><input type="checkbox"><span>Delete Properties from a JavaScript Object</span></label></li>
+      <li><label><input type="checkbox"><span>Using Objects for Lookups</span></label></li>
+      <li><label><input type="checkbox"><span>Testing Objects for Properties</span></label></li>
+      <li><label><input type="checkbox"><span>Manipulating Complex Objects</span></label></li>
+      <li><label><input type="checkbox"><span>Accessing Nested Objects</span></label></li>
+      <li><label><input type="checkbox"><span>Accessing Nested Arrays</span></label></li>
+      <li><label><input type="checkbox"><span><b>Record Collection</b> (checkpoint)</span></label></li>
+    </ul>
+    <div class="tasks-head">Loops &amp; ternaries (→ Profile Lookup)</div>
+    <ul class="tasks">
+      <li><label><input type="checkbox"><span>Iterate with JavaScript While Loops</span></label></li>
+      <li><label><input type="checkbox"><span>Iterate with JavaScript For Loops</span></label></li>
+      <li><label><input type="checkbox"><span>Iterate Odd Numbers With a For Loop</span></label></li>
+      <li><label><input type="checkbox"><span>Count Backwards With a For Loop</span></label></li>
+      <li><label><input type="checkbox"><span>Iterate Through an Array with a For Loop</span></label></li>
+      <li><label><input type="checkbox"><span>Nesting For Loops</span></label></li>
+      <li><label><input type="checkbox"><span>Use the parseInt Function</span></label></li>
+      <li><label><input type="checkbox"><span>Use the parseInt Function with a Radix</span></label></li>
+      <li><label><input type="checkbox"><span>Use the Conditional (Ternary) Operator</span></label></li>
+      <li><label><input type="checkbox"><span>Use Multiple Conditional (Ternary) Operators</span></label></li>
+      <li><label><input type="checkbox"><span><b>Profile Lookup</b> (checkpoint)</span></label></li>
+    </ul>
+    <div class="tasks-head">Functional programming &amp; project</div>
+    <ul class="tasks">
+      <li><label><input type="checkbox"><span>Learn About Functional Programming</span></label></li>
+      <li><label><input type="checkbox"><span>Understand Functional Programming Terminology</span></label></li>
+      <li><label><input type="checkbox"><span>Understand the Hazards of Using Imperative Code</span></label></li>
+      <li><label><input type="checkbox"><span>Use the map Method to Extract Data from an Array</span></label></li>
+      <li><label><input type="checkbox"><span>Use the filter Method to Extract Data from an Array</span></label></li>
+      <li><label><input type="checkbox"><span>Implement the filter Method on a Prototype</span></label></li>
+      <li><label><input type="checkbox"><span><b>Palindrome Checker</b> — the Week 2 project</span></label></li>
+    </ul>
+  </div>
+ </div>
+</section>
+
+<!-- 2h ============================================================ -->
+<section class="slide" data-track="lang" data-title="Bridge — TypeScript before React">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag lang">Bridge · after W2, before W3–4</span><span class="tag time">this deck's Stage 01–02 · ≈ 35–60 h</span></div>
+  <h2>Now take the TypeScript detour</h2>
+  <p class="sub">freeCodeCamp's React unit (next) is written in plain JavaScript. Your path adds
+  TypeScript here so the React you write in Weeks 3–4 is typed from the start — see this deck's
+  <b>Stage 01 (TypeScript fundamentals)</b> and <b>Stage 02 (TypeScript that earns its keep)</b>,
+  a few slides ahead.</p>
+  <div class="cols c2">
+    <div class="card">
+      <h4>Minimum before moving on</h4>
+      <ul class="plain">
+        <li>Comfortable with <code>strict</code> mode, unions, and narrowing</li>
+        <li>Can annotate function parameters and return types without guessing</li>
+        <li>Know what a generic is, even if you don't reach for one yet</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Don't over-invest here</h4>
+      <ul class="plain">
+        <li>Conditional and mapped types can wait — they'll make more sense once
+        you've typed real React props</li>
+        <li>The goal is "type as you go" in Weeks 3–4, not TypeScript mastery in isolation</li>
+      </ul>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- 2i ============================================================ -->
+<section class="slide tall" data-track="mentor" data-title="Week 3–4 — React: JSX, components &amp; props">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag mentor">Week 3–4 · Front End Development Libraries</span><span class="tag time prog" data-prog="w3a">0 / 20 done</span></div>
+  <h2>React: JSX, components &amp; props</h2>
+  <p class="sub">This freeCodeCamp unit teaches React with class components — older syntax than
+  this deck's Stage 03–04, which uses hooks. Learn this as written first; the hooks model will
+  make more sense as a contrast once you've seen both.</p>
+  <div class="checklist-card" data-prog-group="w3a">
+    <div class="tasks-head">JSX</div>
+    <ul class="tasks">
+      <li><label><input type="checkbox"><span>Create a Simple JSX Element</span></label></li>
+      <li><label><input type="checkbox"><span>Create a Complex JSX Element</span></label></li>
+      <li><label><input type="checkbox"><span>Add Comments in JSX</span></label></li>
+      <li><label><input type="checkbox"><span>Render HTML Elements to the DOM</span></label></li>
+      <li><label><input type="checkbox"><span>Define an HTML Class in JSX</span></label></li>
+      <li><label><input type="checkbox"><span>Learn About Self-Closing JSX Tags</span></label></li>
+    </ul>
+    <div class="tasks-head">Components &amp; composition</div>
+    <ul class="tasks">
+      <li><label><input type="checkbox"><span>Create a Stateless Functional Component</span></label></li>
+      <li><label><input type="checkbox"><span>Create a React Component</span></label></li>
+      <li><label><input type="checkbox"><span>Create a Component with Composition</span></label></li>
+      <li><label><input type="checkbox"><span>Use React to Render Nested Components</span></label></li>
+      <li><label><input type="checkbox"><span>Compose React Components</span></label></li>
+      <li><label><input type="checkbox"><span>Render a Class Component to the DOM</span></label></li>
+      <li><label><input type="checkbox"><span>Write a React Component from Scratch</span></label></li>
+    </ul>
+    <div class="tasks-head">Props</div>
+    <ul class="tasks">
+      <li><label><input type="checkbox"><span>Pass Props to a Stateless Functional Component</span></label></li>
+      <li><label><input type="checkbox"><span>Pass an Array as Props</span></label></li>
+      <li><label><input type="checkbox"><span>Use Default Props</span></label></li>
+      <li><label><input type="checkbox"><span>Override Default Props</span></label></li>
+      <li><label><input type="checkbox"><span>Use PropTypes to Define the Props You Expect</span></label></li>
+      <li><label><input type="checkbox"><span>Access Props Using this.props</span></label></li>
+      <li><label><input type="checkbox"><span>Review Using Props with Stateless Functional Components</span></label></li>
+    </ul>
+  </div>
+ </div>
+</section>
+
+<!-- 2j ============================================================ -->
+<section class="slide tall" data-track="mentor" data-title="Week 3–4 — React: state, lifecycle &amp; the project">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag mentor">Week 3–4 · Front End Development Libraries</span><span class="tag time prog" data-prog="w3b">0 / 29 done</span></div>
+  <h2>React: state, lifecycle, conditional rendering &amp; the project</h2>
+  <p class="sub">This is where the "why you rarely need an effect" idea from Stage 03 (ahead in
+  this deck) will start to feel true — watch how much of this list is state and props, not
+  lifecycle methods.</p>
+  <div class="checklist-card" data-prog-group="w3b">
+    <div class="tasks-head">State &amp; controlled forms</div>
+    <ul class="tasks">
+      <li><label><input type="checkbox"><span>Create a Stateful Component</span></label></li>
+      <li><label><input type="checkbox"><span>Render State in the User Interface</span></label></li>
+      <li><label><input type="checkbox"><span>Render State in the User Interface Another Way</span></label></li>
+      <li><label><input type="checkbox"><span>Set State with this.setState</span></label></li>
+      <li><label><input type="checkbox"><span>Bind 'this' to a Class Method</span></label></li>
+      <li><label><input type="checkbox"><span>Use State to Toggle an Element</span></label></li>
+      <li><label><input type="checkbox"><span>Write a Simple Counter</span></label></li>
+      <li><label><input type="checkbox"><span>Create a Controlled Input</span></label></li>
+      <li><label><input type="checkbox"><span>Create a Controlled Form</span></label></li>
+      <li><label><input type="checkbox"><span>Pass State as Props to Child Components</span></label></li>
+      <li><label><input type="checkbox"><span>Pass a Callback as Props</span></label></li>
+    </ul>
+    <div class="tasks-head">Lifecycle &amp; events</div>
+    <ul class="tasks">
+      <li><label><input type="checkbox"><span>Use the Lifecycle Method componentWillMount</span></label></li>
+      <li><label><input type="checkbox"><span>Use the Lifecycle Method componentDidMount</span></label></li>
+      <li><label><input type="checkbox"><span>Add Event Listeners</span></label></li>
+      <li><label><input type="checkbox"><span>Optimize Re-Renders with shouldComponentUpdate</span></label></li>
+      <li><label><input type="checkbox"><span>Introducing Inline Styles</span></label></li>
+      <li><label><input type="checkbox"><span>Add Inline Styles in React</span></label></li>
+    </ul>
+    <div class="tasks-head">Conditional rendering &amp; lists</div>
+    <ul class="tasks">
+      <li><label><input type="checkbox"><span>Use Advanced JavaScript in React Render Method</span></label></li>
+      <li><label><input type="checkbox"><span>Render with an If-Else Condition</span></label></li>
+      <li><label><input type="checkbox"><span>Use &amp;&amp; for a More Concise Conditional</span></label></li>
+      <li><label><input type="checkbox"><span>Use a Ternary Expression for Conditional Rendering</span></label></li>
+      <li><label><input type="checkbox"><span>Render Conditionally from Props</span></label></li>
+      <li><label><input type="checkbox"><span>Change Inline CSS Conditionally Based on Component State</span></label></li>
+      <li><label><input type="checkbox"><span>Use Array.map() to Dynamically Render Elements</span></label></li>
+      <li><label><input type="checkbox"><span>Give Sibling Elements a Unique Key Attribute</span></label></li>
+      <li><label><input type="checkbox"><span>Use Array.filter() to Dynamically Filter an Array</span></label></li>
+      <li><label><input type="checkbox"><span>Render React on the Server with renderToString</span></label></li>
+    </ul>
+    <div class="tasks-head">Project &amp; bonus</div>
+    <ul class="tasks" style="columns:1">
+      <li><label><input type="checkbox"><span><b>Build a Random Quote Machine</b> — the Week 3–4 project</span></label></li>
+      <li><label><input type="checkbox"><span><b>Bonus:</b> Full Stack Open, Part 1 — a second look at React from a different course, hooks-first</span></label></li>
+    </ul>
+  </div>
+  <div class="note info" style="margin-top:14px">
+    <span class="ic">◆</span>
+    <span><b>What comes next.</b> After the project, jump to this deck's <b>Stage 05 — Next.js:
+    routing &amp; rendering</b>, a few slides ahead, to continue JavaScript → TypeScript →
+    React → Next.js.</span>
+  </div>
+ </div>
+</section>
+
+<!-- 3 ============================================================ -->
+<section class="slide tall" data-track="craft" data-title="The whole path">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag">The map</span><span class="tag time">≈ 200–350 focused hours end to end</span></div>
+  <h2>Ten stages</h2>
+  <p class="sub" style="margin-bottom:clamp(10px,1.6vh,18px)">Employable around stage 6, good around stage 9, and stage 10 never really finishes.
+  The <b>5-week sprint</b> takes 00–07 plus a slice of 08–09; the <b>8-week deep dive</b> takes all ten at the upper estimate.</p>
+  <div class="road">
+    <div class="step lang"><span class="n">00</span><span class="t">JavaScript you actually need<span>Values vs references, array methods, closures, async. The foundation.</span></span><span class="h">30–50 h</span></div>
+    <div class="step lang"><span class="n">01</span><span class="t">TypeScript fundamentals<span>Annotations, inference, unions, narrowing, strict mode.</span></span><span class="h">15–25 h</span></div>
+    <div class="step lang"><span class="n">02</span><span class="t">TypeScript that earns its keep<span>Generics, utility types, discriminated unions.</span></span><span class="h">20–35 h</span></div>
+    <div class="step react"><span class="n">03</span><span class="t">React mental model<span>State, immutability, composition — and why you rarely need an effect.</span></span><span class="h">30–50 h</span></div>
+    <div class="step react"><span class="n">04</span><span class="t">React + TypeScript together<span>Typing props, children, events, refs, generic components.</span></span><span class="h">10–15 h</span></div>
+    <div class="step fw"><span class="n">05</span><span class="t">Next.js: routing &amp; rendering<span>File routing, server vs client, caching, streaming.</span></span><span class="h">25–40 h</span></div>
+    <div class="step fw"><span class="n">06</span><span class="t">Data &amp; state<span>Server state vs UI state — the distinction that fixes most architecture.</span></span><span class="h">15–25 h</span></div>
+    <div class="step fw"><span class="n">07</span><span class="t">Styling &amp; design systems<span>CSS first. Then pick one styling approach and go deep.</span></span><span class="h">10–15 h</span></div>
+    <div class="step craft"><span class="n">08</span><span class="t">Quality: tests, a11y, i18n<span>Testing behaviour, keyboard access, more than one language.</span></span><span class="h">20–30 h</span></div>
+    <div class="step craft"><span class="n">09</span><span class="t">Production concerns<span>Core Web Vitals, bundles, monitoring, CI. Shippable, not just working.</span></span><span class="h">20–40 h</span></div>
+  </div>
+ </div>
+</section>
+
+<!-- 3b ============================================================ -->
+<section class="slide" data-track="craft" data-title="Two ways to run this">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag">Pick a track</span><span class="tag time">both assume ≈ 40 focused hours per week</span></div>
+  <h2>Two ways to run the same path</h2>
+  <p class="sub">The ten stages don't change. What changes is depth and how much of the craft
+  layer you take on the first pass. Pick by what you need at the end of it, not by ambition.</p>
+  <div class="cols c2">
+    <div class="card">
+      <h4><span class="dot" style="background:var(--lang)"></span>Track A · 5-week sprint <span style="margin-left:auto;font-size:12px;color:var(--muted);font-weight:400">≈ 200 h</span></h4>
+      <h3 style="margin-top:12px">For</h3>
+      <p>Someone who already programs and needs to be <b>productive in a React/Next codebase</b>
+      quickly — a backend dev moving to full-stack, or anyone with a dated deadline.</p>
+      <h3 style="margin-top:14px">Covers</h3>
+      <p>Stages 00–07 at working depth, plus the minimum of 08–09 needed to ship one deployed app.</p>
+      <h3 style="margin-top:14px">Consciously skips</h3>
+      <p>Conditional/mapped types, i18n, deep testing, design-system work, Core Web Vitals budgets.
+      You'll know these exist and where to come back to them.</p>
+      <h3 style="margin-top:14px">Ends with</h3>
+      <p>One deployed Next.js app you can talk through, and no gaps in the language layer.</p>
+    </div>
+    <div class="card">
+      <h4><span class="dot" style="background:var(--fw)"></span>Track B · 8-week deep dive <span style="margin-left:auto;font-size:12px;color:var(--muted);font-weight:400">≈ 320 h</span></h4>
+      <h3 style="margin-top:12px">For</h3>
+      <p>Someone who wants to <b>own decisions</b>, not just close tickets — career switchers,
+      or a dev who will be the one choosing the stack and reviewing others' React.</p>
+      <h3 style="margin-top:14px">Covers</h3>
+      <p>All ten stages at the upper end of each estimate, with three build projects instead of one.</p>
+      <h3 style="margin-top:14px">Adds over Track A</h3>
+      <p>Generic components, server/client boundary reasoning, caching, testing behaviour,
+      accessibility, i18n, performance budgets, CI and monitoring.</p>
+      <h3 style="margin-top:14px">Ends with</h3>
+      <p>A production-shaped app plus the vocabulary to argue about architecture with evidence.</p>
+    </div>
+  </div>
+  <div class="note" style="margin-top:20px">
+    <span class="ic">◆</span>
+    <span><b>At a different pace?</b> These are hour budgets, not calendars. At 20 h/week the
+    sprint is 10 weeks and the deep dive 16; the sequence and the checkpoints are identical.
+    A complete beginner should expect to roughly double either number.</span>
+  </div>
+ </div>
+</section>
+
+<!-- 3c ============================================================ -->
+<section class="slide tall" data-track="lang" data-title="Track A — 5 weeks, week by week">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag lang">Track A · sprint</span><span class="tag time">5 weeks · ≈ 40 h/week · ≈ 200 h</span></div>
+  <h2>The 5-week sprint</h2>
+  <p class="sub" style="margin-bottom:clamp(10px,1.6vh,18px)">One deliverable per week that opens
+  in a browser. If a week's checkpoint fails, repeat the week — don't carry the gap forward.</p>
+  <div class="road">
+    <div class="step lang"><span class="n">W1</span><span class="t">JavaScript foundation + TypeScript basics
+      <span>Stage 00 (28 h) + Stage 01 (12 h). References, closures, array methods, async; then annotations, inference, unions, narrowing, <code>strict</code>.
+      <b>Checkpoint:</b> convert a 200-line JS file to strict TS with no <code>any</code>.</span></span><span class="h">40 h</span></div>
+    <div class="step lang"><span class="n">W2</span><span class="t">Useful TypeScript + the React model
+      <span>Stage 02 pragmatic subset (14 h): generics, discriminated unions, <code>Pick</code>/<code>Omit</code>/<code>Partial</code>. Then Stage 03 starts (26 h): state, immutability, composition.
+      <b>Checkpoint:</b> a typed multi-component UI with no <code>useEffect</code>.</span></span><span class="h">40 h</span></div>
+    <div class="step react"><span class="n">W3</span><span class="t">Finish React, add types, enter Next.js
+      <span>Stage 03 finish (16 h) + Stage 04 (10 h): props, children, events, refs. Then Stage 05 begins (14 h): App Router, layouts, server vs client components.
+      <b>Checkpoint:</b> a routed app with a server component fetching real data.</span></span><span class="h">40 h</span></div>
+    <div class="step fw"><span class="n">W4</span><span class="t">Rendering, data, styling
+      <span>Stage 05 finish (18 h): server actions, caching, streaming. Stage 06 (14 h): server state vs UI state. Stage 07 (8 h): CSS fundamentals + exactly one styling approach.
+      <b>Checkpoint:</b> a form that mutates data and revalidates correctly.</span></span><span class="h">40 h</span></div>
+    <div class="step craft"><span class="n">W5</span><span class="t">Capstone: build, harden, deploy
+      <span>Project (18 h) + testing minimum (7 h) + keyboard/a11y pass (5 h) + deploy, env vars, error boundaries, basic Lighthouse (10 h).
+      <b>Checkpoint:</b> a URL a stranger can use, and you can explain every rendering choice in it.</span></span><span class="h">40 h</span></div>
+  </div>
+ </div>
+</section>
+
+<!-- 3d ============================================================ -->
+<section class="slide" data-track="lang" data-title="Track A — resources & guardrails">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag lang">Track A · sprint</span><span class="tag time">what to read, and what to ignore</span></div>
+  <h2>Sprint resources and guardrails</h2>
+  <p class="sub">At this pace, resource discipline matters more than resource quality. One
+  primary source per stage, read in order, with the tab count kept low.</p>
+  <div class="cols c2">
+    <div class="card">
+      <h3>The whole reading list</h3>
+      <div class="reslist" style="grid-template-columns:1fr">
+        <div class="res"><span class="nm">javascript.info</span><span class="ds">W1 — parts 1–2 only, skip the browser DOM chapters</span><span class="free">free</span></div>
+        <div class="res"><span class="nm">TS Handbook</span><span class="ds">W1–W2 — "Everyday Types" → "Narrowing" → "Generics". Stop there</span><span class="free">free</span></div>
+        <div class="res"><span class="nm">react.dev "Learn"</span><span class="ds">W2–W3 — read it end to end; it is the course</span><span class="free">free</span></div>
+        <div class="res"><span class="nm">react-typescript-cheatsheet</span><span class="ds">W3 — reference, not reading</span><span class="free">free</span></div>
+        <div class="res"><span class="nm">Next.js "Learn" course</span><span class="ds">W3–W4 — the official dashboard tutorial, typed as you go</span><span class="free">free</span></div>
+        <div class="res"><span class="nm">Next.js docs — Caching</span><span class="ds">W4 — the one page most people never read</span><span class="free">free</span></div>
+        <div class="res"><span class="nm">Testing Library docs</span><span class="ds">W5 — guiding principles + queries page only</span><span class="free">free</span></div>
+      </div>
+      <p style="margin-top:12px;font-size:13px">Everything here is free and primary. A paid
+      course adds pace pressure you already have.</p>
+    </div>
+    <div class="card">
+      <h3>Guardrails that make 5 weeks possible</h3>
+      <ul class="plain">
+        <li><b>Timebox, don't complete.</b> When a week's hours are gone, move on with notes on
+        what's shaky. The sequence matters more than any single stage's polish.</li>
+        <li><b>One project, growing.</b> Don't start five apps. Extend the W2 UI into the W5
+        capstone so each stage lands on code you already understand.</li>
+        <li><b>Ban the shortcuts</b> that hide the model: no UI kit until W4, no state library,
+        no AI-generated components you can't rewrite by hand.</li>
+        <li><b>Type as you go.</b> Writing JS "for speed" and typing later costs more than it saves.</li>
+        <li><b>Stop at the deferred list.</b> If you're reading about conditional types or
+        i18n in week 3, you're off-track — those are Track B.</li>
+      </ul>
+      <h3 style="margin-top:16px">Known cost of this track</h3>
+      <p style="font-size:13.4px;color:var(--ink-2)">You will be able to build, and you will not
+      yet be able to review. Expect to revisit stages 02, 08 and 09 in your first real codebase —
+      that's the trade, made on purpose.</p>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- 3e ============================================================ -->
+<section class="slide tall" data-track="fw" data-title="Track B — 8 weeks, week by week">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag fw">Track B · deep dive</span><span class="tag time">8 weeks · ≈ 40 h/week · ≈ 320 h</span></div>
+  <h2>The 8-week deep dive</h2>
+  <p class="sub" style="margin-bottom:clamp(10px,1.6vh,18px)">Same ten stages at the top of each
+  estimate, with three projects instead of one. Roughly one third reading, two thirds building — every week.</p>
+  <div class="road">
+    <div class="step lang"><span class="n">W1</span><span class="t">Stage 00 — JavaScript, properly
+      <span>References, closures, the event loop, immutable update patterns, modules. Build a small state container by hand.
+      <b>Checkpoint:</b> explain why a stale closure happens, with a runnable example.</span></span><span class="h">40 h</span></div>
+    <div class="step lang"><span class="n">W2</span><span class="t">Stage 01 + start Stage 02 — TypeScript
+      <span>Fundamentals (18 h), then generics and utility types (22 h) with real exercises rather than reading.
+      <b>Checkpoint:</b> a typed generic <code>fetchJSON</code> that narrows its result.</span></span><span class="h">40 h</span></div>
+    <div class="step lang"><span class="n">W3</span><span class="t">Finish Stage 02 + open Stage 03
+      <span>Discriminated unions and type-level modelling (13 h). React mental model begins (27 h): state as a snapshot, lifting, composition.
+      <b>Checkpoint:</b> model a request state as a union that makes bad states unrepresentable.</span></span><span class="h">40 h</span></div>
+    <div class="step react"><span class="n">W4</span><span class="t">Stage 03 finish + Stage 04 + Project 1
+      <span>Effects last (23 h) — when you genuinely need one. Typed props, events, refs, generic components (15 h).
+      <b>Checkpoint:</b> a reusable typed component another person can use without reading its source.</span></span><span class="h">38 h</span></div>
+    <div class="step fw"><span class="n">W5</span><span class="t">Stage 05 — Next.js in depth
+      <span>App Router, layouts, the server/client boundary, server actions, streaming, and the caching layers — read the caching docs twice.
+      <b>Checkpoint:</b> draw your app's render path and prove it with the network tab.</span></span><span class="h">40 h</span></div>
+    <div class="step fw"><span class="n">W6</span><span class="t">Stage 06 + Stage 07 + Project 2
+      <span>Server state vs UI state (25 h), then CSS depth and one styling system taken seriously (15 h): tokens, variants, dark mode.
+      <b>Checkpoint:</b> a themed component set with no duplicated state.</span></span><span class="h">40 h</span></div>
+    <div class="step craft"><span class="n">W7</span><span class="t">Stage 08 — quality
+      <span>Testing behaviour not implementation, keyboard and screen-reader access, i18n and locale-aware formatting (30 h), plus performance measurement begins (10 h).
+      <b>Checkpoint:</b> a keyboard-only pass through your app with zero traps.</span></span><span class="h">40 h</span></div>
+    <div class="step craft"><span class="n">W8</span><span class="t">Stage 09 + capstone
+      <span>Core Web Vitals, bundle budgets, monitoring, CI, error tracking (30 h). Ship Project 3 and write the README you'd want to inherit (10 h).
+      <b>Checkpoint:</b> a deployed app with CI, tests, and a measured LCP you can defend.</span></span><span class="h">40 h</span></div>
+  </div>
+ </div>
+</section>
+
+<!-- 3f ============================================================ -->
+<section class="slide" data-track="fw" data-title="Track B — what the extra 3 weeks buy">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag fw">Track B · deep dive</span><span class="tag time">where the extra ≈ 120 hours go</span></div>
+  <h2>What the extra three weeks actually buy</h2>
+  <p class="sub">Not more topics for their own sake. Three specific capabilities the sprint
+  cannot produce, plus the projects that force them.</p>
+  <div class="cols c3">
+    <div class="card">
+      <h4>1 · Type-level modelling</h4>
+      <p>Generics, discriminated unions and utility types stop being syntax and become a design
+      tool — you make illegal states unrepresentable instead of writing runtime guards.</p>
+      <h3 style="margin-top:12px">Where</h3>
+      <p>Weeks 2–3, ~35 h more than the sprint.</p>
+    </div>
+    <div class="card">
+      <h4>2 · Rendering &amp; caching judgement</h4>
+      <p>The sprint teaches you to make Next.js work. This teaches you to predict it: what runs
+      where, what's cached, what invalidates, and why the staging build behaves differently.</p>
+      <h3 style="margin-top:12px">Where</h3>
+      <p>Week 5, ~25 h more, all of it hands-on with the network tab open.</p>
+    </div>
+    <div class="card">
+      <h4>3 · Shippability</h4>
+      <p>Tests that survive refactors, an app usable without a mouse, more than one locale,
+      a measured performance budget, and CI that stops you shipping regressions.</p>
+      <h3 style="margin-top:12px">Where</h3>
+      <p>Weeks 7–8, ~55 h that the sprint compresses into one afternoon.</p>
+    </div>
+  </div>
+  <div class="cols c2" style="margin-top:clamp(14px,1.8vh,22px)">
+    <div class="card flat">
+      <h3>Three projects, in this order</h3>
+      <ul class="plain">
+        <li><b>W4 — typed component library.</b> Five components, no framework. Forces stages 01–04.</li>
+        <li><b>W6 — data-driven app.</b> Auth, list/detail, mutations, optimistic UI. Forces stages 05–07.</li>
+        <li><b>W8 — the capstone, hardened.</b> Take the W6 app to tested, accessible, monitored and deployed. Forces stages 08–09.</li>
+      </ul>
+    </div>
+    <div class="card flat">
+      <h3>How to tell you chose the right track</h3>
+      <ul class="plain">
+        <li>Finishing week 3 of the sprint feeling <b>rushed but not lost</b> means the sprint fits.</li>
+        <li>Feeling lost means you needed Track B's week 1–3 pacing. Switch; the stages are the same.</li>
+        <li>Cruising through Track B's first fortnight means you had more JavaScript than you thought — jump to its week 3 and finish in six.</li>
+      </ul>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- 4 ============================================================ -->
+<section class="slide" data-track="lang" data-title="Stage 00 — JavaScript">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag lang">Stage 00 · Language</span><span class="tag time">30–50 h</span></div>
+  <h2>JavaScript you actually need</h2>
+  <p class="sub">Not all of JavaScript. The subset that React and TypeScript are built on top of —
+  and the subset whose absence gets misdiagnosed as "React is hard".</p>
+  <div class="cols c2">
+    <div class="card">
+      <h3>Learn properly</h3>
+      <ul class="plain">
+        <li><b>Values vs references</b> — why <code>[1,2] === [1,2]</code> is <code>false</code>, and why mutating props breaks React</li>
+        <li><b>Array methods</b> — <code>map</code>, <code>filter</code>, <code>reduce</code>, <code>find</code>, <code>some</code>. You will write these hourly</li>
+        <li><b>Destructuring, spread, rest</b> — the syntax of every React codebase</li>
+        <li><b>Closures</b> — the mechanism behind hooks and stale-value bugs</li>
+        <li><b>Promises &amp; async/await</b>, and roughly what the event loop does</li>
+        <li><b>ES modules</b> — <code>import</code>/<code>export</code>, default vs named</li>
+        <li><b>Immutable update patterns</b> for objects and arrays</li>
+        <li><code>?.</code> and <code>??</code>, template literals, <code>Set</code>/<code>Map</code></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Safe to defer</h3>
+      <ul class="plain">
+        <li>Prototype-chain internals and <code>class</code> inheritance depth</li>
+        <li><code>this</code> beyond "arrow functions don't rebind it"</li>
+        <li>Generators, proxies, decorators, <code>Symbol</code></li>
+        <li>jQuery-era manual DOM manipulation</li>
+        <li>Bundler internals — the framework handles this now</li>
+      </ul>
+      <h3 style="margin-top:18px">Checkpoint</h3>
+      <p>Without help: explain why two identical arrays aren't equal, rewrite a nested
+      <code>for</code> loop as a <code>reduce</code>, and fetch from an API with
+      <code>async/await</code> including the error path. If any of those is a struggle,
+      stay here — this stage pays compound interest.</p>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- 5 ============================================================ -->
+<section class="slide" data-track="lang" data-title="Stage 01 — TypeScript basics">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag lang">Stage 01 · Language</span><span class="tag time">15–25 h</span></div>
+  <h2>TypeScript fundamentals</h2>
+  <p class="sub">TypeScript is a description of what your JavaScript already does. Most of
+  learning it is learning to <i>stop writing types</i> and let inference work.</p>
+  <div class="cols c2">
+    <div class="card">
+      <h3>Core</h3>
+      <ul class="plain">
+        <li>Primitive annotations, arrays, tuples, objects</li>
+        <li><b>Inference</b> — annotate function inputs and exported boundaries; let the rest infer</li>
+        <li><code>type</code> vs <code>interface</code> (either is fine; be consistent)</li>
+        <li><b>Union types</b> and <b>literal types</b> — prefer <code>'a' | 'b'</code> over <code>enum</code></li>
+        <li>Optional and <code>readonly</code> properties, function types</li>
+        <li><code>unknown</code> vs <code>any</code> — reach for <code>unknown</code></li>
+        <li><b>Narrowing</b>: <code>typeof</code>, <code>in</code>, truthiness, equality</li>
+        <li><code>tsconfig</code> with <code>strict: true</code> from day one</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>The beginner traps</h3>
+      <ul class="no">
+        <li>Annotating every variable. <code>const n: number = 5</code> is noise.</li>
+        <li>Using <code>any</code> to make an error go away — it disables checking for
+          everything downstream</li>
+        <li>Starting without <code>strict</code>, then retrofitting it later</li>
+        <li>Casting with <code>as</code> to silence the compiler when it's right and you're wrong</li>
+      </ul>
+      <h3 style="margin-top:16px">Checkpoint</h3>
+      <p>Convert a 200-line JavaScript file to TypeScript under <code>strict</code> with
+      <b>zero</b> <code>any</code> and zero <code>as</code> casts. If you can't, the types
+      are usually telling you the code has a real ambiguity.</p>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- 6 ============================================================ -->
+<section class="slide" data-track="lang" data-title="Stage 02 — TypeScript depth">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag lang">Stage 02 · Language</span><span class="tag time">20–35 h</span></div>
+  <h2>TypeScript that earns its keep</h2>
+  <p class="sub">This is where TypeScript stops being paperwork and starts deleting whole
+  categories of bug. If you learn one thing on this slide, learn discriminated unions.</p>
+  <div class="cols c2">
+    <div>
+      <div class="card">
+        <h3>Worth real effort</h3>
+        <ul class="plain">
+          <li><b>Generics</b> — functions and types with parameters</li>
+          <li><b>Discriminated unions</b> — make impossible states impossible</li>
+          <li><code>keyof</code>, <code>typeof</code>, indexed access <code>T[K]</code></li>
+          <li>Utility types: <code>Partial</code>, <code>Pick</code>, <code>Omit</code>,
+              <code>Record</code>, <code>ReturnType</code>, <code>Awaited</code></li>
+          <li>Type guards and <code>value is T</code> predicates</li>
+          <li><code>satisfies</code> — check a value against a type without widening it</li>
+        </ul>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h3>Read it, don't write it yet</h3>
+        <p>Conditional types, mapped types, template literal types, variance annotations.
+        You need to <i>read</i> these to use good libraries. You almost never need to
+        author them in application code, and trying to is a well-known time sink.</p>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h4>The pattern that pays for the whole stage</h4>
+        <pre><code><span class="cm">// Four booleans = 16 states, most nonsense.</span>
+<span class="cm">// A union = exactly 4 states, all valid.</span>
+<span class="kw">type</span> <span class="ty">Req</span>&lt;<span class="ty">T</span>&gt; =
+  | { status: <span class="st">'idle'</span> }
+  | { status: <span class="st">'loading'</span> }
+  | { status: <span class="st">'error'</span>; error: <span class="ty">string</span> }
+  | { status: <span class="st">'done'</span>;  data: <span class="ty">T</span> };
+
+<span class="kw">function</span> view(r: <span class="ty">Req</span>&lt;<span class="ty">User</span>&gt;) {
+  <span class="kw">if</span> (r.status === <span class="st">'done'</span>)  <span class="kw">return</span> r.data.name;
+  <span class="kw">if</span> (r.status === <span class="st">'error'</span>) <span class="kw">return</span> r.error;
+  <span class="cm">// r.data here → compile error. Good.</span>
+  <span class="kw">return</span> <span class="st">'…'</span>;
+}</code></pre>
+      </div>
+      <div class="note" style="margin-top:14px">
+        <span class="ic">▲</span>
+        <span><b>Checkpoint.</b> Model a request lifecycle as a discriminated union and prove
+        the compiler rejects reading <code>data</code> while loading. Then find the
+        <code>isLoading</code> / <code>data</code> / <code>error</code> triple somewhere in
+        your own code and replace it.</span>
+      </div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- 7 ============================================================ -->
+<section class="slide" data-track="react" data-title="Stage 03 — React mental model">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag react">Stage 03 · React</span><span class="tag time">30–50 h</span></div>
+  <h2>The React mental model</h2>
+  <p class="sub">React is one idea: <b>UI is a function of state.</b> You change state; React
+  works out the DOM. Nearly every React bug is a violation of that sentence.</p>
+  <div class="cols c3">
+    <div class="card">
+      <h3>The model</h3>
+      <ul class="plain">
+        <li>Components are functions: props in, UI out</li>
+        <li>JSX and its rules (expressions, not statements)</li>
+        <li><code>useState</code> and <b>immutable</b> updates</li>
+        <li>Lists and stable <code>key</code>s — never the array index</li>
+        <li>Controlled inputs and forms</li>
+        <li>Lifting state up; passing children down</li>
+        <li><b>Derive</b>, don't duplicate, state</li>
+        <li><code>useContext</code> for genuinely global things</li>
+        <li><code>useRef</code> for DOM nodes and non-render values</li>
+        <li>Changing <code>key</code> to reset a subtree</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Effects, last and least</h3>
+      <p>Learn <code>useEffect</code> <b>after</b> everything else, and learn it mainly to
+      know when <i>not</i> to use it. An effect is for synchronising with something outside
+      React — a subscription, a timer, a non-React widget.</p>
+      <ul class="no" style="margin-top:10px">
+        <li>Transforming data for render</li>
+        <li>Resetting state when a prop changes</li>
+        <li>Chaining effects that set state</li>
+        <li>Fetching data, in most modern setups</li>
+      </ul>
+      <p style="margin-top:10px">The page <i>You Might Not Need an Effect</i> in the React
+      docs has the highest value-per-minute of anything in this deck.</p>
+    </div>
+    <div class="card">
+      <h3>Checkpoint</h3>
+      <p>Build a filterable, sortable list with a detail view and a form — using
+      <b>no</b> <code>useEffect</code> at all. Every displayed value should be either state
+      or computed from state during render.</p>
+      <h3 style="margin-top:16px">Don't yet</h3>
+      <ul class="no">
+        <li>Reach for <code>useMemo</code>/<code>useCallback</code> before measuring</li>
+        <li>Add a state library</li>
+        <li>Learn class components — they're legacy</li>
+        <li>Learn Redux "because it's on job ads"</li>
+      </ul>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- 8 ============================================================ -->
+<section class="slide" data-track="react" data-title="Stage 04 — React + TypeScript">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag react">Stage 04 · React</span><span class="tag time">10–15 h</span></div>
+  <h2>React and TypeScript together</h2>
+  <p class="sub">A short stage, because if stages 02 and 03 landed there is little new here —
+  just a handful of conventions worth copying rather than deriving.</p>
+  <div class="cols c2">
+    <div class="card">
+      <h3>The conventions</h3>
+      <ul class="plain">
+        <li>Type props as a plain <code>type</code>; skip <code>React.FC</code></li>
+        <li><code>React.ReactNode</code> for children</li>
+        <li>Event types: <code>React.ChangeEvent&lt;HTMLInputElement&gt;</code>, <code>MouseEvent</code></li>
+        <li><code>ComponentProps&lt;typeof Button&gt;</code> to reuse another component's props</li>
+        <li>Generic components for lists and tables</li>
+        <li><b>Discriminated union props</b> for variants that can't mix</li>
+        <li><code>useState&lt;T | null&gt;(null)</code> when the initial value lies</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card">
+        <h4>Union props, so bad calls don't compile</h4>
+        <pre><code><span class="kw">type</span> <span class="ty">Props</span> =
+  | { kind: <span class="st">'link'</span>;   href: <span class="ty">string</span> }
+  | { kind: <span class="st">'button'</span>; onClick: () =&gt; <span class="ty">void</span> };
+
+<span class="cm">// &lt;Cta kind="link" onClick={…} /&gt; → error</span>
+<span class="cm">// &lt;Cta kind="link" /&gt;            → error, href missing</span></code></pre>
+      </div>
+      <div class="note info" style="margin-top:14px">
+        <span class="ic">◆</span>
+        <span><b>Checkpoint.</b> Write a <code>&lt;Table&gt;</code> generic over its row type
+        where the column <code>key</code>s are constrained to <code>keyof Row</code> — so a
+        typo in a column name is a compile error, not an empty cell.</span>
+      </div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- 9 ============================================================ -->
+<section class="slide" data-track="fw" data-title="Stage 05 — Next.js">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag fw">Stage 05 · Framework</span><span class="tag time">25–40 h</span></div>
+  <h2>Next.js: routing and rendering</h2>
+  <p class="sub">React draws components. Next.js answers the harder questions: which URL,
+  rendered where, with what data, cached how long.</p>
+  <div class="cols c3">
+    <div class="card">
+      <h3>Routing</h3>
+      <ul class="plain">
+        <li>Files are routes; folders are segments</li>
+        <li>Dynamic <code>[id]</code> and catch-all <code>[...slug]</code></li>
+        <li>Nested layouts that persist across navigation</li>
+        <li><code>loading</code>, <code>error</code>, <code>not-found</code> conventions</li>
+        <li>Route handlers for HTTP endpoints</li>
+        <li>Middleware for auth, locale, redirects</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Rendering &amp; data</h3>
+      <ul class="plain">
+        <li><b>Server vs Client Components</b> — the concept to actually understand</li>
+        <li><code>'use client'</code> and where the boundary belongs</li>
+        <li>Static, dynamic, and incremental regeneration</li>
+        <li>Caching and revalidation — the most common source of "why is this stale"</li>
+        <li>Server Actions for mutations</li>
+        <li>Streaming with <code>Suspense</code></li>
+        <li>Metadata, images, fonts</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Checkpoint</h3>
+      <p>Ship a small app with a static page, a dynamic detail page, a form that mutates
+      through a Server Action, and a deliberate cache-revalidation strategy you can
+      <b>explain out loud</b>. If you can't explain when a page re-renders and why, keep going.</p>
+      <h3 style="margin-top:16px">Best single resource</h3>
+      <p>The official <b>Next.js Dashboard App</b> course — 16 chapters, builds one real
+      app, covers styling through auth and metadata. Free.</p>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- 10 ============================================================ -->
+<section class="slide" data-track="fw" data-title="App Router vs Pages Router">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag fw">Stage 05 · aside</span></div>
+  <h2>App Router or Pages Router?</h2>
+  <p class="sub">This question causes more paralysis than it deserves, and most of the
+  internet answers it wrongly in one direction or the other.</p>
+  <div class="cols c2">
+    <div class="card">
+      <h3>What's actually true</h3>
+      <ul class="plain">
+        <li><b>App Router is where Next.js is going.</b> New features land there first; it's
+          what new projects should use and what the docs lead with.</li>
+        <li><b>Pages Router is not deprecated.</b> It's still documented and supported, and
+          the two routers are explicitly designed to <i>co-exist in one app</i> so teams can
+          migrate page by page.</li>
+        <li><b>You will meet Pages Router in real jobs.</b> A large share of production
+          Next.js was written before the App Router and hasn't moved.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>What to do</h3>
+      <ul class="plain">
+        <li><b>Learn App Router first.</b> Server Components are the harder, more
+          transferable idea, and Pages Router is easier to pick up afterwards than the reverse.</li>
+        <li><b>Then learn the Pages Router mapping</b> — an afternoon:
+          <code>getServerSideProps</code> → server-side <code>fetch</code>,
+          <code>_app</code>/<code>_document</code> → root layout,
+          <code>pages/api</code> → route handlers.</li>
+        <li><b>Don't migrate a working app to practise.</b> Migration is a project, not an exercise.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note" style="margin-top:20px">
+    <span class="ic">▲</span>
+    <span><b>Careful with tutorials.</b> Search results for "Next.js tutorial" mix the two
+    routers freely, often without saying which. If a tutorial uses
+    <code>getServerSideProps</code> or <code>pages/_app.js</code>, it's Pages Router — fine,
+    but know what you're reading.</span>
+  </div>
+ </div>
+</section>
+
+<!-- 11 ============================================================ -->
+<section class="slide" data-track="fw" data-title="Stage 06 — Data & state">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag fw">Stage 06 · Framework</span><span class="tag time">15–25 h</span></div>
+  <h2>Data and state</h2>
+  <p class="sub">One distinction fixes most front-end architecture arguments: <b>server state
+  is a cache, UI state is a value.</b> Confusing them is why so many apps have a giant global
+  store full of API responses.</p>
+  <table class="t">
+    <thead><tr><th style="width:24%">Kind of state</th><th style="width:38%">What it really is</th><th>Where it belongs</th></tr></thead>
+    <tbody>
+      <tr><td><b>Server data</b></td>
+          <td>A cached copy of something you don't own. Can go stale, needs refetch, loading and error states.</td>
+          <td>Server Components, or a query cache like <b>TanStack Query</b>. Not a global store.</td></tr>
+      <tr><td><b>URL state</b></td>
+          <td>Filters, tabs, pagination, search. Should survive refresh and be shareable.</td>
+          <td><b>The URL.</b> Search params are state, and free to implement.</td></tr>
+      <tr><td><b>Form state</b></td>
+          <td>In-progress edits plus validation.</td>
+          <td>Local state, or <b>React Hook Form</b>; validate with a schema library like <b>Zod</b>, shared with the server.</td></tr>
+      <tr><td><b>Local UI state</b></td>
+          <td>Is the drawer open, which row is hovered.</td>
+          <td><code>useState</code>, as close to the component as possible.</td></tr>
+      <tr><td><b>Genuinely global UI state</b></td>
+          <td>Theme, current user, feature flags, cart.</td>
+          <td>Context, or a small store — <b>Zustand</b>, <b>Redux Toolkit</b>, <b>MobX</b>. Usually far less than you expect.</td></tr>
+    </tbody>
+  </table>
+  <div class="note" style="margin-top:18px">
+    <span class="ic">▲</span>
+    <span><b>Checkpoint.</b> Build a list where filters and pagination live in the URL, server
+    data comes from a cache with real loading and error states, and your global store is
+    either tiny or absent. Then ask which state you could delete because it's derivable.</span>
+  </div>
+ </div>
+</section>
+
+<!-- 12 ============================================================ -->
+<section class="slide" data-track="fw" data-title="Stage 07 — Styling">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag fw">Stage 07 · Framework</span><span class="tag time">10–15 h</span></div>
+  <h2>Styling and design systems</h2>
+  <p class="sub">Every styling library is a way of writing CSS. If the CSS underneath is
+  shaky, the library just relocates the confusion.</p>
+  <div class="cols c3">
+    <div class="card">
+      <h3>Non-negotiable CSS</h3>
+      <ul class="plain">
+        <li>Box model, <b>flexbox</b>, <b>grid</b></li>
+        <li>Cascade, specificity, inheritance</li>
+        <li>Custom properties (<code>--vars</code>)</li>
+        <li>Media &amp; container queries</li>
+        <li>Logical properties (<code>inline-start</code>) — this is how RTL works</li>
+        <li><code>prefers-color-scheme</code>, <code>prefers-reduced-motion</code></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Then pick exactly one</h3>
+      <ul class="plain">
+        <li><b>Tailwind</b> — the current default. Fast, verbose markup, works everywhere.</li>
+        <li><b>CSS Modules</b> — plain CSS, scoped. Boring in the good way; zero runtime.</li>
+        <li><b>CSS-in-JS</b> (Emotion, styled-components) — huge in existing codebases. Note it
+          generally needs a client boundary, so it interacts awkwardly with Server Components.</li>
+      </ul>
+      <p style="margin-top:9px">Learn one deeply. Knowing three shallowly helps nobody.</p>
+    </div>
+    <div class="card">
+      <h3>Then the real skill</h3>
+      <ul class="plain">
+        <li><b>Design tokens</b> — colour, type, spacing as named values, never literals</li>
+        <li>Consuming a <b>component library</b> instead of rebuilding it</li>
+        <li>Variants without prop explosions</li>
+        <li>Theming, including dark mode as a designed state rather than an inversion</li>
+        <li><b>RTL</b> layout if you ever ship Arabic or Hebrew</li>
+      </ul>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- 13 ============================================================ -->
+<section class="slide" data-track="craft" data-title="Stage 08 — Quality">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag">Stage 08 · Craft</span><span class="tag time">20–30 h</span></div>
+  <h2>Testing, accessibility, internationalisation</h2>
+  <p class="sub">The stage that separates "it works on my machine" from "it works for
+  everyone, and still will next month".</p>
+  <div class="cols c3">
+    <div class="card">
+      <h4>Testing</h4>
+      <ul class="plain">
+        <li><b>Vitest</b> or <b>Jest</b> as the runner</li>
+        <li><b>React Testing Library</b> — query by role and label, the way a user finds things</li>
+        <li>Test <b>behaviour</b>, not implementation. No assertions on internal state.</li>
+        <li><b>Playwright</b> or <b>Cypress</b> for a few real end-to-end flows</li>
+        <li>Type-check and lint in CI — cheapest tests you own</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Accessibility</h4>
+      <ul class="plain">
+        <li>Semantic HTML first — most of a11y is not using <code>&lt;div&gt;</code> for everything</li>
+        <li>Labels on every input; alt text that says something</li>
+        <li><b>Keyboard operability</b> and visible focus</li>
+        <li>Colour contrast, and never colour as the only signal</li>
+        <li>ARIA only when semantics genuinely run out</li>
+        <li>Try your app with the mouse unplugged</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Internationalisation</h4>
+      <ul class="plain">
+        <li>No hardcoded user-facing strings, from the first commit</li>
+        <li>Locale-aware dates, numbers, currency (<code>Intl</code>)</li>
+        <li>Pluralisation rules differ per language</li>
+        <li><b>RTL</b> is a layout concern, not a text concern</li>
+        <li>Text expands — German is long, and your button isn't</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note info" style="margin-top:18px">
+    <span class="ic">◆</span>
+    <span><b>Checkpoint.</b> Take a feature you've built and add tests for its behaviour,
+    operate it entirely by keyboard, and run it in a second language including one RTL locale.
+    Everything you find is a bug you'd otherwise have shipped.</span>
+  </div>
+ </div>
+</section>
+
+<!-- 14 ============================================================ -->
+<section class="slide" data-track="craft" data-title="Stage 09 — Production">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag">Stage 09 · Craft</span><span class="tag time">20–40 h</span></div>
+  <h2>Production concerns</h2>
+  <p class="sub">Measure, then optimise. Every performance rule here becomes wrong for some
+  app, and the profiler is the only thing that knows which.</p>
+  <div class="cols c2">
+    <div class="card">
+      <h3>Performance</h3>
+      <ul class="plain">
+        <li><b>Core Web Vitals</b>: LCP (load), INP (responsiveness), CLS (stability)</li>
+        <li>Bundle analysis — find the 300 KB date library you didn't know about</li>
+        <li>Code splitting and dynamic imports for heavy, rarely-used UI</li>
+        <li>Image and font optimisation; these are usually the biggest wins</li>
+        <li>React DevTools Profiler <b>before</b> adding a single <code>useMemo</code></li>
+        <li>The React Compiler handles much of what manual memoisation used to</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Operations</h3>
+      <ul class="plain">
+        <li>Error monitoring and source maps — know it broke before users tell you</li>
+        <li>Real-user monitoring, not just lab scores</li>
+        <li>Environment config and secret handling</li>
+        <li>Feature flags, so deploy and release come apart</li>
+        <li>CI: typecheck, lint, test, build, preview deploy</li>
+        <li>Caching layers: browser, CDN, framework, data. Know which one lied to you.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note" style="margin-top:18px">
+    <span class="ic">▲</span>
+    <span><b>Checkpoint.</b> Take one of your own apps, measure it, find the single worst
+    metric, fix that one thing, and measure again. One honest before-and-after teaches more
+    than any performance checklist.</span>
+  </div>
+ </div>
+</section>
+
+<!-- 15 ============================================================ -->
+<section class="slide" data-track="craft" data-title="The 2026 landscape">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag">Where things stand</span><span class="tag time">Checked August 2026</span></div>
+  <h2>The current landscape</h2>
+  <p class="sub">Useful for not learning something dead. Also a reminder that version numbers
+  churn and mental models don't — the concepts on the previous slides long outlive these rows.</p>
+  <table class="t">
+    <thead><tr><th style="width:16%">Tool</th><th style="width:16%">Current</th><th>What actually matters to a learner</th></tr></thead>
+    <tbody>
+      <tr><td><b>TypeScript</b></td><td><b>7.0</b><br><span style="font-size:11.5px;color:var(--muted)">July 2026</span></td>
+        <td>7.0 is a native <b>Go rewrite</b> of the compiler — roughly 10× faster type-checking, same type system. <b>The language you learn is unchanged.</b> 6.0 stays around for tools that need the programmatic API, and some framework editor tooling still wants it for now.</td></tr>
+      <tr><td><b>React</b></td><td><b>19.2</b><br><span style="font-size:11.5px;color:var(--muted)">19.0 shipped Dec 2024</span></td>
+        <td>Server Components, Actions, <code>use()</code>, and the React Compiler are the meaningful additions. Class components and most manual memoisation are things to recognise, not to learn.</td></tr>
+      <tr><td><b>Next.js</b></td><td><b>16.3</b><br><span style="font-size:11.5px;color:var(--muted)">August 2026</span></td>
+        <td>Turbopack is stable, React Compiler support is in, dev-server startup and memory improved substantially across 16.x. App Router leads; Pages Router still supported.</td></tr>
+      <tr><td><b>Tooling</b></td><td>—</td>
+        <td>Vite for non-Next React apps. Vitest for tests. Biome or ESLint + Prettier. pnpm is common. None of this is worth agonising over early — take the defaults your framework gives you.</td></tr>
+    </tbody>
+  </table>
+  <div class="note info" style="margin-top:18px">
+    <span class="ic">◆</span>
+    <span><b>Don't chase this table.</b> Versions move every few months. Someone who deeply
+    understands state, rendering and types is portable across all of it; someone who memorised
+    an API surface has to relearn every year.</span>
+  </div>
+ </div>
+</section>
+
+<!-- 16 ============================================================ -->
+<section class="slide" data-track="craft" data-title="Common wrong turns">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag">Failure modes</span></div>
+  <h2>Seven ways this goes wrong</h2>
+  <p class="sub">Each of these is common, and each costs weeks to months. They're worth
+  reading before you start, not after.</p>
+  <div class="cols c2">
+    <div class="card">
+      <ul class="no">
+        <li><b>Tutorial hell.</b> Finishing courses feels like progress. Nothing you haven't
+          built from an empty folder is yours yet.</li>
+        <li><b>Skipping the fundamentals.</b> Weak JavaScript and weak CSS surface later as
+          "React is confusing" and "styling is impossible".</li>
+        <li><b>Learning tools before problems.</b> Redux, monorepos, micro-frontends solve
+          pains you haven't felt. Feel the pain first; the tool then makes sense in an hour.</li>
+        <li><b>The <code>useEffect</code> reflex.</b> The most common structural mistake in
+          React code. Reach for it last, not first.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <ul class="no">
+        <li><b><code>any</code> as an escape hatch.</b> Each one silently disables checking
+          for everything downstream. If a type is hard, the design is usually unclear.</li>
+        <li><b>Framework hopping.</b> Switching stacks when it gets hard resets you to zero.
+          Difficulty is the curve, not the wrong choice.</li>
+        <li><b>Building only greenfield toys.</b> Real work is reading unfamiliar code and
+          changing it safely. That's a separate skill, and no tutorial trains it.</li>
+      </ul>
+      <div class="note" style="margin-top:14px">
+        <span class="ic">▲</span>
+        <span>If you recognise several of these, the fix is nearly always the same: pick one
+        project slightly beyond you and finish it, badly, without starting anything else.</span>
+      </div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- 17 ============================================================ -->
+<section class="slide tall" data-track="craft" data-title="Projects that teach">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag">Practice</span></div>
+  <h2>Five projects, in this order</h2>
+  <p class="sub" style="margin-bottom:16px">Each one is chosen to force a specific lesson.
+  Finish each before starting the next — an unfinished project teaches almost nothing.</p>
+  <div class="ladder">
+    <div class="rung"><div><b>A personal site with no data</b>
+      <p>Routing, layouts, styling, deployment, and the whole "get it on the internet" pipeline —
+      with zero state to hide behind. <span class="cm">Teaches: the framework's shape.</span></p></div></div>
+    <div class="rung"><div><b>A TypeScript utility library, no UI at all</b>
+      <p>A date helper, a small parser, a validation function. Generics, unions, unit tests,
+      published types. <span class="cm">Teaches: TypeScript, uncontaminated by React.</span></p></div></div>
+    <div class="rung"><div><b>A CRUD app against a real API</b>
+      <p>Forms, validation, loading and error states, optimistic updates. Use somebody else's
+      messy public API, not a perfect mock. <span class="cm">Teaches: async reality.</span></p></div></div>
+    <div class="rung"><div><b>A dashboard with auth and server data</b>
+      <p>Login, protected routes, server-side data, filters and pagination in the URL, charts,
+      a11y, dark mode. <span class="cm">Teaches: this is roughly what the job is.</span></p></div></div>
+    <div class="rung"><div><b>A change to a codebase you didn't write</b>
+      <p>An open-source issue, or a feature in your team's app. Read, locate, change without
+      breaking, match existing conventions.
+      <span class="cm">Teaches: the actual daily skill — and it's the one nobody practises.</span></p></div></div>
+  </div>
+  <div class="note info" style="margin-top:16px">
+    <span class="ic">◆</span>
+    <span><b>Ship each one.</b> A deployed URL forces the last unglamorous 20% —
+    build config, env vars, error states, the empty case, the slow network — which is where
+    a surprising amount of the learning actually is.</span>
+  </div>
+ </div>
+</section>
+
+<!-- 18 ============================================================ -->
+<section class="slide" data-track="craft" data-title="Landing in a real codebase">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag">Applied</span></div>
+  <h2>What this looks like in a production codebase</h2>
+  <p class="sub">A real app never matches a tutorial. Here's the shape of one working Next.js
+  product, and which stages of this path each part actually draws on.</p>
+  <div class="cols c2">
+    <div class="card">
+      <h3>Typical production stack</h3>
+      <table class="t" style="font-size:13px">
+        <tbody>
+          <tr><td><b>Monorepo</b></td><td>Business logic in one package, UI in another. Stage 00–02.</td></tr>
+          <tr><td><b>Pages Router</b></td><td>Predates the App Router and works. Stage 05 + the mapping.</td></tr>
+          <tr><td><b>Platform split</b></td><td>Separate desktop and mobile-web component trees. Stage 03, 07.</td></tr>
+          <tr><td><b>Observable store</b></td><td>MobX or similar, owning server state. Stage 06.</td></tr>
+          <tr><td><b>CSS-in-JS + design system</b></td><td>Emotion, MUI, shared tokens. Stage 07.</td></tr>
+          <tr><td><b>i18n + RTL</b></td><td>Translation keys, Arabic-first layouts. Stage 08.</td></tr>
+          <tr><td><b>E2E suite</b></td><td>Cypress or Playwright over the booking flow. Stage 08.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>How to actually onboard onto one</h3>
+      <ul class="plain">
+        <li><b>Find the entry points first.</b> Read the route files. They tell you what the
+          product does far faster than the component tree.</li>
+        <li><b>Trace one feature end to end</b> — URL → page → container → components → store →
+          API. One vertical slice beats a broad skim.</li>
+        <li><b>Read the conventions docs</b> before writing anything. Matching the existing
+          pattern matters more than your preferred pattern.</li>
+        <li><b>Make your first change tiny</b> and get it reviewed. You're testing your
+          understanding, not the change.</li>
+        <li><b>Ask what's load-bearing.</b> Every codebase has a piece nobody touches. Find
+          out which before you touch it.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note info" style="margin-top:18px">
+    <span class="ic">◆</span>
+    <span>The fastest onboarding tool is a map of the repo: what each top-level folder is
+    <i>for</i>, which routes exist, and what renders them — before you read a single component.</span>
+  </div>
+ </div>
+</section>
+
+<!-- 19 ============================================================ -->
+<section class="slide tall" data-track="craft" data-title="Resources">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag">Resources</span><span class="tag time">Official docs first — they're the good ones now</span></div>
+  <h2>A short, opinionated library</h2>
+  <p class="sub" style="margin-bottom:16px">Deliberately short. A long list is a way of
+  avoiding the decision about what to read.</p>
+  <div class="reslist">
+    <div class="res"><span class="nm"><a href="https://javascript.info" target="_blank" rel="noopener">javascript.info</a></span><span class="ds">The best structured JavaScript course anywhere</span><span class="free">free</span></div>
+    <div class="res"><span class="nm"><a href="https://developer.mozilla.org/en-US/docs/Web" target="_blank" rel="noopener">MDN Web Docs</a></span><span class="ds">Reference for JS, CSS, HTML and browser APIs</span><span class="free">free</span></div>
+    <div class="res"><span class="nm"><a href="https://www.typescriptlang.org/docs/handbook/intro.html" target="_blank" rel="noopener">TypeScript Handbook</a></span><span class="ds">Official; read it front to back once</span><span class="free">free</span></div>
+    <div class="res"><span class="nm"><a href="https://github.com/type-challenges/type-challenges" target="_blank" rel="noopener">type-challenges</a></span><span class="ds">Puzzles for the type system; do the easy tier</span><span class="free">free</span></div>
+    <div class="res"><span class="nm"><a href="https://react.dev/learn" target="_blank" rel="noopener">react.dev · Learn</a></span><span class="ds">The official tutorial; the whole "Escape Hatches" section matters</span><span class="free">free</span></div>
+    <div class="res"><span class="nm"><a href="https://react.dev/learn/you-might-not-need-an-effect" target="_blank" rel="noopener">You Might Not Need an Effect</a></span><span class="ds">Highest value-per-minute page in React's docs</span><span class="free">free</span></div>
+    <div class="res"><span class="nm"><a href="https://nextjs.org/learn" target="_blank" rel="noopener">Next.js · Learn</a></span><span class="ds">React Foundations, then the 16-chapter Dashboard course</span><span class="free">free</span></div>
+    <div class="res"><span class="nm"><a href="https://nextjs.org/docs" target="_blank" rel="noopener">Next.js docs</a></span><span class="ds">Caching and rendering chapters repay slow reading</span><span class="free">free</span></div>
+    <div class="res"><span class="nm"><a href="https://web.dev/learn" target="_blank" rel="noopener">web.dev · Learn</a></span><span class="ds">Courses on CSS, accessibility and performance</span><span class="free">free</span></div>
+    <div class="res"><span class="nm"><a href="https://testing-library.com/docs/react-testing-library/intro/" target="_blank" rel="noopener">React Testing Library</a></span><span class="ds">Read the guiding principles before the API</span><span class="free">free</span></div>
+    <div class="res"><span class="nm"><a href="https://tanstack.com/query/latest" target="_blank" rel="noopener">TanStack Query</a></span><span class="ds">Docs double as an education in server-state caching</span><span class="free">free</span></div>
+    <div class="res"><span class="nm"><a href="https://www.totaltypescript.com" target="_blank" rel="noopener">Total TypeScript</a></span><span class="ds">Deep advanced TS; some free, mostly paid</span></div>
+  </div>
+  <div class="note" style="margin-top:18px">
+    <span class="ic">▲</span>
+    <span><b>On AI assistants.</b> Excellent for explaining a concept you've already hit and
+    for reviewing code you wrote. Corrosive as a substitute for the struggle — if it writes
+    the code you don't understand yet, you skipped the stage rather than passing it.</span>
+  </div>
+ </div>
+</section>
+
+<!-- 20 ============================================================ -->
+<section class="slide" data-track="craft" data-title="Are you done?">
+ <div class="inner">
+  <div class="eyebrow"><span class="tag">Self-assessment</span></div>
+  <h2>What "done" actually looks like</h2>
+  <p class="sub">Not a certificate. These are the questions a senior engineer's answers
+  reveal in about ten minutes of conversation.</p>
+  <div class="cols c2">
+    <div class="card">
+      <h3>You've genuinely got the language</h3>
+      <ul class="check">
+        <li>You can explain why mutating state doesn't re-render</li>
+        <li>You model states as a union rather than three booleans</li>
+        <li>You reach for <code>unknown</code>, and <code>any</code> feels like a smell</li>
+        <li>You let inference work and only annotate boundaries</li>
+      </ul>
+      <h3 style="margin-top:18px">You've genuinely got React</h3>
+      <ul class="check">
+        <li>You can say what causes a re-render, and check rather than guess</li>
+        <li>Your first instinct for new state is "can I derive this?"</li>
+        <li>You write effects rarely, and can justify each one</li>
+        <li>You reach for composition before configuration props</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>You've genuinely got the framework</h3>
+      <ul class="check">
+        <li>You can explain where a given component renders, and why</li>
+        <li>You can debug a stale value through every caching layer</li>
+        <li>You put filters in the URL without being asked</li>
+        <li>You know which state belongs on the server</li>
+      </ul>
+      <h3 style="margin-top:18px">You're ready for production work</h3>
+      <ul class="check">
+        <li>You can operate your own UI with the keyboard only</li>
+        <li>You measure before optimising, every time</li>
+        <li>You can land a small change in an unfamiliar codebase and match its conventions</li>
+        <li>You can say "I don't know yet" and then go find out</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note info" style="margin-top:20px">
+    <span class="ic">◆</span>
+    <span><b>The honest closing note.</b> Nobody holds all of this at once, and the people who
+    look like they do are just further along one particular path. Pick the next stage, build
+    the thing, ship it badly, repeat. That's the whole method.</span>
+  </div>
+ </div>
+</section>
+
+</div><!-- /deck -->
+
+<!-- overview -->
+<div class="ov" id="ov" role="dialog" aria-label="Slide overview">
+  <h2>Overview</h2>
+  <div class="ovgrid" id="ovgrid"></div>
+</div>
+
+<div class="chrome">
+  <span class="ttl" id="ttl"></span>
+  <span class="hint"><kbd>←</kbd> <kbd>→</kbd> move · <kbd>O</kbd> overview · <kbd>D</kbd> theme</span>
+  <div class="nav">
+    <button id="prev" aria-label="Previous slide">‹</button>
+    <button id="ovbtn" class="count" aria-label="Show overview"><span id="count"></span></button>
+    <button id="next" aria-label="Next slide">›</button>
+  </div>
+</div>
+
+<script>
+const slides = [...document.querySelectorAll('.slide')];
+const N = slides.length;
+let i = 0;
+
+const bar = document.getElementById('bar');
+const ttl = document.getElementById('ttl');
+const cnt = document.getElementById('count');
+const ov  = document.getElementById('ov');
+const TRACK_COLOR = {lang:'--lang', react:'--react', fw:'--fw', craft:'--craft', mentor:'--mentor'};
+
+function show(n, push){
+  i = Math.max(0, Math.min(N-1, n));
+  slides.forEach((s,k)=> s.classList.toggle('on', k===i));
+  const cur = slides[i];
+  bar.style.width = ((i+1)/N*100).toFixed(2)+'%';
+  bar.style.background = 'var('+(TRACK_COLOR[cur.dataset.track]||'--lang')+')';
+  ttl.textContent = cur.dataset.title || '';
+  cnt.textContent = (i+1)+' / '+N;
+  document.getElementById('prev').disabled = i===0;
+  document.getElementById('next').disabled = i===N-1;
+  cur.scrollTop = 0;
+  if (push !== false) history.replaceState(null,'','#'+(i+1));
+}
+
+window.__show = show;   // lets automated checks drive real navigation, not class toggles
+document.getElementById('next').onclick = ()=> show(i+1);
+document.getElementById('prev').onclick = ()=> show(i-1);
+document.getElementById('ovbtn').onclick = ()=> toggleOv();
+
+// overview grid
+document.getElementById('ovgrid').innerHTML = slides.map((s,k)=>
+  `<button class="ovc ${s.dataset.track}" data-i="${k}">
+     <span class="i">${String(k+1).padStart(2,'0')}</span>
+     <span class="n">${(s.dataset.title||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
+   </button>`).join('');
+document.querySelectorAll('.ovc').forEach(b=>{
+  b.onclick = ()=>{ show(+b.dataset.i); toggleOv(false); };
+});
+function toggleOv(force){
+  const on = force===undefined ? !ov.classList.contains('on') : force;
+  ov.classList.toggle('on', on);
+}
+
+// keyboard
+document.addEventListener('keydown', e=>{
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key;
+  if (ov.classList.contains('on') && (k==='Escape'||k==='o'||k==='O')){ toggleOv(false); return; }
+  if (k==='ArrowRight' || k==='PageDown' || k===' ' ){ e.preventDefault(); show(i+1); }
+  else if (k==='ArrowLeft' || k==='PageUp'){ e.preventDefault(); show(i-1); }
+  else if (k==='Home'){ show(0); } else if (k==='End'){ show(N-1); }
+  else if (k==='o'||k==='O'){ toggleOv(); }
+  else if (k==='d'||k==='D'){ const r=document.documentElement;
+    r.dataset.theme = r.dataset.theme==='dark'?'light':'dark'; }
+  else if (k==='p'||k==='P'){ window.print(); }
+  else if (/^[1-9]$/.test(k)){ show(+k-1); }
+});
+
+// swipe
+let x0=null;
+document.addEventListener('touchstart', e=>{ x0 = e.touches[0].clientX; }, {passive:true});
+document.addEventListener('touchend', e=>{
+  if (x0===null) return;
+  const dx = e.changedTouches[0].clientX - x0;
+  if (Math.abs(dx) > 55) show(i + (dx<0?1:-1));
+  x0 = null;
+}, {passive:true});
+
+// theme follows OS on first load
+if (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches)
+  document.documentElement.dataset.theme = 'dark';
+
+// deep link
+const start = parseInt((location.hash||'').slice(1), 10);
+show(Number.isFinite(start) && start>0 ? start-1 : 0, false);
+
+// checklist progress (in-memory only; resets on reload)
+document.querySelectorAll('[data-prog-group]').forEach(group=>{
+  const id = group.dataset.progGroup;
+  const badge = document.querySelector(`[data-prog="${id}"]`);
+  const boxes = [...group.querySelectorAll('input[type="checkbox"]')];
+  function update(){
+    const done = boxes.filter(b=>b.checked).length;
+    if (badge) badge.textContent = `${done} / ${boxes.length} done`;
+    boxes.forEach(b=> b.closest('li').classList.toggle('done', b.checked));
+  }
+  boxes.forEach(b=> b.addEventListener('change', update));
+  update();
+});
+</script>
+</body>
+</html>

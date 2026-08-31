@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lesson 0012 — MobX filter store</title>
+    <link rel="stylesheet" href="../assets/lesson.css" />
+  </head>
+  <body>
+    <article class="lesson">
+      <header class="lesson-header">
+        <p class="lesson-eyebrow">Lesson 0012 · MobX sub-lesson (08b)</p>
+        <h1>Same page — state in a store</h1>
+        <p class="lede">
+          Lesson 0009 lifted filter state to the page parent and derived
+          <code>visible</code> during render. That is the canonical React answer.
+          At work, shared filter/sort state often lives in an SDK
+          <strong>MobX store</strong> with a <strong>computed</strong> filtered
+          list. This lesson rebuilds <code>/rides</code> with the same UI and
+          behaviour — different owner for state.
+        </p>
+      </header>
+
+      <p class="mission-tie">
+        Mission tie-in: curriculum <strong>08b</strong> (MobX twin). Requires
+        <a href="0009-lifting-state-up.html">lesson 0009</a> solid first.
+        Pair with <a href="0011-nextjs-routing.html">lesson 0011</a>:
+        <code>/rides-lift</code> = React lift, <code>/rides</code> = MobX.
+      </p>
+
+      <h2>Two answers, one question</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Lift (08a) <code>/rides-lift</code></th>
+              <th>MobX (08b) <code>/rides</code></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Filter state lives</td>
+              <td><code>page.tsx</code> <code>useState</code></td>
+              <td>Store fields (<code>freeCancel</code>, chips, …)</td>
+            </tr>
+            <tr>
+              <td>Visible list</td>
+              <td><code>const visible = vehicles.filter…</code></td>
+              <td><code>get visibleVehicles()</code> computed</td>
+            </tr>
+            <tr>
+              <td>Sidebar wiring</td>
+              <td>Props drill down</td>
+              <td>Components read store (or thin props from store)</td>
+            </tr>
+            <tr>
+              <td>Re-render trigger</td>
+              <td><code>setState</code></td>
+              <td>Observable change + <code>observer</code></td>
+            </tr>
+            <tr class="kept">
+              <td>Fetch vehicles</td>
+              <td colspan="2"><code>useEffect</code> — still external; not MobX’s job on day one</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Install</h2>
+      <pre><code>npm install mobx mobx-react-lite</code></pre>
+
+      <h2>Store sketch</h2>
+      <p>
+        <code>stores/vehicleResultsStore.ts</code> — one class, one source of
+        truth for filters + sort. Vehicles array fills in after fetch.
+      </p>
+      <pre><code>import { makeAutoObservable } from "mobx";
+import type { Vehicle } from "@/components/VehicleCard";
+
+export class VehicleResultsStore {
+  vehicles: Vehicle[] = [];
+  isLoading = true;
+  freeCancel = false;
+  selectedServices: string[] = [];
+  // … car class, car type, luggage, sortBy
+
+  constructor() {
+    makeAutoObservable(this);
+  }
+
+  get visibleVehicles() {
+    return this.vehicles
+      .filter(/* same rules as lesson 0009 */)
+      .sort(/* same sort */);
+  }
+
+  setFreeCancel(next: boolean) {
+    this.freeCancel = next;
+  }
+
+  clearFilters() {
+  }
+
+  setVehicles(data: Vehicle[]) {
+    this.vehicles = data;
+    this.isLoading = false;
+  }
+}</code></pre>
+
+      <div class="callout">
+        <strong><code>visibleVehicles</code> is a computed</strong> — MobX
+        caches it and recomputes when observables it read change. Same idea as
+        deriving <code>visible</code> during render, but owned by the store.
+        Docs:
+        <a href="https://mobx.js.org/computeds.html">Computed values</a>.
+      </div>
+
+      <h2>Page + <code>observer</code></h2>
+      <pre><code>"use client";
+
+import { useEffect, useState } from "react";
+import { observer } from "mobx-react-lite";
+import { VehicleResultsStore } from "@/stores/vehicleResultsStore";
+import { fetchVehicles } from "@/lib/fetchVehicles";
+
+const RidesMobXPage = observer(function RidesMobXPage() {
+  const [store] = useState(() =&gt; new VehicleResultsStore());
+
+  useEffect(() =&gt; {
+    let cancelled = false;
+    fetchVehicles().then((data) =&gt; {
+      if (!cancelled) store.setVehicles(data);
+    });
+    return () =&gt; { cancelled = true; };
+  }, [store]);
+
+  // JSX reads store.isLoading, store.visibleVehicles, store.setFreeCancel, …
+});
+
+export default RidesMobXPage;</code></pre>
+      <p>
+        <code>observer</code> wraps a component so it re-renders when MobX
+        observables used during render change.
+        <a href="https://mobx.js.org/react-integration.html">React integration</a>.
+      </p>
+
+      <h2>Build order (recommended)</h2>
+      <ol>
+        <li>Copy filter/sort rules from lift page into store computed — test mentally against one vehicle.</li>
+        <li>Wire <code>/rides/page.tsx</code> to read <code>store.visibleVehicles</code>.</li>
+        <li>
+          <strong>Simple wiring first:</strong> pass <code>store.freeCancel</code>
+          and <code>store.setFreeCancel</code> as props (store-backed controlled
+          components).
+        </li>
+        <li>
+          <strong>Then idiomatic:</strong> wrap <code>FiltersPanel</code> in
+          <code>observer</code> and read store inside (less prop drilling).
+        </li>
+      </ol>
+
+      <h2>Work repo tie-in</h2>
+      <p>
+        Compare your store to
+        <code>sdk/src/stores/api/transport-filter.store.ts</code> and
+        <code>hooks/useStateOfFilters.ts</code> — same shape: observable filter
+        knobs, computed or derived results list, UI that subscribes.
+      </p>
+
+      <h2>Skill check</h2>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — computed derives from observables; same role as visible = vehicles.filter in React lift."
+        data-bad="Don't put filter logic in useEffect. Derive — in React during render, in MobX as computed."
+      >
+        <h3>Check 1</h3>
+        <p class="prompt">
+          Where does filtered + sorted list logic live in the MobX version?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">get visibleVehicles() computed on the store</button>
+          <button type="button" class="choice" data-index="1">useEffect that setState on every chip click</button>
+          <button type="button" class="choice" data-index="2">Inside VehicleCard for each row</button>
+          <button type="button" class="choice" data-index="3">document.cookie updated on filter change</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Correct — fetch is still external; useEffect + store.setVehicles is fine. MobX owns filter state, not the network."
+        data-bad="Network is outside React and outside MobX until you model it explicitly. Keep fetch in useEffect for now."
+      >
+        <h3>Check 2</h3>
+        <p class="prompt">
+          Should <code>fetchVehicles</code> move into a MobX action on day one?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">Optional later — useEffect calling store.setVehicles is enough now</button>
+          <button type="button" class="choice" data-index="1">Yes — delete useEffect entirely on first pass</button>
+          <button type="button" class="choice" data-index="2">No — fetch must stay in FilterToggle</button>
+          <button type="button" class="choice" data-index="3">Yes — put fetch inside the computed getter</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — observer re-renders when observables read during render change (e.g. freeCancel toggled)."
+        data-bad="observer connects React render to MobX observables. Without it, UI may not update when store fields change."
+      >
+        <h3>Check 3</h3>
+        <p class="prompt">Why wrap the page in <code>observer</code>?</p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">Re-render when store observables used in JSX change</button>
+          <button type="button" class="choice" data-index="1">Make TypeScript erase the Vehicle type</button>
+          <button type="button" class="choice" data-index="2">Replace use client directive</button>
+          <button type="button" class="choice" data-index="3">Force Next.js to use Pages Router</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <aside class="primary-source">
+        <h2>Primary source (read next)</h2>
+        <p>
+          <a href="https://mobx.js.org/README.html">MobX introduction</a>, then
+          <a href="https://mobx.js.org/react-integration.html">React integration</a>
+          and
+          <a href="https://mobx.js.org/computeds.html">Computed values</a>.
+          Read lift-state on react.dev first if 08a still feels shaky.
+        </p>
+      </aside>
+
+      <p class="ask-teacher">
+        Unclear? Ask — “Singleton store vs useState(() =&gt; new Store())?”,
+        “Does FiltersPanel need observer?”, or “When would I pick lift over
+        MobX on a new page?”
+      </p>
+
+      <footer class="lesson-footer">
+        Checkpoint: demo <code>/rides-lift</code> and <code>/rides</code> side by
+        side — same filters, two state owners. Name three App Router-only
+        things that differ from the Rides Pages Router setup.
+      </footer>
+    </article>
+    <script src="../assets/quiz.js"></script>
+  </body>
+</html>

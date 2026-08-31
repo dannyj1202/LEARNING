@@ -1,0 +1,1876 @@
+<title>TypeScript Field Notes</title>
+<style>
+    :root {
+        --paper: #f3f5f2;
+        --paper-raised: #ffffff;
+        --paper-sunken: #eceee8;
+        --ink: #1b231f;
+        --ink-muted: #5b675f;
+        --rule: #d7dbd2;
+
+        --type-c: #2d4f9e;
+        --type-c-ink: #1f3a7a;
+        --type-c-bg: #e7ecf9;
+        --type-c-bd: #b9c8ef;
+        --value-c: #9c5710;
+        --value-c-ink: #7a4310;
+        --value-c-bg: #faead2;
+        --value-c-bd: #eec98a;
+        --op-c: #3f7a6e;
+        --op-c-ink: #285a50;
+        --op-c-bg: #e2f2ee;
+        --op-c-bd: #a9dccf;
+        --gotcha: #a4342f;
+        --gotcha-ink: #7c231f;
+        --gotcha-bg: #fbe4e2;
+        --gotcha-bd: #f0aca6;
+        --both-c: #5a4aa0;
+        --both-c-ink: #453583;
+        --both-c-bg: #ede9fb;
+        --both-c-bd: #c9bdf0;
+
+        color-scheme: light;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+            --paper: #11151a;
+            --paper-raised: #181d23;
+            --paper-sunken: #0d1013;
+            --ink: #e6ece7;
+            --ink-muted: #93a19a;
+            --rule: #2a322c;
+
+            --type-c: #85a5ff;
+            --type-c-ink: #c0d2ff;
+            --type-c-bg: #16233f;
+            --type-c-bd: #35507f;
+            --value-c: #f0b15c;
+            --value-c-ink: #f6cd93;
+            --value-c-bg: #382a12;
+            --value-c-bd: #8a5e1f;
+            --op-c: #6fd2bd;
+            --op-c-ink: #a7e8d8;
+            --op-c-bg: #10332c;
+            --op-c-bd: #2c6b57;
+            --gotcha: #ff9d95;
+            --gotcha-ink: #ffb8b2;
+            --gotcha-bg: #391413;
+            --gotcha-bd: #8a332e;
+            --both-c: #b3a4f2;
+            --both-c-ink: #cabffa;
+            --both-c-bg: #241d3f;
+            --both-c-bd: #5c4c9e;
+
+            color-scheme: dark;
+        }
+    }
+
+    :root[data-theme="dark"] {
+        --paper: #11151a;
+        --paper-raised: #181d23;
+        --paper-sunken: #0d1013;
+        --ink: #e6ece7;
+        --ink-muted: #93a19a;
+        --rule: #2a322c;
+
+        --type-c: #85a5ff;
+        --type-c-ink: #c0d2ff;
+        --type-c-bg: #16233f;
+        --type-c-bd: #35507f;
+        --value-c: #f0b15c;
+        --value-c-ink: #f6cd93;
+        --value-c-bg: #382a12;
+        --value-c-bd: #8a5e1f;
+        --op-c: #6fd2bd;
+        --op-c-ink: #a7e8d8;
+        --op-c-bg: #10332c;
+        --op-c-bd: #2c6b57;
+        --gotcha: #ff9d95;
+        --gotcha-ink: #ffb8b2;
+        --gotcha-bg: #391413;
+        --gotcha-bd: #8a332e;
+        --both-c: #b3a4f2;
+        --both-c-ink: #cabffa;
+        --both-c-bg: #241d3f;
+        --both-c-bd: #5c4c9e;
+
+        color-scheme: dark;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-size: 16.5px;
+        line-height: 1.62;
+    }
+
+    .mono {
+        font-family: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+    }
+
+    .page {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 3.2rem 1.5rem 5rem;
+    }
+
+    .wide {
+        max-width: 900px;
+    }
+
+    a {
+        color: var(--type-c-ink);
+    }
+
+    header.masthead {
+        margin-bottom: 2.2rem;
+    }
+
+    .eyebrow {
+        font-family: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+        font-size: 0.74rem;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        margin: 0 0 1rem;
+    }
+
+    h1 {
+        font-size: clamp(1.7rem, 1.2rem + 1.8vw, 2.35rem);
+        line-height: 1.18;
+        letter-spacing: -0.01em;
+        margin: 0 0 0.9rem;
+        text-wrap: balance;
+        font-weight: 700;
+    }
+
+    .dek {
+        color: var(--ink-muted);
+        font-size: 1.05rem;
+        max-width: 62ch;
+        margin: 0 0 1.6rem;
+    }
+
+    .dek code {
+        font-size: 0.9em;
+    }
+
+    nav.jumpbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding-top: 1.4rem;
+        border-top: 1px solid var(--rule);
+    }
+
+    nav.jumpbar a {
+        font-family: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+        font-size: 0.76rem;
+        text-decoration: none;
+        color: var(--ink);
+        background: var(--paper-raised);
+        border: 1px solid var(--rule);
+        padding: 0.4em 0.75em;
+        border-radius: 999px;
+    }
+
+    nav.jumpbar a:hover {
+        border-color: var(--type-c-bd);
+        color: var(--type-c-ink);
+    }
+
+    h2 {
+        font-size: 1.32rem;
+        letter-spacing: -0.005em;
+        border-top: 1px solid var(--rule);
+        padding-top: 1.6rem;
+        margin: 3.6rem 0 0.6rem;
+        font-weight: 700;
+    }
+
+    h2 .kicker {
+        display: block;
+        font-family: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        font-weight: 400;
+        margin-bottom: 0.5rem;
+    }
+
+    .section-lede {
+        color: var(--ink-muted);
+        max-width: 64ch;
+        margin: 0 0 1.6rem;
+    }
+
+    p {
+        margin: 0 0 1rem;
+    }
+
+    code {
+        font-family: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+        background: var(--paper-sunken);
+        color: var(--type-c-ink);
+        padding: 0.12em 0.42em;
+        border-radius: 4px;
+        font-size: 0.86em;
+    }
+
+    pre.snippet {
+        font-family: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+        background: var(--paper-sunken);
+        border: 1px solid var(--rule);
+        border-radius: 8px;
+        padding: 0.9rem 1rem;
+        font-size: 0.82rem;
+        line-height: 1.55;
+        overflow-x: auto;
+        margin: 0 0 0.5rem;
+    }
+
+    pre.snippet .cm {
+        color: var(--ink-muted);
+        font-style: italic;
+    }
+
+    figcaption.cite {
+        font-family: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+        font-size: 0.74rem;
+        color: var(--ink-muted);
+        margin: 0 0 1.6rem;
+    }
+
+    /* ── in-page source reader ─────────────────────────────────── */
+    .srcviewer {
+        border: 1px solid var(--rule);
+        border-radius: 12px;
+        background: var(--paper-raised);
+        overflow: hidden;
+        margin: 0 0 2.4rem;
+    }
+
+    .srctabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+        padding: 0.6rem 0.7rem;
+        background: var(--paper-sunken);
+        border-bottom: 1px solid var(--rule);
+    }
+
+    .srctab {
+        font-family: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+        font-size: 0.76rem;
+        color: var(--ink-muted);
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        padding: 0.3rem 0.75rem;
+        cursor: pointer;
+        transition: background 0.12s ease, color 0.12s ease;
+    }
+
+    .srctab:hover {
+        color: var(--ink);
+        background: var(--paper-raised);
+    }
+
+    .srctab.on {
+        color: var(--type-c-ink);
+        background: var(--type-c-bg);
+        border-color: var(--type-c-bd);
+    }
+
+    .srcfile {
+        display: none;
+        padding: 1.3rem 1.4rem 1.5rem;
+    }
+
+    .srcfile.on {
+        display: block;
+    }
+
+    .srchead {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.5rem;
+        border-bottom: 1px solid var(--rule);
+        padding-bottom: 0.6rem;
+        margin-bottom: 0.9rem;
+    }
+
+    .srcpath {
+        font-family: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+        font-size: 0.78rem;
+        color: var(--type-c);
+        margin: 0;
+        word-break: break-all;
+    }
+
+    .srcmeta {
+        font-size: 0.74rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        margin: 0;
+    }
+
+    .srcread {
+        font-size: 0.92rem;
+        color: var(--ink-muted);
+        margin: 0 0 1rem;
+        max-width: 62ch;
+    }
+
+    .src {
+        font-family: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+        font-size: 0.78rem;
+        line-height: 1.65;
+        background: var(--paper-sunken);
+        border: 1px solid var(--rule);
+        border-radius: 8px;
+        padding: 0.85rem 0;
+        overflow-x: auto;
+        margin: 0 0 1.4rem;
+    }
+
+    .src .cl {
+        display: block;
+        padding: 0 1rem 0 0;
+        border-left: 3px solid transparent;
+    }
+
+    .src .cl.hl {
+        background: var(--type-c-bg);
+        border-left-color: var(--type-c);
+    }
+
+    .src .ln {
+        display: inline-block;
+        width: 2.6rem;
+        padding-right: 0.9rem;
+        text-align: right;
+        color: var(--ink-muted);
+        opacity: 0.65;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+
+    .src .lc {
+        white-space: pre;
+    }
+
+    .annos-label {
+        font-size: 0.7rem;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        margin: 0 0 0.7rem;
+    }
+
+    .anno {
+        display: grid;
+        grid-template-columns: 5.5rem 1fr;
+        gap: 0.9rem;
+        padding: 0.55rem 0;
+        border-top: 1px solid var(--rule);
+    }
+
+    .anno .al {
+        font-family: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+        font-size: 0.76rem;
+        color: var(--type-c);
+        padding-top: 0.1rem;
+    }
+
+    .anno p {
+        margin: 0;
+        font-size: 0.9rem;
+        max-width: 68ch;
+    }
+
+    @media (max-width: 680px) {
+        .anno {
+            grid-template-columns: 1fr;
+            gap: 0.2rem;
+        }
+    }
+
+    @media print {
+        .srcfile {
+            display: block !important;
+            break-inside: avoid;
+        }
+
+        .srctabs {
+            display: none;
+        }
+    }
+
+    /* file cards */
+    .file-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 0.9rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .file-card {
+        background: var(--paper-raised);
+        border: 1px solid var(--rule);
+        border-radius: 10px;
+        padding: 1rem 1.1rem 1.1rem;
+    }
+
+    .file-card .fname {
+        font-family: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+        font-size: 0.86rem;
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+    }
+
+    .file-card .fwhy {
+        font-size: 0.87rem;
+        color: var(--ink-muted);
+        margin: 0;
+    }
+
+    /* erasure table */
+    .table-wrap {
+        overflow-x: auto;
+        border: 1px solid var(--rule);
+        border-radius: 10px;
+        margin-bottom: 0.8rem;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+
+    th,
+    td {
+        text-align: left;
+        padding: 0.7rem 0.9rem;
+        border-bottom: 1px solid var(--rule);
+        vertical-align: top;
+    }
+
+    thead th {
+        font-family: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--ink-muted);
+        background: var(--paper);
+    }
+
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    td code {
+        white-space: nowrap;
+    }
+
+    tr.kept td {
+        background: var(--both-c-bg);
+    }
+
+    tr.kept td:first-child {
+        border-left: 3px solid var(--both-c);
+    }
+
+    /* glossary cards */
+    .glossary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .term {
+        background: var(--paper-raised);
+        border: 1px solid var(--rule);
+        border-radius: 10px;
+        padding: 1.05rem 1.15rem 1.15rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.55rem;
+    }
+
+    .term-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+    }
+
+    .term-name {
+        font-family: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+        font-size: 0.98rem;
+        font-weight: 600;
+    }
+
+    .tag {
+        font-family: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+        font-size: 0.66rem;
+        letter-spacing: 0.04em;
+        padding: 0.24em 0.58em;
+        border-radius: 999px;
+        border: 1px solid;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .tag.type {
+        color: var(--type-c-ink);
+        background: var(--type-c-bg);
+        border-color: var(--type-c-bd);
+    }
+
+    .tag.value {
+        color: var(--value-c-ink);
+        background: var(--value-c-bg);
+        border-color: var(--value-c-bd);
+    }
+
+    .tag.op {
+        color: var(--op-c-ink);
+        background: var(--op-c-bg);
+        border-color: var(--op-c-bd);
+    }
+
+    .tag.both {
+        color: var(--both-c-ink);
+        background: var(--both-c-bg);
+        border-color: var(--both-c-bd);
+    }
+
+    .tag.gotcha {
+        color: var(--gotcha-ink);
+        background: var(--gotcha-bg);
+        border-color: var(--gotcha-bd);
+    }
+
+    .term-def {
+        margin: 0;
+        font-size: 0.94rem;
+    }
+
+    .term-def strong {
+        color: var(--ink);
+    }
+
+    .term pre.snippet {
+        margin: 0;
+        font-size: 0.78rem;
+    }
+
+    .term figcaption.cite {
+        margin: -0.3rem 0 0;
+    }
+
+    .term-why {
+        margin: 0;
+        font-size: 0.87rem;
+        color: var(--ink-muted);
+        border-top: 1px dashed var(--rule);
+        padding-top: 0.5rem;
+    }
+
+    .callout {
+        border-radius: 10px;
+        border: 1px solid;
+        padding: 1rem 1.2rem;
+        margin: 0 0 1rem;
+    }
+
+    .callout.gotcha {
+        background: var(--gotcha-bg);
+        border-color: var(--gotcha-bd);
+    }
+
+    .callout.gotcha .callout-label {
+        color: var(--gotcha-ink);
+    }
+
+    .callout.both {
+        background: var(--both-c-bg);
+        border-color: var(--both-c-bd);
+    }
+
+    .callout.both .callout-label {
+        color: var(--both-c-ink);
+    }
+
+    .callout-label {
+        font-family: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+        font-size: 0.72rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        font-weight: 700;
+        margin: 0 0 0.4rem;
+    }
+
+    .callout p:last-child {
+        margin-bottom: 0;
+    }
+
+    /* self-check */
+    details.quiz {
+        background: var(--paper-raised);
+        border: 1px solid var(--rule);
+        border-radius: 10px;
+        padding: 0.9rem 1.1rem;
+        margin-bottom: 0.7rem;
+    }
+
+    details.quiz[open] {
+        padding-bottom: 1.1rem;
+    }
+
+    details.quiz summary {
+        cursor: pointer;
+        font-size: 0.95rem;
+        list-style: none;
+        display: flex;
+        gap: 0.7rem;
+        align-items: baseline;
+    }
+
+    details.quiz summary::-webkit-details-marker {
+        display: none;
+    }
+
+    details.quiz summary::before {
+        content: "Q·";
+        font-family: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+        color: var(--type-c-ink);
+        flex-shrink: 0;
+    }
+
+    .quiz-answer {
+        margin-top: 0.7rem;
+        padding-top: 0.7rem;
+        border-top: 1px dashed var(--rule);
+        font-size: 0.92rem;
+        color: var(--ink-muted);
+    }
+
+    .quiz-answer strong {
+        color: var(--ink);
+    }
+
+    /* still fuzzy */
+    .fuzzy-list {
+        display: grid;
+        gap: 0.8rem;
+    }
+
+    .fuzzy-item {
+        background: var(--paper-raised);
+        border: 1px dashed var(--rule);
+        border-radius: 10px;
+        padding: 0.9rem 1.1rem;
+    }
+
+    .fuzzy-item .term-name {
+        font-size: 0.92rem;
+    }
+
+    .fuzzy-item p {
+        margin: 0.4rem 0 0;
+        font-size: 0.89rem;
+        color: var(--ink-muted);
+    }
+
+    footer {
+        margin-top: 4rem;
+        padding-top: 1.4rem;
+        border-top: 1px solid var(--rule);
+        color: var(--ink-muted);
+        font-size: 0.83rem;
+    }
+
+    footer code {
+        font-size: 0.86em;
+    }
+</style>
+
+<div class="page">
+
+    <header class="masthead">
+        <p class="eyebrow">Onboarding notes · ct-web-transport / packages/app/app-common + packages/sdk/src/types</p>
+        <h1>The types were already in the code. You just have to learn to read them.</h1>
+        <p class="dek">
+            Built from real files — not toy examples — plus one confirmed lookup into the design
+            system's source. <strong>All nine files are embedded in this page in full</strong>, line
+            numbered and annotated, so nothing here needs a second tab: read the code at
+            <a href="#componentsource">Code: components</a> and <a href="#sdksource">Code: SDK
+                types</a>, then the definitions that name those exact lines.
+        </p>
+        <nav class="jumpbar">
+            <a href="#sources">Sources</a>
+            <a href="#erasure">The one idea</a>
+            <a href="#componentsource">Code: components</a>
+            <a href="#shaping">Shaping data</a>
+            <a href="#enums">Enums</a>
+            <a href="#functions">Functions</a>
+            <a href="#imports">Imports</a>
+            <a href="#operators">Operators</a>
+            <a href="#sdksource">Code: SDK types</a>
+            <a href="#sdktypes">SDK type files</a>
+            <a href="#nullability">Nullability</a>
+            <a href="#selfcheck">Self-check</a>
+            <a href="#fuzzy">Still fuzzy</a>
+        </nav>
+    </header>
+
+    <h2 id="sources"><span class="kicker">Ground truth</span>The files this glossary is built from</h2>
+    <p class="section-lede">
+        Small, readable, and they overlap on purpose — <code>PoliciesFilter</code> and
+        <code>MultiSelectFilter</code> are near-twins, so once a pattern clicks in one, you'll
+        recognize it immediately in the other. Groups F and G add a second set: the four type files in
+        <code>packages/sdk/src/types/</code>, listed after these three.
+    </p>
+    <div class="file-grid">
+        <div class="file-card">
+            <p class="fname">InfoRow/InfoRow.tsx</p>
+            <p class="fwhy">A tiny presentational component. Its <code>Props</code> type has a nested
+                object shape and every property is optional except two — good for reading how object
+                types are built up.</p>
+        </div>
+        <div class="file-card">
+            <p class="fname">PoliciesFilter/PoliciesFilter.tsx</p>
+            <p class="fwhy">Imports two types from the SDK with <code>import type</code>, and defines
+                a <code>void</code>-returning handler. The clearest single file for the type/value
+                boundary.</p>
+        </div>
+        <div class="file-card">
+            <p class="fname">MultiSelectFilter/MultiSelectFilter.tsx</p>
+            <p class="fwhy">Same shape as PoliciesFilter, plus a default parameter value
+                (<code>isDesktop = false</code>) and a ternary choosing between two enum members.</p>
+        </div>
+    </div>
+    <p class="section-lede">
+        And the four SDK type files behind <a href="#sdktypes">Group F</a> — read them in this order:
+    </p>
+    <div class="file-grid">
+        <div class="file-card">
+            <p class="fname">sdk/src/types/sort.types.ts</p>
+            <p class="fwhy">Four lines. The smallest complete <code>type</code> alias in the repo — start
+                here to confirm the shape of a type file before reading a big one.</p>
+        </div>
+        <div class="file-card">
+            <p class="fname">sdk/src/types/filters.types.ts</p>
+            <p class="fwhy">Six <code>interface</code>s describing the whole filter sidebar. Arrays of named
+                types, and one type that refers to itself.</p>
+        </div>
+        <div class="file-card">
+            <p class="fname">sdk/src/types/transport.types.ts</p>
+            <p class="fwhy">What a "ride" actually is: two enums, plus <code>Airport</code> /
+                <code>Destination</code> / <code>BookingLocation</code> and their <code>| null</code> unions.
+            </p>
+        </div>
+        <div class="file-card">
+            <p class="fname">sdk/src/types/index.ts</p>
+            <p class="fwhy">Five <code>export *</code> lines. Explains why App imports from the package root
+                and never from a deep path.</p>
+        </div>
+    </div>
+
+    <h2 id="erasure"><span class="kicker">Read this section first</span>Type-level vs. value-level</h2>
+    <p class="section-lede">
+        Every one of your unfamiliar constructs traces back to this one distinction. TypeScript
+        files hold two layers stacked on top of each other: <strong>values</strong> — the actual
+        variables, functions, and objects that exist while the code runs — and <strong>types</strong>
+        — descriptions the compiler uses to catch mistakes, which disappear entirely before your
+        code ever reaches a browser. That disappearing act is called <strong>erasure</strong>.
+    </p>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Written in the file</th>
+                    <th>What survives to the running browser</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>import type { ReactNode } from 'react';</code></td>
+                    <td>Nothing. The whole line is deleted at compile time.</td>
+                </tr>
+                <tr>
+                    <td><code>export type Props = { ... };</code></td>
+                    <td>Nothing. <code>type</code> never exists past compilation.</td>
+                </tr>
+                <tr>
+                    <td><code>textColor?: COLOR_VARIANTS</code></td>
+                    <td>Nothing of the annotation. Only the property itself, if a caller actually passes one.</td>
+                </tr>
+                <tr>
+                    <td><code>: JSX.Element</code>, <code>: void</code></td>
+                    <td>Nothing. Return-type annotations are compiler-only.</td>
+                </tr>
+                <tr class="kept">
+                    <td><code>export enum COLOR_VARIANTS { WHITE = 'white', ... }</code></td>
+                    <td><strong>A real JavaScript object</strong> — <code>{ WHITE: 'white', ... }</code> —
+                        that exists at runtime. Enums are the exception.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="callout both">
+        <p class="callout-label">Worth pausing on</p>
+        <p>Almost everything with a "type flavor" — <code>type</code>, <code>interface</code>,
+            <code>import type</code>, every <code>: X</code> annotation — is erased. <code>enum</code>
+            quietly breaks that pattern: it looks like a type-only declaration but the compiler actually
+            emits a real object for it. That's confirmed straight from the design system's source
+            (<code>theme/palette.theme</code>, <code>theme/typography.theme</code>) — both
+            <code>COLOR_VARIANTS</code> and <code>TYPOGRAPHY_VARIANT</code> are declared with
+            <code>export declare enum</code>, so your instinct on those two was exactly right.
+        </p>
+    </div>
+
+    <h2 id="componentsource"><span class="kicker">Read the code here</span>The three files, in full</h2>
+    <p class="section-lede">Every definition below is anchored to one of these lines, so the code lives in the page rather than in another tab. Switch files with the buttons; the highlighted lines are the ones the glossary talks about, and the notes under each file explain them in order.</p>
+    <div class="srcviewer">
+      <div class="srctabs">
+      <button type="button" class="srctab on">InfoRow.tsx</button>
+      <button type="button" class="srctab">PoliciesFilter.tsx</button>
+      <button type="button" class="srctab">MultiSelectFilter.tsx</button>
+      <button type="button" class="srctab">VehicleCard.tsx (excerpt)</button>
+      </div>
+    <section class="srcfile on" id="src-inforow">
+      <div class="srchead">
+        <p class="srcpath">packages/app/app-common/components/InfoRow/InfoRow.tsx</p>
+        <p class="srcmeta">26 lines · a presentational component</p>
+      </div>
+      <p class="srcread">The smallest component in the set. Read it as three blocks: what it pulls in (1&ndash;3), the shape it accepts (5&ndash;14), and what it draws (16&ndash;26). Almost every component in this repo has exactly those three blocks in that order.</p>
+      <div class="src">
+<span class="cl hl"><span class="ln">1</span><span class="lc">import type { ReactNode } from &#x27;react&#x27;;</span></span>
+<span class="cl hl"><span class="ln">2</span><span class="lc">import { COLOR_VARIANTS, Typography, TYPOGRAPHY_VARIANT } from &#x27;@tajawal/ct-web-design-system&#x27;;</span></span>
+<span class="cl"><span class="ln">3</span><span class="lc">import Styled from &#x27;./InfoRow.styled&#x27;;</span></span>
+<span class="cl"><span class="ln">4</span><span class="lc">&nbsp;</span></span>
+<span class="cl hl"><span class="ln">5</span><span class="lc">export type Props = {</span></span>
+<span class="cl"><span class="ln">6</span><span class="lc">  icon: ReactNode;</span></span>
+<span class="cl"><span class="ln">7</span><span class="lc">  text: string;</span></span>
+<span class="cl hl"><span class="ln">8</span><span class="lc">  textColor?: COLOR_VARIANTS;</span></span>
+<span class="cl hl"><span class="ln">9</span><span class="lc">  stylingSettings?: {</span></span>
+<span class="cl"><span class="ln">10</span><span class="lc">    iconSize?: number;</span></span>
+<span class="cl"><span class="ln">11</span><span class="lc">    textSize?: TYPOGRAPHY_VARIANT;</span></span>
+<span class="cl"><span class="ln">12</span><span class="lc">    gap?: number;</span></span>
+<span class="cl"><span class="ln">13</span><span class="lc">  };</span></span>
+<span class="cl"><span class="ln">14</span><span class="lc">};</span></span>
+<span class="cl"><span class="ln">15</span><span class="lc">&nbsp;</span></span>
+<span class="cl hl"><span class="ln">16</span><span class="lc">export default function InfoRow({ icon, text, textColor, stylingSettings }: Props): JSX.Element {</span></span>
+<span class="cl hl"><span class="ln">17</span><span class="lc">  const { iconSize = 16, textSize = TYPOGRAPHY_VARIANT.CAPTIONREG, gap = 8 } = stylingSettings || {};</span></span>
+<span class="cl"><span class="ln">18</span><span class="lc">  return (</span></span>
+<span class="cl"><span class="ln">19</span><span class="lc">    &lt;Styled.Row style={{ gap }}&gt;</span></span>
+<span class="cl"><span class="ln">20</span><span class="lc">      &lt;Styled.IconWrapper style={{ width: iconSize, height: iconSize }}&gt;{icon}&lt;/Styled.IconWrapper&gt;</span></span>
+<span class="cl"><span class="ln">21</span><span class="lc">      &lt;Typography color={textColor} component=&quot;p&quot; variant={textSize}&gt;</span></span>
+<span class="cl"><span class="ln">22</span><span class="lc">        {text}</span></span>
+<span class="cl"><span class="ln">23</span><span class="lc">      &lt;/Typography&gt;</span></span>
+<span class="cl"><span class="ln">24</span><span class="lc">    &lt;/Styled.Row&gt;</span></span>
+<span class="cl"><span class="ln">25</span><span class="lc">  );</span></span>
+<span class="cl"><span class="ln">26</span><span class="lc">}</span></span>
+      </div>
+      <div class="annos">
+        <p class="annos-label">Line by line</p>
+        <div class="anno"><span class="al">L1</span><p><code>import type</code> &mdash; pulls in a name usable <em>only</em> in type position. The whole line is deleted at compile time; nothing of it reaches the browser.</p></div>
+        <div class="anno"><span class="al">L2</span><p>A regular import, by contrast, survives to runtime. <code>Typography</code> is a real component and <code>COLOR_VARIANTS</code> is a real object &mdash; both exist while the page runs.</p></div>
+        <div class="anno"><span class="al">L5&ndash;14</span><p>The repo convention: an exported <code>Props</code> type sitting directly above the component it describes. That's a house style, not a TypeScript requirement.</p></div>
+        <div class="anno"><span class="al">L8</span><p><code>textColor?</code> &mdash; the <code>?</code> makes the property optional. Callers may leave it out.</p></div>
+        <div class="anno"><span class="al">L9&ndash;13</span><p>A nested object type, written inline rather than pulled out into its own name. Every field inside is independently optional.</p></div>
+        <div class="anno"><span class="al">L16</span><p>Three things at once: the parameter is <em>destructured</em> (<code>{ icon, text, ... }</code>), the whole parameter is typed <code>: Props</code>, and the function is declared to return <code>: JSX.Element</code> &mdash; a piece of renderable React markup.</p></div>
+        <div class="anno"><span class="al">L17</span><p>Destructuring with defaults. If <code>stylingSettings</code> is missing, <code>|| {}</code> substitutes an empty object so the destructuring doesn't throw &mdash; then each of <code>iconSize</code>, <code>textSize</code>, <code>gap</code> falls back to its own default. This is plain JavaScript; no TypeScript involved.</p></div>
+        <div class="anno"><span class="al">L19&ndash;20</span><p><code>{{ gap }}</code> is not special syntax &mdash; the outer braces are JSX's &ldquo;expression goes here,&rdquo; the inner ones are an object literal. So it reads <code>style={</code> an object <code>}</code>.</p></div>
+      </div>
+    </section>
+    <section class="srcfile" id="src-policies">
+      <div class="srchead">
+        <p class="srcpath">packages/app/app-common/components/PoliciesFilter/PoliciesFilter.tsx</p>
+        <p class="srcmeta">43 lines · a filter section, list-rendered</p>
+      </div>
+      <p class="srcread">The clearest file in the repo for the type/value boundary, because the imports are literally grouped by comment into the two kinds. Also your first real sighting of the <code>.map()</code> pattern from Lesson 0003, in production form.</p>
+      <div class="src">
+<span class="cl"><span class="ln">1</span><span class="lc">import { Typography } from &#x27;@mui/material&#x27;;</span></span>
+<span class="cl"><span class="ln">2</span><span class="lc">import { Toggle, TYPOGRAPHY_VARIANT } from &#x27;@tajawal/ct-web-design-system&#x27;;</span></span>
+<span class="cl"><span class="ln">3</span><span class="lc">import { buildTestId } from &#x27;@tajawal/web-common/lib&#x27;;</span></span>
+<span class="cl"><span class="ln">4</span><span class="lc">import { FilterSectionStyled } from &#x27;@/app-mweb/containers/FiltersDrawer/components/FilterSection&#x27;;</span></span>
+<span class="cl"><span class="ln">5</span><span class="lc">&nbsp;</span></span>
+<span class="cl hl"><span class="ln">6</span><span class="lc">// utils</span></span>
+<span class="cl"><span class="ln">7</span><span class="lc">import _map from &#x27;lodash/map&#x27;;</span></span>
+<span class="cl"><span class="ln">8</span><span class="lc">&nbsp;</span></span>
+<span class="cl hl"><span class="ln">9</span><span class="lc">// types</span></span>
+<span class="cl hl"><span class="ln">10</span><span class="lc">import type { PolicyFilter } from &#x27;@tajawal/web-transport-sdk/stores&#x27;;</span></span>
+<span class="cl hl"><span class="ln">11</span><span class="lc">import type { TransportFilterSelectableItem } from &#x27;@tajawal/web-transport-sdk/types&#x27;;</span></span>
+<span class="cl"><span class="ln">12</span><span class="lc">&nbsp;</span></span>
+<span class="cl"><span class="ln">13</span><span class="lc">export type Props = {</span></span>
+<span class="cl"><span class="ln">14</span><span class="lc">  testIdPrefix: string;</span></span>
+<span class="cl"><span class="ln">15</span><span class="lc">  filter: PolicyFilter;</span></span>
+<span class="cl hl"><span class="ln">16</span><span class="lc">  onFilterChange: () =&gt; void;</span></span>
+<span class="cl"><span class="ln">17</span><span class="lc">};</span></span>
+<span class="cl"><span class="ln">18</span><span class="lc">&nbsp;</span></span>
+<span class="cl"><span class="ln">19</span><span class="lc">export default function PoliciesFilter({ testIdPrefix, filter, onFilterChange }: Props): JSX.Element {</span></span>
+<span class="cl"><span class="ln">20</span><span class="lc">  const testId = buildTestId(testIdPrefix, &#x27;PoliciesFilter&#x27;);</span></span>
+<span class="cl"><span class="ln">21</span><span class="lc">&nbsp;</span></span>
+<span class="cl hl"><span class="ln">22</span><span class="lc">  function handleToggle(key: string): void {</span></span>
+<span class="cl"><span class="ln">23</span><span class="lc">    filter.toggle(key);</span></span>
+<span class="cl"><span class="ln">24</span><span class="lc">    onFilterChange();</span></span>
+<span class="cl"><span class="ln">25</span><span class="lc">  }</span></span>
+<span class="cl"><span class="ln">26</span><span class="lc">&nbsp;</span></span>
+<span class="cl"><span class="ln">27</span><span class="lc">  return (</span></span>
+<span class="cl"><span class="ln">28</span><span class="lc">    &lt;div data-testid={testId}&gt;</span></span>
+<span class="cl hl"><span class="ln">29</span><span class="lc">      {_map(filter.uncommittedState, (item: TransportFilterSelectableItem, index: number) =&gt; (</span></span>
+<span class="cl hl"><span class="ln">30</span><span class="lc">        &lt;FilterSectionStyled.ToggleRow $first={index === 0} $last={index === filter.uncommittedState.length - 1} key={item.key} data-testid={buildTestId(testId, `Row${index}`)}&gt;</span></span>
+<span class="cl"><span class="ln">31</span><span class="lc">          &lt;Typography variant={TYPOGRAPHY_VARIANT.BODY2}&gt;{item.name}&lt;/Typography&gt;</span></span>
+<span class="cl"><span class="ln">32</span><span class="lc">          &lt;Toggle</span></span>
+<span class="cl"><span class="ln">33</span><span class="lc">            size=&quot;medium&quot;</span></span>
+<span class="cl"><span class="ln">34</span><span class="lc">            label={item.key}</span></span>
+<span class="cl"><span class="ln">35</span><span class="lc">            isChecked={item.selected}</span></span>
+<span class="cl hl"><span class="ln">36</span><span class="lc">            onChange={() =&gt; handleToggle(item.key)}</span></span>
+<span class="cl"><span class="ln">37</span><span class="lc">            testId={buildTestId(testId, `Toggle${index}`)}</span></span>
+<span class="cl"><span class="ln">38</span><span class="lc">          /&gt;</span></span>
+<span class="cl"><span class="ln">39</span><span class="lc">        &lt;/FilterSectionStyled.ToggleRow&gt;</span></span>
+<span class="cl"><span class="ln">40</span><span class="lc">      ))}</span></span>
+<span class="cl"><span class="ln">41</span><span class="lc">    &lt;/div&gt;</span></span>
+<span class="cl"><span class="ln">42</span><span class="lc">  );</span></span>
+<span class="cl"><span class="ln">43</span><span class="lc">}</span></span>
+      </div>
+      <div class="annos">
+        <p class="annos-label">Line by line</p>
+        <div class="anno"><span class="al">L6&ndash;11</span><p>The author grouped the imports by hand: utilities, then types. Note that only the <code>// types</code> group uses <code>import type</code> &mdash; those two lines vanish at compile time, the rest don't.</p></div>
+        <div class="anno"><span class="al">L16</span><p><code>onFilterChange: () =&gt; void</code> &mdash; a function-typed property. It means &ldquo;this prop must hold a function that takes no arguments and hands nothing back.&rdquo; This is how a child says &ldquo;something changed&rdquo; without knowing what the parent will do.</p></div>
+        <div class="anno"><span class="al">L22</span><p><code>: void</code> on a return means &ldquo;don't expect a usable value back.&rdquo; The function still <em>does</em> things &mdash; it just doesn't produce a result worth capturing.</p></div>
+        <div class="anno"><span class="al">L29</span><p><code>_map</code> is lodash's version of <code>.map()</code> &mdash; same idea as Lesson 0003. The callback's parameters are explicitly typed <code>(item: TransportFilterSelectableItem, index: number)</code>, which is how you learn the element type without opening the SDK.</p></div>
+        <div class="anno"><span class="al">L30</span><p><code>key={item.key}</code> &mdash; a stable id, not the array index. Exactly the rule from Lesson 0003. The index <em>is</em> also in scope here, which makes the choice deliberate.</p></div>
+        <div class="anno"><span class="al">L30</span><p><code>$first</code> and <code>$last</code> are Emotion transient props (Lesson 0005) &mdash; the <code>$</code> prefix marks them as styling-only, so they're used to compute CSS and never forwarded onto the DOM element.</p></div>
+        <div class="anno"><span class="al">L36</span><p><code>onChange={() =&gt; handleToggle(item.key)}</code> &mdash; wrapped in an arrow function because the handler needs an argument. Writing <code>onChange={handleToggle(item.key)}</code> would call it immediately during render instead of on click. Common review catch.</p></div>
+      </div>
+    </section>
+    <section class="srcfile" id="src-multiselect">
+      <div class="srchead">
+        <p class="srcpath">packages/app/app-common/components/MultiSelectFilter/MultiSelectFilter.tsx</p>
+        <p class="srcmeta">57 lines · near-twin of PoliciesFilter</p>
+      </div>
+      <p class="srcread">Deliberately read second. It is the same file as PoliciesFilter with two additions &mdash; a default parameter value and a ternary picking between two enum members. Spotting what's the same is the point; that's how repo patterns become recognisable.</p>
+      <div class="src">
+<span class="cl"><span class="ln">1</span><span class="lc">import { Typography } from &#x27;@mui/material&#x27;;</span></span>
+<span class="cl"><span class="ln">2</span><span class="lc">import { color, COLOR_VARIANTS, TYPOGRAPHY_VARIANT, Chips } from &#x27;@tajawal/ct-web-design-system&#x27;;</span></span>
+<span class="cl"><span class="ln">3</span><span class="lc">import { buildTestId } from &#x27;@tajawal/web-common/lib&#x27;;</span></span>
+<span class="cl"><span class="ln">4</span><span class="lc">import { FilterSectionStyled } from &#x27;@/app-mweb/containers/FiltersDrawer/components/FilterSection&#x27;;</span></span>
+<span class="cl"><span class="ln">5</span><span class="lc">&nbsp;</span></span>
+<span class="cl"><span class="ln">6</span><span class="lc">// utils</span></span>
+<span class="cl"><span class="ln">7</span><span class="lc">import _map from &#x27;lodash/map&#x27;;</span></span>
+<span class="cl"><span class="ln">8</span><span class="lc">&nbsp;</span></span>
+<span class="cl"><span class="ln">9</span><span class="lc">// types</span></span>
+<span class="cl"><span class="ln">10</span><span class="lc">import type { StringMultiselectFilter } from &#x27;@tajawal/web-transport-sdk/stores&#x27;;</span></span>
+<span class="cl"><span class="ln">11</span><span class="lc">import type { TransportFilterSelectableItem } from &#x27;@tajawal/web-transport-sdk/types&#x27;;</span></span>
+<span class="cl"><span class="ln">12</span><span class="lc">&nbsp;</span></span>
+<span class="cl"><span class="ln">13</span><span class="lc">export type Props = {</span></span>
+<span class="cl"><span class="ln">14</span><span class="lc">  testIdPrefix: string;</span></span>
+<span class="cl"><span class="ln">15</span><span class="lc">  title: string;</span></span>
+<span class="cl"><span class="ln">16</span><span class="lc">  filter: StringMultiselectFilter;</span></span>
+<span class="cl"><span class="ln">17</span><span class="lc">  onFilterChange: () =&gt; void;</span></span>
+<span class="cl hl"><span class="ln">18</span><span class="lc">  isDesktop?: boolean;</span></span>
+<span class="cl"><span class="ln">19</span><span class="lc">};</span></span>
+<span class="cl"><span class="ln">20</span><span class="lc">&nbsp;</span></span>
+<span class="cl hl"><span class="ln">21</span><span class="lc">export default function MultiSelectFilter({ testIdPrefix, title, filter, onFilterChange, isDesktop = false }: Props): JSX.Element {</span></span>
+<span class="cl"><span class="ln">22</span><span class="lc">  function handleToggle(key: string): void {</span></span>
+<span class="cl"><span class="ln">23</span><span class="lc">    filter.toggle(key);</span></span>
+<span class="cl"><span class="ln">24</span><span class="lc">    onFilterChange();</span></span>
+<span class="cl"><span class="ln">25</span><span class="lc">  }</span></span>
+<span class="cl"><span class="ln">26</span><span class="lc">&nbsp;</span></span>
+<span class="cl"><span class="ln">27</span><span class="lc">  return (</span></span>
+<span class="cl"><span class="ln">28</span><span class="lc">    &lt;div data-testid={testIdPrefix}&gt;</span></span>
+<span class="cl"><span class="ln">29</span><span class="lc">      &lt;FilterSectionStyled.Title</span></span>
+<span class="cl hl"><span class="ln">30</span><span class="lc">        variant={</span></span>
+<span class="cl hl"><span class="ln">31</span><span class="lc">          isDesktop</span></span>
+<span class="cl hl"><span class="ln">32</span><span class="lc">            ? TYPOGRAPHY_VARIANT.HEADING3SEMBLD</span></span>
+<span class="cl hl"><span class="ln">33</span><span class="lc">            : TYPOGRAPHY_VARIANT.HEADING2</span></span>
+<span class="cl hl"><span class="ln">34</span><span class="lc">        }</span></span>
+<span class="cl"><span class="ln">35</span><span class="lc">        component=&quot;h2&quot;</span></span>
+<span class="cl"><span class="ln">36</span><span class="lc">      &gt;</span></span>
+<span class="cl"><span class="ln">37</span><span class="lc">        {title}</span></span>
+<span class="cl"><span class="ln">38</span><span class="lc">      &lt;/FilterSectionStyled.Title&gt;</span></span>
+<span class="cl"><span class="ln">39</span><span class="lc">&nbsp;</span></span>
+<span class="cl"><span class="ln">40</span><span class="lc">      &lt;FilterSectionStyled.ChipGroup&gt;</span></span>
+<span class="cl hl"><span class="ln">41</span><span class="lc">        {_map(filter.uncommittedState, (item: TransportFilterSelectableItem, index: number) =&gt; (</span></span>
+<span class="cl"><span class="ln">42</span><span class="lc">          &lt;Chips</span></span>
+<span class="cl hl"><span class="ln">43</span><span class="lc">            key={item.key}</span></span>
+<span class="cl"><span class="ln">44</span><span class="lc">            isSelected={item.selected}</span></span>
+<span class="cl"><span class="ln">45</span><span class="lc">            onClick={() =&gt; handleToggle(item.key)}</span></span>
+<span class="cl"><span class="ln">46</span><span class="lc">            data-testid={buildTestId(testIdPrefix, `Chip${index}`)}</span></span>
+<span class="cl"><span class="ln">47</span><span class="lc">            label={item.name}</span></span>
+<span class="cl"><span class="ln">48</span><span class="lc">            size=&quot;small&quot;</span></span>
+<span class="cl"><span class="ln">49</span><span class="lc">            type=&quot;action&quot;</span></span>
+<span class="cl"><span class="ln">50</span><span class="lc">          &gt;</span></span>
+<span class="cl"><span class="ln">51</span><span class="lc">            {item.name}</span></span>
+<span class="cl"><span class="ln">52</span><span class="lc">          &lt;/Chips&gt;</span></span>
+<span class="cl"><span class="ln">53</span><span class="lc">        ))}</span></span>
+<span class="cl"><span class="ln">54</span><span class="lc">      &lt;/FilterSectionStyled.ChipGroup&gt;</span></span>
+<span class="cl"><span class="ln">55</span><span class="lc">    &lt;/div&gt;</span></span>
+<span class="cl"><span class="ln">56</span><span class="lc">  );</span></span>
+<span class="cl"><span class="ln">57</span><span class="lc">}</span></span>
+      </div>
+      <div class="annos">
+        <p class="annos-label">Line by line</p>
+        <div class="anno"><span class="al">L18</span><p><code>isDesktop?: boolean</code> &mdash; optional in the <em>type</em>.</p></div>
+        <div class="anno"><span class="al">L21</span><p><code>isDesktop = false</code> &mdash; a default <em>value</em>, in the function signature. These two work as a pair: the <code>?</code> lets callers omit it, the <code>= false</code> decides what happens when they do. Inside the body it's always a real boolean, never undefined.</p></div>
+        <div class="anno"><span class="al">L30&ndash;34</span><p>A plain JavaScript ternary (<code>condition ? a : b</code>) choosing between two enum members. Nothing TypeScript-specific is happening &mdash; the enum members are just values.</p></div>
+        <div class="anno"><span class="al">L41</span><p>The identical <code>_map</code> + typed-callback pattern as PoliciesFilter L29. Once you've read one, you've read every filter component in this repo.</p></div>
+        <div class="anno"><span class="al">L43</span><p><code>key={item.key}</code> again &mdash; same stable-id rule, same file shape.</p></div>
+      </div>
+    </section>
+    <section class="srcfile" id="src-vehiclecard">
+      <div class="srchead">
+        <p class="srcpath">packages/app/app-common/components/VehicleCard/VehicleCard.tsx</p>
+        <p class="srcmeta">lines 78&ndash;107 of 111 · the price block</p>
+      </div>
+      <p class="srcread">Only the excerpt that matters for the two operators in Group E. This one block contains three different ways of handling &ldquo;this might not be there,&rdquo; which is worth comparing side by side.</p>
+      <div class="src">
+<span class="cl"><span class="ln">78</span><span class="lc">      &lt;/Styled.BottomRow&gt;</span></span>
+<span class="cl"><span class="ln">79</span><span class="lc">&nbsp;</span></span>
+<span class="cl"><span class="ln">80</span><span class="lc">      &lt;Styled.PriceBlock&gt;</span></span>
+<span class="cl"><span class="ln">81</span><span class="lc">        {priceDetail.hasDiscount &amp;&amp; (</span></span>
+<span class="cl"><span class="ln">82</span><span class="lc">          &lt;Styled.DiscountBadge data-testid={buildTestId(testIdPrefix, &#x27;Discount&#x27;)}&gt;</span></span>
+<span class="cl hl"><span class="ln">83</span><span class="lc">            {priceDetail.discount == null ? (</span></span>
+<span class="cl"><span class="ln">84</span><span class="lc">              t(&#x27;VehicleCard.Discount_Default&#x27;)</span></span>
+<span class="cl hl"><span class="ln">85</span><span class="lc">            ) : priceDetail.discount.type?.toLowerCase().includes(&#x27;percent&#x27;) ? (</span></span>
+<span class="cl"><span class="ln">86</span><span class="lc">              t(&#x27;VehicleCard.Discount_PriceDropped&#x27;, { value: priceDetail.discount.value })</span></span>
+<span class="cl"><span class="ln">87</span><span class="lc">            ) : (</span></span>
+<span class="cl"><span class="ln">88</span><span class="lc">              &lt;&gt;</span></span>
+<span class="cl"><span class="ln">89</span><span class="lc">                {t(&#x27;VehicleCard.Discount_PriceDroppedAmount&#x27;)}</span></span>
+<span class="cl"><span class="ln">90</span><span class="lc">                &lt;CurrencySymbol</span></span>
+<span class="cl"><span class="ln">91</span><span class="lc">                  currency={currency}</span></span>
+<span class="cl"><span class="ln">92</span><span class="lc">                  variant={TYPOGRAPHY_VARIANT.CAPTIONREG}</span></span>
+<span class="cl"><span class="ln">93</span><span class="lc">                  color={COLOR_VARIANTS.MINESHAFT}</span></span>
+<span class="cl"><span class="ln">94</span><span class="lc">                &gt;</span></span>
+<span class="cl hl"><span class="ln">95</span><span class="lc">                  {priceDetail?.discount?.value}</span></span>
+<span class="cl"><span class="ln">96</span><span class="lc">                &lt;/CurrencySymbol&gt;</span></span>
+<span class="cl"><span class="ln">97</span><span class="lc">              &lt;/&gt;</span></span>
+<span class="cl"><span class="ln">98</span><span class="lc">            )}</span></span>
+<span class="cl"><span class="ln">99</span><span class="lc">          &lt;/Styled.DiscountBadge&gt;</span></span>
+<span class="cl"><span class="ln">100</span><span class="lc">        )}</span></span>
+<span class="cl"><span class="ln">101</span><span class="lc">        &lt;VehicleCardPrice</span></span>
+<span class="cl"><span class="ln">102</span><span class="lc">          hasDiscount={priceDetail.hasDiscount}</span></span>
+<span class="cl"><span class="ln">103</span><span class="lc">          price={priceDetail.totalPrice}</span></span>
+<span class="cl hl"><span class="ln">104</span><span class="lc">          discountedPrice={priceDetail.originalPrice ?? undefined}</span></span>
+<span class="cl"><span class="ln">105</span><span class="lc">          currency={currency}</span></span>
+<span class="cl"><span class="ln">106</span><span class="lc">          testId={buildTestId(testIdPrefix, &#x27;Price&#x27;)}</span></span>
+<span class="cl"><span class="ln">107</span><span class="lc">        /&gt;</span></span>
+      </div>
+      <div class="annos">
+        <p class="annos-label">Line by line</p>
+        <div class="anno"><span class="al">L83</span><p><code>== null</code> with <em>two</em> equals signs, not three. This is deliberate: <code>== null</code> is true for both <code>null</code> and <code>undefined</code>, while <code>=== null</code> would catch only <code>null</code> and miss the undefined case. One of the few places loose equality is the correct choice.</p></div>
+        <div class="anno"><span class="al">L85</span><p><code>?.</code> optional chaining &mdash; if <code>type</code> is null or undefined the whole expression short-circuits to <code>undefined</code> instead of throwing. Runtime behaviour, not a type annotation.</p></div>
+        <div class="anno"><span class="al">L95</span><p><code>priceDetail?.discount?.value</code> &mdash; chained twice, guarding each hop. Note L86 just above reads <code>priceDetail.discount.value</code> with no guards at all: safe only because the L83 branch already proved it isn't null.</p></div>
+        <div class="anno"><span class="al">L104</span><p><code>?? undefined</code> &mdash; nullish coalescing. Falls through only on null/undefined. Had this been <code>||</code>, a genuine <code>originalPrice</code> of <code>0</code> would be discarded, because <code>0</code> is falsy. That is a real, shippable pricing bug.</p></div>
+      </div>
+    </section>
+    </div>
+
+    <h2 id="shaping"><span class="kicker">Group A</span>Shaping data</h2>
+    <p class="section-lede">How these files describe "what shape of object am I allowed to pass here."</p>
+    <div class="glossary-grid">
+
+        <div class="term">
+            <div class="term-head"><span class="term-name">type alias</span><span class="tag type">type-level</span>
+            </div>
+            <p class="term-def">A name you give to a shape, so you can write the name instead of the
+                whole shape every time. <code>type Props = {...}</code> means "from now on, <code>Props</code>
+                <em>is</em> this exact object shape."
+            </p>
+            <pre class="snippet">export type Props = {
+  icon: ReactNode;
+  text: string;
+  textColor?: COLOR_VARIANTS;
+  ...
+};</pre>
+            <figcaption class="cite">InfoRow.tsx:5-14</figcaption>
+            <p class="term-why">Every component in these three files exports a <code>Props</code> type
+                right above the component itself — that's the repo's convention, not a TypeScript
+                requirement.</p>
+        </div>
+
+        <div class="term">
+            <div class="term-head"><span class="term-name">optional property <code>?</code></span><span
+                    class="tag type">type-level</span></div>
+            <p class="term-def">Inside an object type, a <code>?</code> right after a property name
+                means "callers may leave this out entirely." Without it, leaving the property out is a
+                compile error.</p>
+            <pre class="snippet">textColor?: COLOR_VARIANTS;
+stylingSettings?: { ... };</pre>
+            <figcaption class="cite">InfoRow.tsx:8-9</figcaption>
+            <p class="term-why">Don't confuse this with <code>?.</code> below — same character, two
+                unrelated jobs. This one lives inside a <em>type</em>; <code>?.</code> lives inside an
+                <em>expression</em>, at runtime.
+            </p>
+        </div>
+
+        <div class="term">
+            <div class="term-head"><span class="term-name">nested object type</span><span
+                    class="tag type">type-level</span></div>
+            <p class="term-def">An object type can contain another object type inline, instead of
+                pulling it out into its own named type. Every field inside can be optional independently.</p>
+            <pre class="snippet">stylingSettings?: {
+  iconSize?: number;
+  textSize?: TYPOGRAPHY_VARIANT;
+  gap?: number;
+};</pre>
+            <figcaption class="cite">InfoRow.tsx:9-13</figcaption>
+            <p class="term-why">Reads the same way you'd read a plain JS object literal — TypeScript
+                object types intentionally mirror JS object syntax.</p>
+        </div>
+
+        <div class="term">
+            <div class="term-head"><span class="term-name">function-typed property</span><span
+                    class="tag type">type-level</span></div>
+            <p class="term-def"><code>() =&gt; void</code> as a property's type means "this property
+                must hold a function that takes no arguments and returns nothing usable" — i.e. a callback.</p>
+            <pre class="snippet">export type Props = {
+  ...
+  onFilterChange: () => void;
+};</pre>
+            <figcaption class="cite">PoliciesFilter.tsx:16</figcaption>
+            <p class="term-why">Appears in <em>every</em> filter component's <code>Props</code> in this
+                repo — it's how a child tells a parent "something changed," without knowing what the
+                parent does about it.</p>
+        </div>
+
+    </div>
+
+    <h2 id="enums"><span class="kicker">Group B</span>Enums — the odd one out</h2>
+    <p class="section-lede">Confirmed directly from <code>@tajawal/ct-web-design-system</code>'s compiled types.</p>
+    <div class="glossary-grid">
+        <div class="term">
+            <div class="term-head"><span class="term-name">enum</span><span class="tag both">type + runtime</span></div>
+            <p class="term-def">A fixed, named set of allowed values — callers pick one member instead
+                of typing an arbitrary string, so a typo like <code>"withe"</code> is caught at compile
+                time instead of failing silently in the UI.</p>
+            <pre class="snippet">export declare enum COLOR_VARIANTS {
+  MINESHAFT = "mineshaft",
+  WHITE = "white",
+  <span class="cm">/* ...61 more */</span>
+}</pre>
+            <figcaption class="cite">@tajawal/ct-web-design-system · theme/palette.theme</figcaption>
+            <p class="term-why">Used both as a <strong>type</strong> (<code>textColor?: COLOR_VARIANTS</code>
+                in InfoRow.tsx:8) and as a <strong>value</strong>
+                (<code>TYPOGRAPHY_VARIANT.CAPTIONREG</code> in InfoRow.tsx:17) — the same name works in
+                both worlds, which is exactly what makes enums the exception to erasure above.</p>
+        </div>
+        <div class="term">
+            <div class="term-head"><span class="term-name">enum member as a value</span><span
+                    class="tag value">runtime</span></div>
+            <p class="term-def">Because the enum compiles to a real object, <code>TYPOGRAPHY_VARIANT.CAPTIONREG</code>
+                isn't just a type — it's an actual string (<code>"captionReg"</code>) you can hand to a
+                default parameter, log, or compare with <code>===</code>.</p>
+            <pre class="snippet">const { textSize = TYPOGRAPHY_VARIANT.CAPTIONREG } = stylingSettings || {};
+...
+variant={
+  isDesktop ? TYPOGRAPHY_VARIANT.HEADING3SEMBLD : TYPOGRAPHY_VARIANT.HEADING2
+}</pre>
+            <figcaption class="cite">InfoRow.tsx:17 · MultiSelectFilter.tsx:30-34</figcaption>
+            <p class="term-why">The ternary in MultiSelectFilter is a plain JS ternary — nothing
+                TS-specific about it — it's just choosing between two runtime values that happen to come
+                from an enum.</p>
+        </div>
+    </div>
+
+    <h2 id="functions"><span class="kicker">Group C</span>Functions: what goes in, what comes back</h2>
+    <div class="glossary-grid">
+
+        <div class="term">
+            <div class="term-head"><span class="term-name"><code>: void</code></span><span
+                    class="tag type">type-level</span></div>
+            <p class="term-def">"This function doesn't hand back a usable value." It can still
+                <em>do</em> things (mutate, call other functions) — it just promises nothing worth
+                capturing in a variable.
+            </p>
+            <pre class="snippet">function handleToggle(key: string): void {
+  filter.toggle(key);
+  onFilterChange();
+}</pre>
+            <figcaption class="cite">PoliciesFilter.tsx:22-25</figcaption>
+            <p class="term-why">Contrast with a function that promises a real value back, e.g. one
+                typed <code>: number</code> or <code>: boolean</code> — the return type is the function's
+                contract with whoever calls it.</p>
+        </div>
+
+        <div class="term">
+            <div class="term-head"><span class="term-name"><code>: JSX.Element</code></span><span
+                    class="tag type">type-level</span></div>
+            <p class="term-def">A built-in type meaning "a piece of renderable React markup." Same
+                annotation slot as <code>: void</code> above — just promising a different kind of thing
+                back.</p>
+            <pre class="snippet">export default function InfoRow({ icon, text, ... }: Props): JSX.Element {
+  return ( <span class="cm">/* ... */</span> );
+}</pre>
+            <figcaption class="cite">InfoRow.tsx:16</figcaption>
+            <p class="term-why">Every default-exported component function in these three files ends
+                its signature with this — it's the repo's standard for "this is a component."</p>
+        </div>
+
+        <div class="term">
+            <div class="term-head"><span class="term-name">default value in destructuring</span><span
+                    class="tag value">runtime (JS)</span></div>
+            <p class="term-def">Plain JavaScript, not TypeScript — when you pull a property out of an
+                object and it's <code>undefined</code>, the <code>= value</code> fills in a fallback
+                instead.</p>
+            <pre class="snippet">const { iconSize = 16, textSize = TYPOGRAPHY_VARIANT.CAPTIONREG, gap = 8 }
+  = stylingSettings || {};</pre>
+            <figcaption class="cite">InfoRow.tsx:17</figcaption>
+            <p class="term-why">The <code>|| {}</code> at the end matters too: if <code>stylingSettings</code>
+                itself was never passed, this destructures an empty object instead of crashing on
+                <code>undefined</code>.
+            </p>
+        </div>
+
+        <div class="term">
+            <div class="term-head"><span class="term-name">default parameter value</span><span class="tag value">runtime
+                    (JS)</span></div>
+            <p class="term-def">Same idea, one level up — a whole parameter gets a fallback if the
+                caller doesn't pass it, right in the function signature.</p>
+            <pre class="snippet">function MultiSelectFilter({ ..., isDesktop = false }: Props): JSX.Element {</pre>
+            <figcaption class="cite">MultiSelectFilter.tsx:21</figcaption>
+            <p class="term-why">This is exactly why <code>isDesktop</code> is marked optional
+                (<code>isDesktop?: boolean</code>) in the <code>Props</code> type above it — the type
+                says "may be omitted," the default value says "here's what happens when it is."</p>
+        </div>
+
+    </div>
+
+    <h2 id="imports"><span class="kicker">Group D</span>The import boundary</h2>
+    <div class="glossary-grid">
+        <div class="term">
+            <div class="term-head"><span class="term-name">import type</span><span class="tag type">type-level</span>
+            </div>
+            <p class="term-def">A version of <code>import</code> that only pulls in type information —
+                never a real, runtime value. Straight from the erasure idea above: since types don't
+                exist once compiled, the compiler can strip this entire line out of the bundle.</p>
+            <pre class="snippet">// types
+import type { PolicyFilter } from '@tajawal/web-transport-sdk/stores';
+import type { TransportFilterSelectableItem } from '@tajawal/web-transport-sdk/types';</pre>
+            <figcaption class="cite">PoliciesFilter.tsx:9-11</figcaption>
+            <p class="term-why">Notice the file groups imports by comment: regular imports, then
+                <code># utils</code>, then <code># types</code> last, using <code>import type</code> for
+                that whole group. That grouping is a repo convention worth copying.
+            </p>
+        </div>
+        <div class="term">
+            <div class="term-head"><span class="term-name">regular import (contrast)</span><span
+                    class="tag value">runtime</span></div>
+            <p class="term-def">A normal <code>import</code> pulls in something the code actually
+                calls or renders while running — it cannot be erased, because the browser needs it.</p>
+            <pre class="snippet">import { Typography } from '@mui/material';
+import { Toggle, TYPOGRAPHY_VARIANT } from '@tajawal/ct-web-design-system';
+import { buildTestId } from '@tajawal/web-common/lib';</pre>
+            <figcaption class="cite">PoliciesFilter.tsx:1-3</figcaption>
+            <p class="term-why"><code>TYPOGRAPHY_VARIANT</code> is imported here as a normal import,
+                not <code>import type</code> — because (per Group B) it's used as a real value, not just a
+                type.</p>
+        </div>
+    </div>
+
+    <h2 id="operators"><span class="kicker">Group E</span>Two operators you'll see constantly</h2>
+    <p class="section-lede">
+        Not TypeScript-specific — both are plain JavaScript — but they show up everywhere once a
+        codebase starts being strict about what might be missing. Cited from
+        <code>VehicleCard.tsx</code>, a fourth real file, since neither appears in the original three.
+    </p>
+    <div class="glossary-grid">
+        <div class="term">
+            <div class="term-head"><span class="term-name">optional chaining <code>?.</code></span><span
+                    class="tag op">operator</span></div>
+            <p class="term-def">"Access this, but if the thing on the left is <code>null</code> or
+                <code>undefined</code>, stop right there and give back <code>undefined</code> instead of
+                throwing."
+            </p>
+            <pre class="snippet">priceDetail.discount.type?.toLowerCase().includes('percent')
+priceDetail?.discount?.value</pre>
+            <figcaption class="cite">VehicleCard.tsx:85, 95</figcaption>
+            <p class="term-why">Chainable — the second example checks <code>priceDetail</code> and
+                <code>discount</code> independently, so a missing value at either step stops the chain
+                instead of crashing.
+            </p>
+        </div>
+        <div class="term">
+            <div class="term-head"><span class="term-name">nullish coalescing <code>??</code></span><span
+                    class="tag op">operator</span></div>
+            <p class="term-def">"Use the left value, unless it's specifically <code>null</code> or
+                <code>undefined</code> — then use the right one."
+            </p>
+            <pre class="snippet">discountedPrice={priceDetail.originalPrice ?? undefined}</pre>
+            <figcaption class="cite">VehicleCard.tsx:104</figcaption>
+            <p class="term-why">Different from <code>||</code>, which also overrides <em>valid</em>
+                falsy values like <code>0</code> or <code>""</code>. See the self-check below — this
+                distinction is the single most common source of a subtle bug.</p>
+        </div>
+    </div>
+
+    <h2 id="sdksource"><span class="kicker">Read the code here</span>The SDK type files, in full</h2>
+    <p class="section-lede">The four type files behind Groups F and G, in the order they're worth reading &mdash; smallest first, so the <em>shape</em> of a type file is familiar before you meet a long one.</p>
+    <div class="srcviewer">
+      <div class="srctabs">
+      <button type="button" class="srctab on">sort.types.ts</button>
+      <button type="button" class="srctab">filters.types.ts</button>
+      <button type="button" class="srctab">transport.types.ts</button>
+      <button type="button" class="srctab">home-page.types.ts</button>
+      <button type="button" class="srctab">index.ts</button>
+      </div>
+    <section class="srcfile on" id="src-sort">
+      <div class="srchead">
+        <p class="srcpath">packages/sdk/src/types/sort.types.ts</p>
+        <p class="srcmeta">4 lines · the whole file</p>
+      </div>
+      <p class="srcread">Start here. It is the entire file &mdash; proof that a <code>.types.ts</code> file is nothing more exotic than a list of named shapes. Once this looks trivial, the 65-line one is just more of it.</p>
+      <div class="src">
+<span class="cl hl"><span class="ln">1</span><span class="lc">export type SortDataType = {</span></span>
+<span class="cl"><span class="ln">2</span><span class="lc">  key: string;</span></span>
+<span class="cl"><span class="ln">3</span><span class="lc">  selected: boolean;</span></span>
+<span class="cl"><span class="ln">4</span><span class="lc">};</span></span>
+      </div>
+      <div class="annos">
+        <p class="annos-label">Line by line</p>
+        <div class="anno"><span class="al">L1</span><p><code>export type X = {</code> names a shape so callers can write <code>SortDataType</code> instead of repeating <code>{ key: string; selected: boolean }</code> everywhere.</p></div>
+        <div class="anno"><span class="al">L2&ndash;3</span><p>Neither has a <code>?</code>, so both are required. A sort option always has a key and always knows whether it's the selected one.</p></div>
+      </div>
+    </section>
+    <section class="srcfile" id="src-filters">
+      <div class="srchead">
+        <p class="srcpath">packages/sdk/src/types/filters.types.ts</p>
+        <p class="srcmeta">37 lines · the whole filter sidebar</p>
+      </div>
+      <p class="srcread">Six interfaces describing every filter on the results page. Read <code>FilterData</code> first &mdash; it is the table of contents, and the five below it are the entries.</p>
+      <div class="src">
+<span class="cl hl"><span class="ln">1</span><span class="lc">export interface FilterData {</span></span>
+<span class="cl hl"><span class="ln">2</span><span class="lc">  price: PriceFilterData;</span></span>
+<span class="cl hl"><span class="ln">3</span><span class="lc">  city: CityFilterItem[];</span></span>
+<span class="cl hl"><span class="ln">4</span><span class="lc">  tag: TagFilterItem[];</span></span>
+<span class="cl hl"><span class="ln">5</span><span class="lc">  category: CategoryFilterItem[];</span></span>
+<span class="cl"><span class="ln">6</span><span class="lc">  cancellation: toggleFilterItem;</span></span>
+<span class="cl"><span class="ln">7</span><span class="lc">  confirmation: toggleFilterItem;</span></span>
+<span class="cl"><span class="ln">8</span><span class="lc">}</span></span>
+<span class="cl"><span class="ln">9</span><span class="lc">&nbsp;</span></span>
+<span class="cl"><span class="ln">10</span><span class="lc">export interface PriceFilterData {</span></span>
+<span class="cl"><span class="ln">11</span><span class="lc">  min: number;</span></span>
+<span class="cl"><span class="ln">12</span><span class="lc">  max: number;</span></span>
+<span class="cl"><span class="ln">13</span><span class="lc">}</span></span>
+<span class="cl"><span class="ln">14</span><span class="lc">&nbsp;</span></span>
+<span class="cl hl"><span class="ln">15</span><span class="lc">export interface CityFilterItem {</span></span>
+<span class="cl"><span class="ln">16</span><span class="lc">  id: number;</span></span>
+<span class="cl"><span class="ln">17</span><span class="lc">  totalCount: number;</span></span>
+<span class="cl"><span class="ln">18</span><span class="lc">  selected?: boolean;</span></span>
+<span class="cl"><span class="ln">19</span><span class="lc">}</span></span>
+<span class="cl"><span class="ln">20</span><span class="lc">&nbsp;</span></span>
+<span class="cl hl"><span class="ln">21</span><span class="lc">export interface TagFilterItem {</span></span>
+<span class="cl"><span class="ln">22</span><span class="lc">  id: number;</span></span>
+<span class="cl"><span class="ln">23</span><span class="lc">  totalCount: number;</span></span>
+<span class="cl"><span class="ln">24</span><span class="lc">  selected?: boolean;</span></span>
+<span class="cl"><span class="ln">25</span><span class="lc">}</span></span>
+<span class="cl"><span class="ln">26</span><span class="lc">&nbsp;</span></span>
+<span class="cl hl"><span class="ln">27</span><span class="lc">export interface toggleFilterItem {</span></span>
+<span class="cl"><span class="ln">28</span><span class="lc">  count: number;</span></span>
+<span class="cl"><span class="ln">29</span><span class="lc">}</span></span>
+<span class="cl"><span class="ln">30</span><span class="lc">export interface CategoryFilterItem {</span></span>
+<span class="cl"><span class="ln">31</span><span class="lc">  id: number;</span></span>
+<span class="cl"><span class="ln">32</span><span class="lc">  totalCount: number;</span></span>
+<span class="cl"><span class="ln">33</span><span class="lc">  selected?: boolean;</span></span>
+<span class="cl"><span class="ln">34</span><span class="lc">  isUndetermined?: boolean;</span></span>
+<span class="cl"><span class="ln">35</span><span class="lc">  hasSubCategories: boolean;</span></span>
+<span class="cl hl"><span class="ln">36</span><span class="lc">  categories?: CategoryFilterItem[];</span></span>
+<span class="cl"><span class="ln">37</span><span class="lc">}</span></span>
+      </div>
+      <div class="annos">
+        <p class="annos-label">Line by line</p>
+        <div class="anno"><span class="al">L1</span><p><code>interface</code>, not <code>type</code>. For reading purposes they're the same thing: both name an object shape, both are erased. Don't hunt for a hidden meaning in the choice.</p></div>
+        <div class="anno"><span class="al">L2</span><p><code>price: PriceFilterData</code> &mdash; exactly one, and it must be present.</p></div>
+        <div class="anno"><span class="al">L3&ndash;5</span><p><code>CityFilterItem[]</code> &mdash; the <code>[]</code> means &ldquo;a list of those.&rdquo; Every element must have that shape.</p></div>
+        <div class="anno"><span class="al">L15&ndash;25</span><p><strong>Review-worthy:</strong> <code>CityFilterItem</code> and <code>TagFilterItem</code> are <em>structurally identical</em> &mdash; same three fields, same types. Because TypeScript checks shape and not name (Lesson 0004c), it will happily accept a city item where a tag item is expected. The compiler cannot catch that mix-up for you.</p></div>
+        <div class="anno"><span class="al">L27</span><p><code>toggleFilterItem</code> is camelCase while every other interface here is PascalCase. A genuine naming inconsistency &mdash; the kind of small nit worth leaving in a review.</p></div>
+        <div class="anno"><span class="al">L36</span><p><code>categories?: CategoryFilterItem[]</code> &mdash; the type refers to <em>itself</em>. That's a recursive type, and it's how a category models sub-categories to any depth. The <code>?</code> is what stops the recursion: a leaf category simply omits the key.</p></div>
+      </div>
+    </section>
+    <section class="srcfile" id="src-transport">
+      <div class="srchead">
+        <p class="srcpath">packages/sdk/src/types/transport.types.ts</p>
+        <p class="srcmeta">65 lines · what a &ldquo;ride&rdquo; actually is</p>
+      </div>
+      <p class="srcread">The single most useful file to read in the whole SDK. Two enums at the top define the flows the product supports; the three interfaces below define the places a booking moves between.</p>
+      <div class="src">
+<span class="cl hl"><span class="ln">1</span><span class="lc">import type { AirportSearchTerminal } from &#x27;@/types/api/airport.types&#x27;;</span></span>
+<span class="cl hl"><span class="ln">2</span><span class="lc">import type { LocationDisplayType } from &#x27;@/types/api/location.types&#x27;;</span></span>
+<span class="cl"><span class="ln">3</span><span class="lc">&nbsp;</span></span>
+<span class="cl hl"><span class="ln">4</span><span class="lc">export enum TransportFlow {</span></span>
+<span class="cl"><span class="ln">5</span><span class="lc">  AIRPORT_PICKUP = &#x27;AIRPORT_PICKUP&#x27;,</span></span>
+<span class="cl"><span class="ln">6</span><span class="lc">  AIRPORT_DROP_OFF = &#x27;AIRPORT_DROP_OFF&#x27;,</span></span>
+<span class="cl"><span class="ln">7</span><span class="lc">  POINT_TO_POINT = &#x27;POINT_TO_POINT&#x27;,</span></span>
+<span class="cl"><span class="ln">8</span><span class="lc">}</span></span>
+<span class="cl"><span class="ln">9</span><span class="lc">&nbsp;</span></span>
+<span class="cl hl"><span class="ln">10</span><span class="lc">export enum BookingDirection {</span></span>
+<span class="cl"><span class="ln">11</span><span class="lc">  PICKUP = &#x27;pickup&#x27;,</span></span>
+<span class="cl"><span class="ln">12</span><span class="lc">  DROPOFF = &#x27;dropoff&#x27;,</span></span>
+<span class="cl"><span class="ln">13</span><span class="lc">}</span></span>
+<span class="cl"><span class="ln">14</span><span class="lc">&nbsp;</span></span>
+<span class="cl"><span class="ln">15</span><span class="lc">export interface Airport {</span></span>
+<span class="cl"><span class="ln">16</span><span class="lc">  id: string;</span></span>
+<span class="cl"><span class="ln">17</span><span class="lc">  code: string;</span></span>
+<span class="cl"><span class="ln">18</span><span class="lc">  name: string;</span></span>
+<span class="cl hl"><span class="ln">19</span><span class="lc">  city?: string;</span></span>
+<span class="cl"><span class="ln">20</span><span class="lc">  country?: string;</span></span>
+<span class="cl hl"><span class="ln">21</span><span class="lc">  /** Display subtext carried over from the picked autocomplete result (`Location.secondaryText`). */</span></span>
+<span class="cl"><span class="ln">22</span><span class="lc">  address?: string;</span></span>
+<span class="cl"><span class="ln">23</span><span class="lc">  terminal?: string;</span></span>
+<span class="cl"><span class="ln">24</span><span class="lc">  date?: string;</span></span>
+<span class="cl"><span class="ln">25</span><span class="lc">  time?: string;</span></span>
+<span class="cl"><span class="ln">26</span><span class="lc">  flightCode?: string;</span></span>
+<span class="cl"><span class="ln">27</span><span class="lc">  latitude?: number;</span></span>
+<span class="cl"><span class="ln">28</span><span class="lc">  longitude?: number;</span></span>
+<span class="cl hl"><span class="ln">29</span><span class="lc">  placeId?: string | null;</span></span>
+<span class="cl"><span class="ln">30</span><span class="lc">  terminals?: AirportSearchTerminal[];</span></span>
+<span class="cl"><span class="ln">31</span><span class="lc">  displayType?: LocationDisplayType;</span></span>
+<span class="cl"><span class="ln">32</span><span class="lc">}</span></span>
+<span class="cl"><span class="ln">33</span><span class="lc">&nbsp;</span></span>
+<span class="cl"><span class="ln">34</span><span class="lc">export interface Destination {</span></span>
+<span class="cl"><span class="ln">35</span><span class="lc">  id: string;</span></span>
+<span class="cl hl"><span class="ln">36</span><span class="lc">  name: string;</span></span>
+<span class="cl"><span class="ln">37</span><span class="lc">  city?: string;</span></span>
+<span class="cl"><span class="ln">38</span><span class="lc">  country?: string;</span></span>
+<span class="cl"><span class="ln">39</span><span class="lc">  /** Display subtext carried over from the picked autocomplete result (`Location.secondaryText`). */</span></span>
+<span class="cl"><span class="ln">40</span><span class="lc">  address?: string;</span></span>
+<span class="cl"><span class="ln">41</span><span class="lc">  latitude?: number;</span></span>
+<span class="cl"><span class="ln">42</span><span class="lc">  longitude?: number;</span></span>
+<span class="cl"><span class="ln">43</span><span class="lc">  placeId?: string | null;</span></span>
+<span class="cl"><span class="ln">44</span><span class="lc">  iata?: string | null;</span></span>
+<span class="cl"><span class="ln">45</span><span class="lc">  terminal?: string;</span></span>
+<span class="cl"><span class="ln">46</span><span class="lc">  displayType?: LocationDisplayType;</span></span>
+<span class="cl"><span class="ln">47</span><span class="lc">}</span></span>
+<span class="cl"><span class="ln">48</span><span class="lc">&nbsp;</span></span>
+<span class="cl"><span class="ln">49</span><span class="lc">export interface BookingLocation {</span></span>
+<span class="cl"><span class="ln">50</span><span class="lc">  id: string;</span></span>
+<span class="cl"><span class="ln">51</span><span class="lc">  name: string;</span></span>
+<span class="cl hl"><span class="ln">52</span><span class="lc">  city?: string | null;</span></span>
+<span class="cl hl"><span class="ln">53</span><span class="lc">  country?: string | null;</span></span>
+<span class="cl"><span class="ln">54</span><span class="lc">  latitude?: number | null;</span></span>
+<span class="cl"><span class="ln">55</span><span class="lc">  longitude?: number | null;</span></span>
+<span class="cl"><span class="ln">56</span><span class="lc">  placeId?: string | null;</span></span>
+<span class="cl"><span class="ln">57</span><span class="lc">  iata?: string | null;</span></span>
+<span class="cl"><span class="ln">58</span><span class="lc">  displayType?: LocationDisplayType;</span></span>
+<span class="cl"><span class="ln">59</span><span class="lc">  code?: string;</span></span>
+<span class="cl"><span class="ln">60</span><span class="lc">  terminal?: string | null;</span></span>
+<span class="cl"><span class="ln">61</span><span class="lc">  date?: string | null;</span></span>
+<span class="cl"><span class="ln">62</span><span class="lc">  time?: string | null;</span></span>
+<span class="cl"><span class="ln">63</span><span class="lc">  flightCode?: string | null;</span></span>
+<span class="cl hl"><span class="ln">64</span><span class="lc">  terminals?: AirportSearchTerminal[] | null;</span></span>
+<span class="cl"><span class="ln">65</span><span class="lc">}</span></span>
+      </div>
+      <div class="annos">
+        <p class="annos-label">Line by line</p>
+        <div class="anno"><span class="al">L1&ndash;2</span><p><code>@/</code> is a <em>path alias</em> configured in tsconfig, pointing at this package's own <code>src</code>. It is <strong>not</strong> an npm scope &mdash; contrast <code>@tajawal/&hellip;</code> in the component files, which really is a package.</p></div>
+        <div class="anno"><span class="al">L4&ndash;8</span><p>An enum: a fixed set of allowed values, so a typo is caught at compile time instead of failing silently. Enums are the exception to erasure &mdash; this one becomes a real JavaScript object at runtime.</p></div>
+        <div class="anno"><span class="al">L10&ndash;13</span><p><strong>Compare with the enum above.</strong> There the member names and their string values match exactly; here <code>PICKUP = 'pickup'</code> differs in case. So never assume the value from the name &mdash; look it up. This bites when comparing against an API string.</p></div>
+        <div class="anno"><span class="al">L21</span><p><code>/** &hellip; */</code> is a TSDoc comment. Your editor shows it on hover wherever <code>address</code> is used, which is why it's worth reading rather than skipping.</p></div>
+        <div class="anno"><span class="al">L19&ndash;20</span><p><code>city?: string</code> on <code>Airport</code> &mdash; may be absent, but never null.</p></div>
+        <div class="anno"><span class="al">L29</span><p><code>placeId?: string | null</code> &mdash; the <code>|</code> reads as <em>or</em>. Combined with the <code>?</code>, that's three legal states: a string, an explicit null, or missing entirely.</p></div>
+        <div class="anno"><span class="al">L52&ndash;53</span><p><strong>Read the difference deliberately.</strong> <code>Destination.city</code> (L36) is <code>string</code>; <code>BookingLocation.city</code> is <code>string | null</code>. The author is telling you the API can return an explicit null on one and not the other. That is signal, not noise.</p></div>
+        <div class="anno"><span class="al">L49&ndash;65</span><p>Nearly every field here is nullable, because a <code>BookingLocation</code> is assembled from partial data as the user moves through the flow. This is the interface where the <code>strict: false</code> landmine below will actually bite you.</p></div>
+      </div>
+    </section>
+    <section class="srcfile" id="src-homepage">
+      <div class="srchead">
+        <p class="srcpath">packages/sdk/src/types/home-page.types.ts</p>
+        <p class="srcmeta">40 lines · the search form's state, as a type</p>
+      </div>
+      <p class="srcread">Written entirely with <code>type</code> aliases, where filters.types.ts used <code>interface</code> &mdash; same package, both styles. It also shows the other nullability spelling: required keys that are allowed to hold null.</p>
+      <div class="src">
+<span class="cl"><span class="ln">1</span><span class="lc">import type { FlightSegment } from &#x27;@/types/api/flight.types&#x27;;</span></span>
+<span class="cl"><span class="ln">2</span><span class="lc">import type { TransportSearchLocation } from &#x27;@/types/api/transport-search.types&#x27;;</span></span>
+<span class="cl hl"><span class="ln">3</span><span class="lc">import type { Airport, Destination, TransportFlow } from &#x27;@/types/transport.types&#x27;;</span></span>
+<span class="cl"><span class="ln">4</span><span class="lc">&nbsp;</span></span>
+<span class="cl"><span class="ln">5</span><span class="lc">export type HomePageSnapshot = {</span></span>
+<span class="cl hl"><span class="ln">6</span><span class="lc">  flow: TransportFlow;</span></span>
+<span class="cl hl"><span class="ln">7</span><span class="lc">  airport: Airport | null;</span></span>
+<span class="cl hl"><span class="ln">8</span><span class="lc">  destination: Destination | null;</span></span>
+<span class="cl"><span class="ln">9</span><span class="lc">  dateTimeIso: string | null;</span></span>
+<span class="cl"><span class="ln">10</span><span class="lc">  passengers: number;</span></span>
+<span class="cl hl"><span class="ln">11</span><span class="lc">  selectedFlight: FlightSegment | null;</span></span>
+<span class="cl"><span class="ln">12</span><span class="lc">  manualFlightPath: boolean;</span></span>
+<span class="cl"><span class="ln">13</span><span class="lc">  terminalId: number | null;</span></span>
+<span class="cl"><span class="ln">14</span><span class="lc">  terminalName: string | null;</span></span>
+<span class="cl"><span class="ln">15</span><span class="lc">  pickupIsAirportLeg: boolean | null;</span></span>
+<span class="cl"><span class="ln">16</span><span class="lc">  destinationIsAirportLeg: boolean | null;</span></span>
+<span class="cl"><span class="ln">17</span><span class="lc">  submitted: boolean;</span></span>
+<span class="cl"><span class="ln">18</span><span class="lc">};</span></span>
+<span class="cl"><span class="ln">19</span><span class="lc">&nbsp;</span></span>
+<span class="cl"><span class="ln">20</span><span class="lc">export type TransportSearchHydrateInput = {</span></span>
+<span class="cl"><span class="ln">21</span><span class="lc">  origin: TransportSearchLocation;</span></span>
+<span class="cl"><span class="ln">22</span><span class="lc">  destination: TransportSearchLocation;</span></span>
+<span class="cl"><span class="ln">23</span><span class="lc">  date: string;</span></span>
+<span class="cl"><span class="ln">24</span><span class="lc">  time: string;</span></span>
+<span class="cl"><span class="ln">25</span><span class="lc">  passengers: number;</span></span>
+<span class="cl hl"><span class="ln">26</span><span class="lc">  flightNumber?: string;</span></span>
+<span class="cl hl"><span class="ln">27</span><span class="lc">  /**</span></span>
+<span class="cl"><span class="ln">28</span><span class="lc">   * Flight timing carried in the search URL. Used to rebuild the `selectedFlight` validation anchor</span></span>
+<span class="cl"><span class="ln">29</span><span class="lc">   * on hydrate so the pickup-before-arrival / drop-off-after-departure guards still fire after a</span></span>
+<span class="cl"><span class="ln">30</span><span class="lc">   * modify-search or shared-link entry (where the full flight payload isn&#x27;t re-fetched).</span></span>
+<span class="cl"><span class="ln">31</span><span class="lc">   */</span></span>
+<span class="cl"><span class="ln">32</span><span class="lc">  flightCode?: string;</span></span>
+<span class="cl"><span class="ln">33</span><span class="lc">  departureDate?: string | null;</span></span>
+<span class="cl"><span class="ln">34</span><span class="lc">  departureTime24h?: string | null;</span></span>
+<span class="cl"><span class="ln">35</span><span class="lc">  arrivalDate?: string | null;</span></span>
+<span class="cl"><span class="ln">36</span><span class="lc">  arrivalTime24h?: string | null;</span></span>
+<span class="cl"><span class="ln">37</span><span class="lc">  terminal?: string | null;</span></span>
+<span class="cl"><span class="ln">38</span><span class="lc">  /** Airport leg address subtext — carried in the search URL for modify-search hydrate. */</span></span>
+<span class="cl"><span class="ln">39</span><span class="lc">  address?: string | null;</span></span>
+<span class="cl"><span class="ln">40</span><span class="lc">};</span></span>
+      </div>
+      <div class="annos">
+        <p class="annos-label">Line by line</p>
+        <div class="anno"><span class="al">L3</span><p>Imports three names from the file you just read. Types compose across files exactly like values do.</p></div>
+        <div class="anno"><span class="al">L6</span><p><code>flow: TransportFlow</code> &mdash; an enum used in <em>type</em> position, meaning &ldquo;must be one of that enum's members.&rdquo; The same name is also usable as a value (<code>TransportFlow.POINT_TO_POINT</code>). Enums live in both worlds.</p></div>
+        <div class="anno"><span class="al">L7&ndash;8</span><p><code>airport: Airport | null</code> &mdash; note there's <em>no</em> <code>?</code> here. The key must always be present; it just may hold null. That's &ldquo;we haven't picked one yet,&rdquo; deliberately distinct from &ldquo;this key doesn't exist.&rdquo;</p></div>
+        <div class="anno"><span class="al">L20&ndash;39</span><p>Contrast the second type: here the optional fields <em>do</em> use <code>?</code>, because a hydrate input genuinely may not carry them. Two shapes, two different nullability conventions, one file &mdash; read them carefully rather than by habit.</p></div>
+        <div class="anno"><span class="al">L27&ndash;31</span><p>A multi-line TSDoc comment explaining <em>why</em> the field exists, not what it is. This is the good kind of comment, and it encodes real product logic about modify-search and shared links.</p></div>
+      </div>
+    </section>
+    <section class="srcfile" id="src-index">
+      <div class="srchead">
+        <p class="srcpath">packages/sdk/src/types/index.ts</p>
+        <p class="srcmeta">5 lines · the barrel</p>
+      </div>
+      <p class="srcread">The whole file. It explains a question you'd otherwise have to guess at: why App code imports from a package root instead of reaching into deep file paths.</p>
+      <div class="src">
+<span class="cl hl"><span class="ln">1</span><span class="lc">export * from &#x27;./api&#x27;;</span></span>
+<span class="cl hl"><span class="ln">2</span><span class="lc">export * from &#x27;./filters.types&#x27;;</span></span>
+<span class="cl hl"><span class="ln">3</span><span class="lc">export * from &#x27;./home-page.types&#x27;;</span></span>
+<span class="cl hl"><span class="ln">4</span><span class="lc">export * from &#x27;./sort.types&#x27;;</span></span>
+<span class="cl hl"><span class="ln">5</span><span class="lc">export * from &#x27;./transport.types&#x27;;</span></span>
+      </div>
+      <div class="annos">
+        <p class="annos-label">Line by line</p>
+        <div class="anno"><span class="al">L1&ndash;5</span><p><code>export * from './x'</code> re-exports everything <code>x</code> exports, as if this file had declared it. Five lines collapse five files into one import surface.</p></div>
+        <div class="anno"><span class="al">L1&ndash;5</span><p>This is plain ES module syntax, not a TypeScript feature &mdash; and unlike the type declarations it re-exports, the statement itself is real runtime code.</p></div>
+      </div>
+    </section>
+    </div>
+
+    <h2 id="sdktypes"><span class="kicker">Group F</span>The SDK type files</h2>
+    <p class="section-lede">
+        Everything above came from <em>component</em> files. These came from the four type files in
+        <code>packages/sdk/src/types/</code> — <code>sort.types.ts</code>, <code>filters.types.ts</code>,
+        <code>transport.types.ts</code>, <code>index.ts</code> — which is where the repo defines what a
+        "ride" actually is. Taught in <a href="../lessons/0006-read-a-real-types-file.html">Lesson 0006</a>.
+    </p>
+    <div class="glossary-grid">
+
+        <div class="term">
+            <div class="term-head"><span class="term-name">interface</span><span class="tag type">type-level</span>
+            </div>
+            <p class="term-def">Another way to name an object shape. For <em>reading</em> purposes it is
+                interchangeable with <code>type X = {...}</code> — both describe a shape, both are erased
+                at compile time.</p>
+            <pre class="snippet">export interface PriceFilterData {
+  min: number;
+  max: number;
+}</pre>
+            <figcaption class="cite">filters.types.ts:10-13</figcaption>
+            <p class="term-why">This repo uses <strong>both</strong> — <code>filters.types.ts</code> is all
+                <code>interface</code>, <code>home-page.types.ts</code> is all <code>type</code>. Don't read
+                meaning into which one a file picked; the choice isn't consistent here. The real differences
+                (<code>interface</code> can be re-opened and <code>extends</code>-ed; only <code>type</code>
+                can express a union) matter when writing, not reading.
+            </p>
+        </div>
+
+        <div class="term">
+            <div class="term-head"><span class="term-name">array type <code>T[]</code></span><span
+                    class="tag type">type-level</span></div>
+            <p class="term-def"><code>[]</code> after any type means "a list of those." Read
+                <code>city: CityFilterItem[]</code> as "the <code>city</code> key holds an array, and every
+                element in it must have the <code>CityFilterItem</code> shape."</p>
+            <pre class="snippet">export interface FilterData {
+  price: PriceFilterData;   <span class="cm">// exactly one</span>
+  city: CityFilterItem[];   <span class="cm">// a list</span>
+  tag: TagFilterItem[];
+}</pre>
+            <figcaption class="cite">filters.types.ts:1-8</figcaption>
+            <p class="term-why">The entire filter sidebar's data shape fits on one screen because of this —
+                named shapes composed into lists, rather than one giant nested literal.</p>
+        </div>
+
+        <div class="term">
+            <div class="term-head"><span class="term-name">recursive type</span><span
+                    class="tag type">type-level</span></div>
+            <p class="term-def">A type is allowed to refer to <em>itself</em>. Valid, not a mistake — it's
+                how you model nesting to an unknown depth.</p>
+            <pre class="snippet">export interface CategoryFilterItem {
+  id: number;
+  hasSubCategories: boolean;
+  categories?: CategoryFilterItem[];
+}</pre>
+            <figcaption class="cite">filters.types.ts:30-37</figcaption>
+            <p class="term-why">A category may contain categories, which may contain categories. The
+                <code>?</code> is what keeps it finite — a leaf category just omits the key.
+            </p>
+        </div>
+
+        <div class="term">
+            <div class="term-head"><span class="term-name">union type <code>|</code></span><span
+                    class="tag type">type-level</span></div>
+            <p class="term-def"><code>|</code> reads as <strong>or</strong>: the value may be any one of the
+                listed types. In these files it's almost always used to add <code>null</code>.</p>
+            <pre class="snippet">placeId?: string | null;
+terminals?: AirportSearchTerminal[] | null;</pre>
+            <figcaption class="cite">transport.types.ts:56, 64</figcaption>
+            <p class="term-why">Unions can hold any types, not just <code>null</code> — a union of exact
+                strings (<code>'loading' | 'success'</code>) is the safer alternative to
+                <code>string</code>. You haven't hit one in this repo yet, but you will.</p>
+        </div>
+
+        <div class="term">
+            <div class="term-head"><span class="term-name">barrel export</span><span class="tag value">runtime</span>
+            </div>
+            <p class="term-def"><code>export * from './x'</code> re-exports everything <code>x</code>
+                exports, as if this file had declared it itself.</p>
+            <pre class="snippet"><span class="cm">// types/index.ts — the whole file</span>
+export * from './api';
+export * from './filters.types';
+export * from './transport.types';</pre>
+            <figcaption class="cite">index.ts:1-5</figcaption>
+            <p class="term-why">Five lines collapse four files into one import surface — which is why App
+                code imports from the package root and never reaches into deep internal paths. Plain ES
+                module syntax, not a TypeScript feature.</p>
+        </div>
+
+        <div class="term">
+            <div class="term-head"><span class="term-name">path alias <code>@/</code></span><span
+                    class="tag type">build-level</span></div>
+            <p class="term-def">A prefix configured in <code>tsconfig.json</code> that stands in for a
+                directory — <strong>not</strong> a package in <code>node_modules</code>.</p>
+            <pre class="snippet"><span class="cm">// tsconfig.json</span>
+"baseUrl": "./src",
+"paths": { "@/*": ["./*"] }
+
+<span class="cm">// so this means src/types/transport.types</span>
+import type { Airport } from '@/types/transport.types';</pre>
+            <figcaption class="cite">packages/sdk/tsconfig.json:18-21</figcaption>
+            <p class="term-why">First instinct on seeing <code>@/</code> is "scoped npm package" (like
+                <code>@tajawal/…</code>). It isn't. One <code>@</code> is a scope, <code>@/</code> is this
+                package's own <code>src</code>.</p>
+        </div>
+
+    </div>
+
+    <h2 id="nullability"><span class="kicker">Group G</span>Nullability — and the repo's landmine</h2>
+    <p class="section-lede">
+        <code>?</code> and <code>| null</code> answer two different questions. Read together they describe
+        three legal states, and in <em>this</em> repo the compiler enforces none of them.
+    </p>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Written in the file</th>
+                    <th>Values the annotation allows</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>city: string</code></td>
+                    <td>A string. The key must be present.</td>
+                </tr>
+                <tr>
+                    <td><code>city?: string</code></td>
+                    <td>A string, or the key left out entirely.</td>
+                </tr>
+                <tr>
+                    <td><code>city: string | null</code></td>
+                    <td>A string or <code>null</code> — but the key must still be present.</td>
+                </tr>
+                <tr class="kept">
+                    <td><code>city?: string | null</code></td>
+                    <td>A string, <code>null</code>, <em>or</em> left out. Three states.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="section-lede">
+        Both spellings appear side by side in <code>transport.types.ts</code>:
+        <code>Destination.city</code> is <code>string</code>, <code>BookingLocation.city</code> is
+        <code>string | null</code>. That's the author signalling the API can return an explicit null on one
+        and not the other — signal worth reading, not noise.
+    </p>
+
+    <div class="callout gotcha">
+        <p class="callout-label">The landmine — verify this yourself before trusting any nullability annotation here</p>
+        <p>
+            Both <code>packages/sdk/tsconfig.json</code> and <code>packages/app/tsconfig.json</code> set
+            <code>"strict": false</code>, which leaves <code>strictNullChecks</code> off. Per the official
+            docs, that means <code>null</code> and <code>undefined</code> are
+            <em>"effectively ignored by the language… This can lead to unexpected errors at runtime."</em>
+            Confirmed by running the repo's own TypeScript 4.9.5:
+            <code>loc.city.toUpperCase()</code> on a <code>string | null</code> compiles clean under
+            <code>--strict false</code>, and fails with <code>TS18049: 'loc.city' is possibly 'null' or
+                'undefined'</code> under <code>--strict true</code>.
+        </p>
+        <p>
+            <strong>So: the type files tell the truth about shape, but the compiler does not enforce
+                nullability.</strong> A <code>| null</code> here is a note from the author to you, not a
+            guardrail. Catching an unguarded access is a human reviewer's job on this codebase.
+        </p>
+        <p>
+            Don't over-correct — <code>strict: false</code> is narrower than it sounds. Verified with the
+            same compiler, these all still error: a missing required property (<code>TS2741</code>), a
+            <code>string</code> where a <code>number</code> belongs, an unknown extra key on a fresh object
+            literal, and a wrong element type inside an array. Only the null/undefined family is off.
+        </p>
+    </div>
+
+    <h2 id="selfcheck"><span class="kicker">Active recall</span>Quick self-check</h2>
+    <p class="section-lede">Answer in your head first, then open each to check. If one surprises you, that's the one to
+        reread above.</p>
+
+    <details class="quiz">
+        <summary>In <code>textColor?: COLOR_VARIANTS</code>, what happens if a caller of <code>InfoRow</code> doesn't
+            pass <code>textColor</code> at all?</summary>
+        <div class="quiz-answer">Nothing breaks. <code>?</code> means the property is allowed to be
+            absent — inside the component, <code>textColor</code> is simply <code>undefined</code>. It
+            would only be a compile error without the <code>?</code>.</div>
+    </details>
+
+    <details class="quiz">
+        <summary>Which of these two lines still exists somewhere in the JavaScript the browser actually runs:
+            <code>import type { ReactNode } from 'react';</code> or <code>export enum COLOR_VARIANTS {...}</code>?
+        </summary>
+        <div class="quiz-answer">Only the enum. <code>import type</code> is erased completely; the
+            enum compiles into a real object. This is the exception from the erasure table above — worth
+            memorizing since it's counterintuitive.</div>
+    </details>
+
+    <details class="quiz">
+        <summary><code>handleToggle(key: string): void</code> — if you wrote <code>const x = handleToggle('a')</code>,
+            could you usefully do anything with <code>x</code> afterward?</summary>
+        <div class="quiz-answer">No. TypeScript will let you write it, but <code>x</code> is
+            <code>undefined</code> — <code>void</code> is the function's way of saying "don't expect a
+            return value," so nothing meaningful is there to use.
+        </div>
+    </details>
+
+    <details class="quiz">
+        <summary>If <code>priceDetail.originalPrice</code> is <code>0</code>, what does
+            <code>priceDetail.originalPrice ?? undefined</code> evaluate to?</summary>
+        <div class="quiz-answer"><strong><code>0</code></strong> — not <code>undefined</code>.
+            <code>??</code> only falls through on <code>null</code>/<code>undefined</code>, and
+            <code>0</code> is neither. If this had used <code>||</code> instead, a legitimate price of
+            <code>0</code> would have been incorrectly replaced.
+        </div>
+    </details>
+
+    <details class="quiz">
+        <summary><code>terminal?: string | null</code> — how many distinct legal states does that describe, and what
+            are they?</summary>
+        <div class="quiz-answer">Three: a string, an explicit <code>null</code>, or the key left out
+            entirely. The <code>?</code> buys "may be absent"; the <code>| null</code> buys "may be present
+            but null." They stack rather than overlap.</div>
+    </details>
+
+    <details class="quiz">
+        <summary>A diff adds <code>return loc.city.toUpperCase();</code> where <code>city</code> is typed
+            <code>string | null</code>. Does CI catch it?</summary>
+        <div class="quiz-answer"><strong>No.</strong> <code>strict: false</code> in both packages means
+            <code>strictNullChecks</code> is off, so the compiler ignores the <code>| null</code> completely
+            — it builds, ships, and throws the first time the API returns a null. This is a review comment
+            only a human can leave on this repo.
+        </div>
+    </details>
+
+    <details class="quiz">
+        <summary>Since <code>strict</code> is off, does <code>const c: CityFilterItem = { id: 1 }</code> —
+            missing the required <code>totalCount</code> — compile?</summary>
+        <div class="quiz-answer">No — <code>TS2741: Property 'totalCount' is missing</code>. Shape checking
+            is completely unaffected by <code>strict: false</code>; only the null/undefined checks are
+            disabled. Don't let the landmine above talk you into distrusting the types entirely.</div>
+    </details>
+
+    <details class="quiz">
+        <summary><code>categories?: CategoryFilterItem[]</code> sits <em>inside</em>
+            <code>CategoryFilterItem</code>. Is that a mistake?</summary>
+        <div class="quiz-answer">No — it's a recursive type, and it's the point: a category may contain
+            sub-categories to any depth. The <code>?</code> is what makes it terminate, since a leaf category
+            simply omits the key.</div>
+    </details>
+
+    <h2 id="fuzzy"><span class="kicker">Definition of done</span>Still fuzzy — on purpose, for now</h2>
+    <p class="section-lede">
+        Nothing here appeared in the three files this glossary is built from, so rather than force
+        an example that isn't real, they're named and deferred honestly. You'll meet all three soon.
+    </p>
+    <div class="fuzzy-list">
+        <div class="fuzzy-item">
+            <span class="term-name mono">generics — <code>&lt;T&gt;</code></span>
+            <p>A way to write one function or type that works across many shapes while still
+                keeping them distinct — e.g. "this returns an array of whatever type went in." You'll
+                likely meet this first in a shared SDK utility or a generic API-response type.</p>
+        </div>
+        <div class="fuzzy-item">
+            <span class="term-name mono">discriminated unions / narrowing</span>
+            <p>A pattern where an object type has a shared "tag" field (like <code>kind: 'a' | 'b'</code>),
+                and checking that field with an <code>if</code> lets TypeScript automatically figure out
+                the rest of the object's shape inside that branch.</p>
+        </div>
+        <div class="fuzzy-item">
+            <span class="term-name mono">utility types — <code>Partial&lt;T&gt;</code>, <code>Pick&lt;T, K&gt;</code>,
+                <code>Omit&lt;T, K&gt;</code></span>
+            <p>Built-in helpers that build a new type out of an existing one — "all of <code>Props</code>
+                but optional," or "only these two fields of <code>Props</code>." Common once a codebase
+                has enough shared types worth reshaping instead of retyping.</p>
+        </div>
+    </div>
+
+    <footer>
+        Sources: <code>packages/app/app-common/components/InfoRow/InfoRow.tsx</code>,
+        <code>PoliciesFilter/PoliciesFilter.tsx</code>,
+        <code>MultiSelectFilter/MultiSelectFilter.tsx</code>, plus
+        <code>VehicleCard/VehicleCard.tsx</code> (operators) and
+        <code>@tajawal/ct-web-design-system</code>'s compiled
+        <code>theme/palette.theme</code> / <code>theme/typography.theme</code> declarations
+        (enum confirmation). Groups F and G add
+        <code>packages/sdk/src/types/{sort,filters,transport,home-page,index}.ts</code> and both
+        packages' <code>tsconfig.json</code>. The <code>strict: false</code> behaviour was verified by
+        running the repo's own TypeScript 4.9.5, not assumed. Written as a standalone study reference —
+        not part of the ct-web-transport repo.
+    </footer>
+
+</div>
+
+<script>
+    // In-page source reader: one tab bar per viewer, panels swap in place.
+    document.querySelectorAll('.srcviewer').forEach(function (viewer) {
+        var tabs = Array.prototype.slice.call(viewer.querySelectorAll('.srctab'));
+        var panels = Array.prototype.slice.call(viewer.querySelectorAll('.srcfile'));
+
+        tabs.forEach(function (tab, i) {
+            tab.addEventListener('click', function () {
+                tabs.forEach(function (t) { t.classList.remove('on'); });
+                panels.forEach(function (p) { p.classList.remove('on'); });
+                tab.classList.add('on');
+                if (panels[i]) panels[i].classList.add('on');
+            });
+        });
+    });
+</script>

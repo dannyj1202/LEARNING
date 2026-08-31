@@ -314,6 +314,47 @@ footer.lesson-footer {
   margin-left: 2.5rem;
 }
 
+/* Comparison tables — "written vs. what it means" style */
+.table-wrap {
+  max-width: var(--wide);
+  overflow-x: auto;
+  margin: 1.25rem 0 1.75rem;
+}
+
+.table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+}
+
+.table-wrap th {
+  text-align: left;
+  font-size: 0.72rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 0 0.9rem 0.5rem 0;
+  border-bottom: 1px solid var(--ink);
+}
+
+.table-wrap td {
+  padding: 0.6rem 0.9rem 0.6rem 0;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+
+.table-wrap tr:last-child td {
+  border-bottom: none;
+}
+
+/* Highlight the row that carries the punchline */
+.table-wrap tr.kept td {
+  background: var(--accent-soft);
+  padding-left: 0.6rem;
+}
+
 @media print {
   body {
     background: #fff;

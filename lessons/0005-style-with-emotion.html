@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lesson 0005 — Style with Emotion</title>
+    <link rel="stylesheet" href="../assets/lesson.css" />
+  </head>
+  <body>
+    <article class="lesson">
+      <header class="lesson-header">
+        <p class="lesson-eyebrow">Lesson 0005 · React foundations</p>
+        <h1>Style with Emotion</h1>
+        <p class="lede">
+          <code>VehicleCard</code> renders real, typed data now. Time to make it
+          look like the reference screenshot instead of unstyled HTML.
+        </p>
+      </header>
+
+      <p class="mission-tie">
+        Mission tie-in: every lesson so far has been about correctness — the right
+        data, in the right shape, rendered in the right place. Look at the
+        <a href="../assets/vehicle-results-target.png">reference screenshot</a>
+        again: none of that work is visible yet. Emotion is how the card border,
+        the price color, and the pill-shaped Book button actually appear.
+      </p>
+
+      <h2>A styled component is a real component</h2>
+      <p>
+        Official docs:
+        <a href="https://emotion.sh/docs/styled"><code>@emotion/styled</code></a>
+        takes an HTML tag and a template literal of CSS, and returns a React
+        component that renders that tag with that CSS attached.
+      </p>
+
+      <pre><code>import styled from "@emotion/styled";
+
+const Card = styled.article`
+  border: 1px solid #e2e2e2;
+  border-radius: 8px;
+  padding: 1rem;
+`;
+
+const BookButton = styled.button`
+  background: #0a6e78;
+  color: white;
+  border-radius: 999px;
+  padding: 0.5rem 1.25rem;
+  border: none;
+`;
+
+function VehicleCard({ title, price }: Vehicle) {
+  return (
+    &lt;Card&gt;
+      &lt;h2&gt;{title}&lt;/h2&gt;
+      &lt;p&gt;USD {price}&lt;/p&gt;
+      &lt;BookButton&gt;Book now&lt;/BookButton&gt;
+    &lt;/Card&gt;
+  );
+}</code></pre>
+
+      <p>
+        <code>Card</code> and <code>BookButton</code> are not helpers that
+        <em>apply</em> styling — they <strong>are</strong> the component. Use them
+        exactly like <code>&lt;article&gt;</code> or <code>&lt;button&gt;</code>,
+        anywhere in your JSX.
+      </p>
+
+      <h2>Styling from a prop — and typing it</h2>
+      <p>
+        A <code>FilterChip</code> looks different when selected. Emotion lets a
+        prop drive the CSS directly, and — since this is TypeScript — that prop
+        gets a real type, the same way <code>VehicleCard</code>'s props do:
+      </p>
+
+      <pre><code>const Chip = styled.button&lt;{ active: boolean }&gt;`
+  background: ${(props) =&gt; (props.active ? "#0a6e78" : "white")};
+  color: ${(props) =&gt; (props.active ? "white" : "#1a1a1a")};
+  border-radius: 999px;
+`;
+
+&lt;Chip active={true}&gt;Meet &amp; Greet&lt;/Chip&gt;</code></pre>
+
+      <div class="callout">
+        <strong>Good news first.</strong>
+        Official docs:
+        <a href="https://emotion.sh/docs/styled"
+          >"Emotion passes all props (except for <code>theme</code>) to custom
+          components and only props that are valid html attributes for string
+          tags."</a
+        > A DOM tag like <code>styled.button</code> already filters to real HTML
+        attributes automatically. <code>active</code> isn't a real
+        <code>&lt;button&gt;</code> attribute, so Emotion keeps it off the DOM
+        for you — no extra code needed.
+      </div>
+
+      <h2>The trap: a prop name that happens to be a real attribute</h2>
+      <p>
+        The filter only knows attribute <em>names</em>, not your <em>intent</em>.
+        If a style-only prop happens to share its name with a genuine (even
+        old, rarely-used) HTML attribute, it passes the filter and lands on the
+        DOM anyway — Emotion's own docs use exactly this case as their example:
+      </p>
+
+      <pre><code>const PriceTag = styled.p&lt;{ color: string }&gt;`
+  color: ${(props) =&gt; props.color};
+`;
+
+&lt;PriceTag color="red"&gt;USD 29 (sale!)&lt;/PriceTag&gt;
+// renders: &lt;p color="red" class="css-xyz"&gt;USD 29 (sale!)&lt;/p&gt;</code></pre>
+
+      <p>
+        <code>color</code> is a genuine, if legacy, HTML attribute
+        (<code>&lt;font color="red"&gt;</code>, from way back) — so Emotion's
+        default check treats it as legitimate and forwards it, even though here
+        it's meant purely for styling.
+      </p>
+
+      <div class="callout">
+        <strong>Rule to remember — this one bites in real code review.</strong>
+        Rename the prop to something that isn't a real attribute (like
+        <code>highlightColor</code>) and the problem disappears automatically —
+        the default filter keeps non-attribute names off the DOM. If you must
+        keep the colliding name, the documented fix is
+        <a href="https://emotion.sh/docs/styled#customizing-prop-forwarding"
+          >Customizing Prop Forwarding</a
+        >:
+      </div>
+
+      <pre><code>import styled from "@emotion/styled";
+import isPropValid from "@emotion/is-prop-valid";
+
+const PriceTag = styled("p", {
+  shouldForwardProp: (prop) =&gt; isPropValid(prop) &amp;&amp; prop !== "color",
+})&lt;{ color: string }&gt;`
+  color: ${(props) =&gt; props.color};
+`;</code></pre>
+
+      <p>
+        Note the two changes: <code>styled.p</code> becomes
+        <code>styled("p", { ... })</code> — the options object only exists on
+        the function-call form, not the dot shorthand — and
+        <code>isPropValid</code> comes from a separate package,
+        <code>@emotion/is-prop-valid</code>. It's the same check Emotion runs
+        internally by default; here you're composing on top of it, not
+        replacing it.
+      </p>
+
+      <h2>Skill check</h2>
+      <p>
+        Each of these is a small code review. Answer from memory — do not scroll up.
+      </p>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — color happens to be a real (legacy) HTML attribute, so Emotion's default filter treats it as legitimate and forwards it, exactly like the docs' own example."
+        data-bad="Check whether color is an actual HTML attribute name, not whether it looks custom. It's an old but real one — that's exactly why the default filter lets it through."
+      >
+        <h3>Check 1</h3>
+        <p class="prompt">
+          <code>const PriceTag = styled.p&lt;{ color: string }&gt;`...`;</code>
+          used as <code>&lt;PriceTag color="red"&gt;USD 29&lt;/PriceTag&gt;</code>
+          — does <code>color</code> end up as an attribute on the rendered
+          <code>&lt;p&gt;</code>?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">Yes, color is a real HTML attribute</button>
+          <button type="button" class="choice" data-index="1">No, Emotion filters all custom props</button>
+          <button type="button" class="choice" data-index="2">Yes, but only in production builds</button>
+          <button type="button" class="choice" data-index="3">No, TypeScript strips it at compile time</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Correct — highlightColor isn't a real HTML attribute name, so Emotion's default filter keeps it off the DOM automatically. No shouldForwardProp needed here."
+        data-bad="highlightColor doesn't match any real HTML attribute. Compare it to Check 1's color — the default filter only forwards names that actually exist as attributes."
+      >
+        <h3>Check 2</h3>
+        <p class="prompt">
+          Same idea, renamed:
+          <code>styled.p&lt;{ highlightColor: string }&gt;</code>, used as
+          <code>&lt;PriceTag highlightColor="red"&gt;USD 29&lt;/PriceTag&gt;</code>
+          — does <code>highlightColor</code> leak onto the DOM?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">No, it is not a real attribute</button>
+          <button type="button" class="choice" data-index="1">Yes, all props always leak through</button>
+          <button type="button" class="choice" data-index="2">No, but only with shouldForwardProp added</button>
+          <button type="button" class="choice" data-index="3">Yes, renaming never changes forwarding</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — switching to the function-call form and composing shouldForwardProp with isPropValid is the actual documented fix when you can't just rename the prop."
+        data-bad="A data attribute or Vehicle's type don't touch this at all. The documented fix, straight from the Emotion docs, is styled('p', { shouldForwardProp: ... })."
+      >
+        <h3>Check 3</h3>
+        <p class="prompt">
+          You must keep the prop named <code>color</code> (API consistency with
+          other components). What's the actual documented fix to stop it
+          leaking onto the DOM?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">Switch to styled('p', {shouldForwardProp})</button>
+          <button type="button" class="choice" data-index="1">Switch color prop to a data attribute</button>
+          <button type="button" class="choice" data-index="2">Wrap PriceTag in React.memo instead</button>
+          <button type="button" class="choice" data-index="3">Add color to Vehicle's type instead</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <aside class="primary-source">
+        <h2>Primary source (read next)</h2>
+        <p>
+          This one isn't in your personal field guides — they're TypeScript/React
+          fundamentals, not styling libraries. Work through
+          <a href="https://emotion.sh/docs/introduction">Emotion: Introduction</a>
+          and <a href="https://emotion.sh/docs/styled"><code>@emotion/styled</code></a>
+          on emotion.sh, including the prop-forwarding section — those are the
+          canonical text this lesson compresses.
+        </p>
+      </aside>
+
+      <p class="ask-teacher">
+        Unclear on anything? Ask me in chat — I'm your teacher for this mission. Good
+        follow-ups: "What other prop names are secretly real HTML attributes?",
+        "Can I style an existing component, not just an HTML tag?", or "How does
+        this compare to plain CSS classes?"
+      </p>
+
+      <footer class="lesson-footer">
+        Next up (when you're ready):
+        <a href="0008-usestate-filter-sidebar.html"
+          ><code>useState</code> — making the filter sidebar respond to clicks</a
+        >, now that the card can look right when it does.
+      </footer>
+    </article>
+    <script src="../assets/quiz.js"></script>
+  </body>
+</html>

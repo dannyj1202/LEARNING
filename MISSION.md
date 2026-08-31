@@ -7,6 +7,7 @@ You want to ship a real product page: an Almosafer-style vehicle listing where u
 - Build a Next.js 16 + TypeScript + Emotion page that lists vehicles with filters, sort, and a Book action — matching the structure of the reference screenshot
 - Independently compose UI from React components (cards, filters, chips, steppers) without copy-pasting blindly
 - Explain why state lives where it does on this page (filters → visible results)
+- Read someone else's TS/React code and spot real bugs in it (wrong types, unsafe assumptions, misuse of props/state) — code-review fluency, not just build-from-scratch fluency
 
 ## Constraints
 - ~3 hours/day, 5 days/week, for 2 weeks (~30 hours total)

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lesson 0004c — Object types and structural typing</title>
+    <link rel="stylesheet" href="../assets/lesson.css" />
+  </head>
+  <body>
+    <article class="lesson">
+      <header class="lesson-header">
+        <p class="lesson-eyebrow">Lesson 0004c · TypeScript foundations</p>
+        <h1>Object types and structural typing</h1>
+        <p class="lede">
+          Why does a fresh <code>{ ...seats: 7 }</code> get flagged, but the exact
+          same value passed through a variable doesn't? The answer is the single
+          most useful "why did TypeScript accept/reject this?" mental model there is.
+        </p>
+      </header>
+
+      <p class="mission-tie">
+        Mission tie-in: in
+        <a href="0004-type-the-vehicle-model.html">Lesson 0004</a> you learned an
+        extra field on a <code>Vehicle</code> literal gets flagged. That's true, but
+        incomplete — and the missing piece is exactly the kind of thing a reviewer
+        needs to know cold, because it looks identical on the surface and behaves
+        differently underneath.
+      </p>
+
+      <h2>TypeScript checks shape, not name — "duck typing"</h2>
+      <p>
+        TypeScript uses a <strong>structural</strong> type system: if a value has all
+        the properties a type requires, it's accepted — regardless of what the value
+        was declared as, or whether it was ever labeled with that type's name at all.
+      </p>
+
+      <pre><code>interface Point {
+  x: number;
+  y: number;
+}
+
+function printPoint(p: Point) {
+  console.log(`${p.x}, ${p.y}`);
+}
+
+const myObject = { x: 10, y: 20, z: 30 }; // never declared as Point, has an extra field
+printPoint(myObject); // fine — it HAS the required shape</code></pre>
+
+      <p>
+        <em>Source: TypeScript Field Guide, §1.2 — "if it walks like a duck and
+        quacks like a duck, TypeScript treats it as a duck — regardless of what it's
+        named."</em> This is different from languages like Java or C#, which check by
+        declared class name, not shape.
+      </p>
+
+      <h2>So why did the extra field get flagged in Lesson 0004?</h2>
+      <p>
+        Compare these two, side by side — same extra field, different outcome:
+      </p>
+
+      <pre><code>// A) Fresh literal, assigned directly — TypeScript flags "seats"
+const a: Vehicle = { id: "v4", title: "Minivan", price: 74, seats: 7 };
+
+// B) Same value, passed through a variable first — TypeScript allows it
+const raw = { id: "v4", title: "Minivan", price: 74, seats: 7 };
+const b: Vehicle = raw; // no error — myObject-style structural match</code></pre>
+
+      <div class="callout">
+        <strong>Rule to remember.</strong>
+        Excess property checks only apply to <strong>fresh object literals</strong>
+        written directly where a type is expected. The moment that same value passes
+        through a variable, TypeScript falls back to pure structural matching: "does
+        it have everything <code>Vehicle</code> needs?" — extra fields stop being an
+        error. This isn't a loophole to exploit; it's why the check exists at all —
+        to catch literal typos, not to police every object that happens to have
+        extra data.
+      </div>
+
+      <h2>Optional and readonly fields</h2>
+      <p>
+        Two modifiers show up constantly on real object types:
+      </p>
+
+      <pre><code>interface Vehicle {
+  readonly id: string;      // cannot be reassigned after creation
+  title: string;
+  price: number;
+  discountCode?: string;    // optional — may be present or absent, never null
+}</code></pre>
+
+      <p>
+        <code>?</code> means the property can be omitted entirely — not set to
+        <code>undefined</code> explicitly, just left out. <code>readonly</code> means
+        the property can be read but never reassigned once the object exists,
+        independent of whether the whole object itself is <code>const</code> — handy
+        for an <code>id</code>, which should never change after a vehicle is created.
+      </p>
+
+      <h2><code>type</code> vs <code>interface</code> — a real decision</h2>
+      <p>
+        Both can describe <code>Vehicle</code>'s shape. The difference that actually
+        matters day to day:
+      </p>
+      <ul>
+        <li><code>interface</code> can be <code>extends</code>-ed cleanly and merged/re-opened by libraries — the production default for object shapes, especially component props.</li>
+        <li><code>type</code> is required for unions (<code>"loading" | "success"</code>), tuples, and function types like <code>SortFn</code> from Lesson 0004b — <code>interface</code> can't express those.</li>
+      </ul>
+      <p>
+        <em>Source: TypeScript Field Guide, §1.8 — "Most teams default to
+        <code>interface</code> for object shapes... Reach for <code>type</code> when
+        you need unions, tuples, or advanced type manipulation."</em>
+      </p>
+
+      <h2>Skill check</h2>
+      <p>
+        Each of these is a small code review. Answer from memory — do not scroll up.
+      </p>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — raw is a variable, not a fresh literal, so the excess property check doesn't apply. Structural matching only asks: does it have what Vehicle needs? Yes."
+        data-bad="Re-read the side-by-side comparison. The excess property check only fires on a literal written directly at the assignment — not on a value that already passed through a variable."
+      >
+        <h3>Check 1</h3>
+        <p class="prompt">
+          <code>const raw = { id: "v4", title: "Minivan", price: 74, seats: 7 };
+          const b: Vehicle = raw;</code> — does this compile?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">Yes, raw isn't a fresh literal</button>
+          <button type="button" class="choice" data-index="1">No, seats is still flagged</button>
+          <button type="button" class="choice" data-index="2">No, raw needs a type annotation</button>
+          <button type="button" class="choice" data-index="3">Yes, but only in strict mode</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Correct — omitting the field entirely is exactly what a `?` allows. Setting it to undefined explicitly is a different (also valid) case, but not what's shown here."
+        data-bad="Look at what's actually missing from the object — is a key set to undefined, or is it just not there at all? Those aren't the same question for an optional field."
+      >
+        <h3>Check 2</h3>
+        <p class="prompt">
+          Given <code>discountCode?: string</code>, which object satisfies the type?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">{ id: "v1", title: "SUV", price: 89 }</button>
+          <button type="button" class="choice" data-index="1">{ id: "v1", title: "SUV" }</button>
+          <button type="button" class="choice" data-index="2">{ discountCode: 10, price: 89 }</button>
+          <button type="button" class="choice" data-index="3">{ id: 1, title: "SUV", price: 89 }</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — type is required here because a union of string literals isn't an object shape. interface can only describe object shapes, not unions."
+        data-bad="Think about what interface can actually express. A union of exact string values isn't an object shape at all — one of these two tools can't declare it."
+      >
+        <h3>Check 3</h3>
+        <p class="prompt">
+          You need <code>type Status = "loading" | "success" | "error";</code>. Can
+          this be written as an <code>interface</code> instead?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">No, interface can't express unions</button>
+          <button type="button" class="choice" data-index="1">Yes, interface handles all cases</button>
+          <button type="button" class="choice" data-index="2">Yes, but extends is required</button>
+          <button type="button" class="choice" data-index="3">No, type is deprecated now</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <aside class="primary-source">
+        <h2>Primary source (read next)</h2>
+        <p>
+          Read §1.2, §1.5, and §1.8 of your
+          <a href="file:///Users/daniel.varghese/Desktop/Almosafer/Almosafer/07%20Learning%20Block/Study/TypeScript%20Field%20Guide.md"
+            >TypeScript Field Guide</a
+          >
+          — the structural typing mental model, Objects and Interfaces, and Type
+          Aliases vs. Interfaces. Cross-reference with the official
+          <a href="https://www.typescriptlang.org/docs/handbook/2/objects.html"
+            >Object Types</a
+          >
+          handbook page if anything's unclear.
+        </p>
+      </aside>
+
+      <p class="ask-teacher">
+        Unclear on anything? Ask me in chat — I'm your teacher for this mission. Good
+        follow-ups: "Show me a case where structural typing causes a real bug," "Why
+        does readonly exist if const already exists?", or "Rewrite Vehicle as an
+        interface and tell me what actually changes."
+      </p>
+
+      <footer class="lesson-footer">
+        Next up (when you're ready):
+        <a href="0005-style-with-emotion.html">Emotion</a> — styling
+        <code>VehicleCard</code>, chips, and the Book button to match the reference
+        screenshot, now that the data feeding them is trustworthy and well
+        understood.
+      </footer>
+    </article>
+    <script src="../assets/quiz.js"></script>
+  </body>
+</html>

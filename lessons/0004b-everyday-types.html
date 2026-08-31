@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lesson 0004b — Everyday types</title>
+    <link rel="stylesheet" href="../assets/lesson.css" />
+  </head>
+  <body>
+    <article class="lesson">
+      <header class="lesson-header">
+        <p class="lesson-eyebrow">Lesson 0004b · TypeScript foundations</p>
+        <h1>Everyday types</h1>
+        <p class="lede">
+          <code>Vehicle</code> used <code>string</code> and <code>number</code>
+          without a second thought. This lesson is about the other everyday shapes —
+          tuples and function types — that show up constantly once you're reading
+          real code instead of writing it from scratch.
+        </p>
+      </header>
+
+      <p class="mission-tie">
+        Mission tie-in: in
+        <a href="0004-type-the-vehicle-model.html">Lesson 0004</a> you typed
+        <code>Vehicle</code> and caught a typo'd prop before it ran. Two more
+        everyday shapes are coming up fast: <code>useState</code> (lesson 0007)
+        returns a <strong>tuple</strong>, and a sort function you'll write for the
+        results list is a <strong>function type</strong> — worth knowing both before
+        you meet them in the wild.
+      </p>
+
+      <h2>Most types, you never write</h2>
+      <p>
+        TypeScript infers types automatically from the value on the right-hand side.
+        You only annotate when the type isn't obvious from context — most often,
+        function parameters.
+      </p>
+
+      <pre><code>let age = 36;              // inferred as number, no annotation needed
+const vehicles = [39, 168]; // inferred as number[]
+
+function calculateTotal(price: number, quantity: number) {
+  return price * quantity;  // return type inferred as number
+}</code></pre>
+
+      <p>
+        <em>Source: TypeScript Field Guide, §1.3 — "In practice you'll rarely write
+        <code>let age: number = 36</code>. TypeScript infers the type automatically."</em>
+      </p>
+
+      <h2>Arrays vs. tuples — when position means something</h2>
+      <p>
+        An array (<code>Vehicle[]</code>) is a list of same-shaped things, any
+        length. A <strong>tuple</strong> is a fixed-length array where each position
+        has its own specific type — TypeScript enforces both the length and what
+        goes where.
+      </p>
+
+      <pre><code>// Array: any number of same-shaped items
+const prices: number[] = [39, 168, 89];
+
+// Tuple: exactly two items, and position 0 must be a number,
+// position 1 must be a string
+type PriceEntry = [number, string];
+const entry: PriceEntry = [39, "Standard Sedan"];</code></pre>
+
+      <div class="callout">
+        <strong>Why this matters soon.</strong>
+        <code>useState(0)</code> (lesson 0007) doesn't return an object — it returns
+        a tuple: <code>[value, setValue]</code>. Position 0 is always the current
+        value, position 1 is always the setter function. That's not a convention you
+        memorize; it's a tuple type doing its job.
+      </div>
+
+      <h2>Function types — a signature you can hand around</h2>
+      <p>
+        A function's type is its parameter types plus its return type. You can name
+        that signature and use it as a type, the same way <code>Vehicle</code> names
+        an object shape.
+      </p>
+
+      <pre><code>type SortFn = (a: Vehicle, b: Vehicle) => number;
+
+const byPriceAscending: SortFn = (a, b) => a.price - b.price;</code></pre>
+
+      <p>
+        Anything typed <code>SortFn</code> is guaranteed to take two vehicles and
+        return a number — the exact shape the results list's sort dropdown will need
+        later.
+      </p>
+
+      <h2>Skill check</h2>
+      <p>
+        Each of these is a small code review. Answer from memory — do not scroll up.
+      </p>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — position 0 must be a number, position 1 a string. Swapping them breaks the tuple's per-position contract."
+        data-bad="Check each position against PriceEntry's declared order: number first, string second. One of these swaps that order."
+      >
+        <h3>Check 1</h3>
+        <p class="prompt">
+          Given <code>type PriceEntry = [number, string];</code>, which assignment
+          does TypeScript reject?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">["Sedan", 39] swaps the order</button>
+          <button type="button" class="choice" data-index="1">[39, "Sedan"] keeps the order</button>
+          <button type="button" class="choice" data-index="2">[168, "SUV"] keeps the order</button>
+          <button type="button" class="choice" data-index="3">[89, "Van"] keeps the order</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Correct — a tuple return means position is contractual: value first, setter second, every time."
+        data-bad="Look at what useState actually returns — not an object with named keys, but a pair where order is fixed and meaningful."
+      >
+        <h3>Check 2</h3>
+        <p class="prompt">
+          Why does <code>const [count, setCount] = useState(0)</code> rely on
+          destructuring by position rather than by name?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">useState returns a fixed-order tuple</button>
+          <button type="button" class="choice" data-index="1">useState returns a random object</button>
+          <button type="button" class="choice" data-index="2">Names count and setCount are required</button>
+          <button type="button" class="choice" data-index="3">Position never matters in JavaScript</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — SortFn demands (Vehicle, Vehicle) => number. Returning a boolean breaks the contract even though the logic reads correctly."
+        data-bad="Check the declared type carefully: SortFn's return type is number, not boolean. One of these returns the wrong type despite looking reasonable."
+      >
+        <h3>Check 3</h3>
+        <p class="prompt">
+          <code>type SortFn = (a: Vehicle, b: Vehicle) =&gt; number;</code> — which
+          of these fails to satisfy <code>SortFn</code>?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">(a, b) => a.price > b.price</button>
+          <button type="button" class="choice" data-index="1">(a, b) => a.price - b.price</button>
+          <button type="button" class="choice" data-index="2">(a, b) => b.price - a.price</button>
+          <button type="button" class="choice" data-index="3">(a, b) => a.title.length - b.title.length</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <aside class="primary-source">
+        <h2>Primary source (read next)</h2>
+        <p>
+          Read §1.3–1.4 and §1.6 of your
+          <a href="file:///Users/daniel.varghese/Desktop/Almosafer/Almosafer/07%20Learning%20Block/Study/TypeScript%20Field%20Guide.md"
+            >TypeScript Field Guide</a
+          >
+          — Primitive Types, Arrays and Tuples, and Functions. Cross-reference with
+          the official
+          <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html"
+            >Everyday Types</a
+          >
+          handbook page if anything's unclear.
+        </p>
+      </aside>
+
+      <p class="ask-teacher">
+        Unclear on anything? Ask me in chat — I'm your teacher for this mission. Good
+        follow-ups: "Why did the guide warn that tuples don't fully block .push()?",
+        "Show me a tuple with three positions," or "What's the actual return type of
+        useState under the hood?"
+      </p>
+
+      <footer class="lesson-footer">
+        Next up (when you're ready): object types and interfaces — the structural
+        "duck typing" mental model, optional and readonly fields, and why
+        <code>type</code> vs <code>interface</code> is a real production decision,
+        not a style nitpick.
+      </footer>
+    </article>
+    <script src="../assets/quiz.js"></script>
+  </body>
+</html>

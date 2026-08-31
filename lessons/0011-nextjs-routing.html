@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lesson 0011 — Next.js routing</title>
+    <link rel="stylesheet" href="../assets/lesson.css" />
+  </head>
+  <body>
+    <article class="lesson">
+      <header class="lesson-header">
+        <p class="lesson-eyebrow">Lesson 0011 · Next.js App Router</p>
+        <h1>Routing — folders are URLs</h1>
+        <p class="lede">
+          Your vehicle page works, but it all lives at <code>/</code>. Real apps
+          have multiple screens. In the App Router, the <code>app/</code> folder
+          <em>is</em> the route table — no separate router config file. You
+          extract shared UI into components, put each screen on its own route,
+          and link between them with <code>Link</code>.
+        </p>
+      </header>
+
+      <p class="mission-tie">
+        Mission tie-in: side-project task <strong>0010</strong> (dashboard
+        “Next.js routing”). File number is <strong>0011</strong> because
+        <a href="0010-useeffect-edge-states.html">lesson 0010</a> is
+        <code>useEffect</code>. End-of-week-2 checkpoint: demo filters on a
+        real route, not only the home page.
+      </p>
+
+      <h2>The one idea</h2>
+      <div class="callout">
+        <strong>Folder path under <code>app/</code> = URL path.</strong>
+        A <code>page.tsx</code> in that folder makes the segment public. Official
+        docs:
+        <a href="https://nextjs.org/docs/app/getting-started/layouts-and-pages"
+          >Layouts and Pages</a
+        >.
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>File</th>
+              <th>URL</th>
+              <th>Role</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>app/page.tsx</code></td>
+              <td><code>/</code></td>
+              <td>Landing — links to other routes</td>
+            </tr>
+            <tr>
+              <td><code>app/rides-lift/page.tsx</code></td>
+              <td><code>/rides-lift</code></td>
+              <td>Your lift-state vehicle page (08a)</td>
+            </tr>
+            <tr>
+              <td><code>app/rides/page.tsx</code></td>
+              <td><code>/rides</code></td>
+              <td>MobX store version — lesson 0012</td>
+            </tr>
+            <tr>
+              <td><code>app/layout.tsx</code></td>
+              <td>wraps all routes</td>
+              <td>Shared shell: <code>&lt;html&gt;</code>, fonts, metadata</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Build steps (side project)</h2>
+      <ol>
+        <li>
+          <strong>Extract</strong> — move the big <code>Home</code> component
+          from <code>app/page.tsx</code> into
+          <code>components/RidesResultsPage.tsx</code> (keep
+          <code>"use client"</code> there — hooks and Emotion need it).
+        </li>
+        <li>
+          <strong>Lift route</strong> — create
+          <code>app/rides-lift/page.tsx</code> that renders
+          <code>&lt;RidesResultsPage /&gt;</code> (thin file, ~3 lines).
+        </li>
+        <li>
+          <strong>Landing</strong> — replace <code>app/page.tsx</code> with a
+          simple home page and <code>Link</code> components to
+          <code>/rides-lift</code> and <code>/rides</code>.
+        </li>
+        <li>
+          <strong>Test</strong> — <code>npm run dev</code>, click each link,
+          confirm URL bar and page content match.
+        </li>
+      </ol>
+
+      <pre><code>// app/rides-lift/page.tsx — folder name = URL segment
+import RidesResultsPage from "@/components/RidesResultsPage";
+
+export default function RidesLiftPage() {
+  return &lt;RidesResultsPage /&gt;;
+}</code></pre>
+
+      <pre><code>// app/page.tsx — no "use client" needed (no hooks)
+import Link from "next/link";
+
+export default function Home() {
+  return (
+    &lt;main&gt;
+      &lt;h1&gt;Almosafer learning&lt;/h1&gt;
+      &lt;Link href="/rides-lift"&gt;Lift state version&lt;/Link&gt;
+      &lt;Link href="/rides"&gt;MobX store version&lt;/Link&gt;
+    &lt;/main&gt;
+  );
+}</code></pre>
+
+      <h2><code>layout.tsx</code> vs <code>page.tsx</code></h2>
+      <ul>
+        <li>
+          <strong>layout</strong> — wraps child routes; stays mounted when you
+          navigate between pages in the same layout (good for nav bars you add
+          later).
+        </li>
+        <li>
+          <strong>page</strong> — the actual screen for that URL segment; swaps
+          when the route changes.
+        </li>
+      </ul>
+      <p>
+        Your project already has <code>app/layout.tsx</code> with fonts and
+        metadata. You usually leave it alone while adding routes underneath.
+      </p>
+
+      <h2>Server vs Client (just enough for now)</h2>
+      <p>
+        App Router pages are <strong>Server Components</strong> by default — no
+        hooks, no browser-only APIs. Your vehicle page uses
+        <code>useState</code>, <code>useEffect</code>, and Emotion, so it
+        stays a <strong>Client Component</strong> (<code>"use client"</code> at
+        the top of the file that uses hooks).
+      </p>
+      <p>
+        Pattern: thin <code>page.tsx</code> (can be server) imports a
+        <code>"use client"</code> component that owns the interactive UI.
+      </p>
+
+      <h2><code>Link</code> vs <code>&lt;a&gt;</code></h2>
+      <p>
+        Use <code>next/link</code> for in-app navigation — client-side
+        transition without full reload. Plain <code>&lt;a href&gt;</code> still
+        works but reloads the whole page.
+      </p>
+
+      <h2>Work repo tie-in</h2>
+      <p>
+        In ct-web-transport, routes live under the app package’s pages/containers
+        split — different folder convention, same idea: URL maps to a screen
+        component. After this lesson you should recognize “this file is the page
+        for this path.”
+      </p>
+
+      <h2>Skill check</h2>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — app/rides-lift/page.tsx maps to /rides-lift. The rides-lift folder is the URL segment."
+        data-bad="Count folders from app/ outward. page.tsx makes that segment public."
+      >
+        <h3>Check 1</h3>
+        <p class="prompt">
+          Which URL does <code>app/rides-lift/page.tsx</code> serve?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">/rides-lift</button>
+          <button type="button" class="choice" data-index="1">/app/rides-lift</button>
+          <button type="button" class="choice" data-index="2">/rides-lift/page</button>
+          <button type="button" class="choice" data-index="3">/components/rides-lift</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Correct — extract once into RidesResultsPage; each route imports it. No copy-paste of 200 lines."
+        data-bad="Two routes need the same UI. Where should the logic live so you don't maintain two copies?"
+      >
+        <h3>Check 2</h3>
+        <p class="prompt">
+          Why extract <code>RidesResultsPage</code> before adding
+          <code>/rides-lift</code>?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">Reuse one component from multiple route files</button>
+          <button type="button" class="choice" data-index="1">Next.js requires components to live outside app/</button>
+          <button type="button" class="choice" data-index="2">So useEffect runs twice per route</button>
+          <button type="button" class="choice" data-index="3">To remove TypeScript from page.tsx</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — hooks and event handlers need a Client Component. Put use client on the file that uses them."
+        data-bad="Default in App Router is Server Component — no useState there without use client."
+      >
+        <h3>Check 3</h3>
+        <p class="prompt">
+          Where does <code>"use client"</code> belong for the filter sidebar?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">On the component file that calls useState / useEffect</button>
+          <button type="button" class="choice" data-index="1">Only in layout.tsx</button>
+          <button type="button" class="choice" data-index="2">In next.config.ts</button>
+          <button type="button" class="choice" data-index="3">Nowhere — App Router pages are always client</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <aside class="primary-source">
+        <h2>Primary source (read next)</h2>
+        <p>
+          <a href="https://nextjs.org/docs/app/getting-started/layouts-and-pages"
+            >Layouts and Pages</a
+          >
+          on nextjs.org — nested routes and the component hierarchy. Skim
+          <a href="https://nextjs.org/docs/app/api-reference/file-conventions/page"
+            >page.js convention</a
+          >
+          for what makes a segment public.
+        </p>
+      </aside>
+
+      <p class="ask-teacher">
+        Unclear? Ask — “Do I need a layout per route?”, “Can the landing page
+        use Emotion?”, or “Why is my page blank after moving files?”
+      </p>
+
+      <footer class="lesson-footer">
+        Next:
+        <a href="0012-mobx-filter-store.html">MobX filter store (08b twin)</a>
+        on <code>/rides</code> — same filters, state owned by a store instead of
+        lifted props. Do routing first, then 0012.
+      </footer>
+    </article>
+    <script src="../assets/quiz.js"></script>
+  </body>
+</html>

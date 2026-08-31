@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lesson 0010 — useEffect and edge states</title>
+    <link rel="stylesheet" href="../assets/lesson.css" />
+  </head>
+  <body>
+    <article class="lesson">
+      <header class="lesson-header">
+        <p class="lesson-eyebrow">Lesson 0010 · React foundations</p>
+        <h1><code>useEffect</code> — and the states nobody designs</h1>
+        <p class="lede">
+          After filters work, real pages still need loading, empty, and
+          “no matches for these filters.” Some of that is just conditional
+          JSX. Some of it needs an <em>effect</em> — code that syncs React
+          with something outside React. Knowing when an effect is the
+          <strong>wrong</strong> tool matters as much as knowing the API.
+        </p>
+      </header>
+
+      <p class="mission-tie">
+        Mission tie-in: side-project task <strong>0009</strong>. File number is
+        <strong>0010</strong> (lesson 0009 is lift-state). Your vehicle page
+        should show honest empty/loading UI before Next.js routing polish.
+      </p>
+
+      <h2>Three UI states (no Effect required)</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>State</th>
+              <th>Typical condition</th>
+              <th>What to render</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Loading</td>
+              <td><code>isLoading === true</code></td>
+              <td>Skeleton / “Loading rides…”</td>
+            </tr>
+            <tr>
+              <td>Empty catalog</td>
+              <td><code>vehicles.length === 0</code></td>
+              <td>“No vehicles available”</td>
+            </tr>
+            <tr class="kept">
+              <td>No matches</td>
+              <td>data exists, <code>visible.length === 0</code></td>
+              <td>“No rides match these filters” + clear filters</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        “No matches” is just derived data after lift-state — an
+        <code>if</code> in JSX, not an Effect. Official guidance:
+        <a href="https://react.dev/learn/you-might-not-need-an-effect"
+          >You Might Not Need an Effect</a
+        >.
+      </p>
+
+      <h2>What <code>useEffect</code> is for</h2>
+      <div class="callout">
+        <strong>Effects synchronize with an external system</strong> — network,
+        browser APIs, a non-React widget — after React has painted.
+        <a href="https://react.dev/learn/synchronizing-with-effects"
+          >Synchronizing with Effects</a
+        >.
+      </div>
+      <pre><code>useEffect(() =&gt; {
+  let cancelled = false;
+  setIsLoading(true);
+  fetchVehicles().then((data) =&gt; {
+    if (!cancelled) {
+      setVehicles(data);
+      setIsLoading(false);
+    }
+  });
+  return () =&gt; { cancelled = true; }; // cleanup if unmounted
+}, []); // run after mount (dependency array)</code></pre>
+
+      <h2>When Effect is the wrong tool</h2>
+      <ul>
+        <li>
+          Transforming data for render (filter/sort) → calculate during render.
+        </li>
+        <li>
+          Resetting state when a prop changes → often key the component or
+          calculate instead.
+        </li>
+        <li>
+          Chaining <code>setState</code> in an Effect just because another
+          state changed → usually derive or update together in the event
+          handler.
+        </li>
+      </ul>
+      <p>
+        A fair code-review question: “Does this Effect talk to the outside
+        world, or is it recreating props/state React already has?”
+      </p>
+
+      <h2>Skill check</h2>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — visible is derived; empty filtered results are a render branch, not a sync with an external system."
+        data-bad="Filtering already happens from state you own. Effects are for outside React, not for if (visible.length === 0)."
+      >
+        <h3>Check 1</h3>
+        <p class="prompt">
+          Filters leave zero cards. How should you show “No matches”?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">Conditional JSX from visible.length</button>
+          <button type="button" class="choice" data-index="1">useEffect that alerts when length hits 0</button>
+          <button type="button" class="choice" data-index="2">Delete the vehicles array in an effect</button>
+          <button type="button" class="choice" data-index="3">Force a full page reload with location</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Correct — fetching is an external system. Load once (or when inputs change), store results in state, render from state."
+        data-bad="Ask whether the work is ‘talk to the network’ or ‘recompute from data I already have’."
+      >
+        <h3>Check 2</h3>
+        <p class="prompt">
+          Which job is a good fit for <code>useEffect</code> on this page?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">Fetch mock/API vehicles after mount</button>
+          <button type="button" class="choice" data-index="1">Sort the list when sort dropdown changes</button>
+          <button type="button" class="choice" data-index="2">Compute visible from freeCancel boolean</button>
+          <button type="button" class="choice" data-index="3">Toggle chip active styles via Emotion</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — cleanup cancels or ignores late responses so setState does not run on an unmounted tree."
+        data-bad="Think about a slow fetch: user navigates away before it finishes. What should not happen?"
+      >
+        <h3>Check 3</h3>
+        <p class="prompt">
+          Why return a cleanup function from a fetch Effect?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">Ignore results if the component unmounted</button>
+          <button type="button" class="choice" data-index="1">Make TypeScript erase the Promise type</button>
+          <button type="button" class="choice" data-index="2">Force Emotion to flush styled CSS</button>
+          <button type="button" class="choice" data-index="3">Replace keys on every VehicleCard map</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <aside class="primary-source">
+        <h2>Primary source (read next)</h2>
+        <p>
+          <a href="https://react.dev/learn/synchronizing-with-effects"
+            >Synchronizing with Effects</a
+          >
+          then
+          <a href="https://react.dev/learn/you-might-not-need-an-effect"
+            >You Might Not Need an Effect</a
+          >
+          — read both; the second prevents cargo-cult Effects. Cross-check your
+          React Mastery Guide for the same warnings in field-guide language.
+        </p>
+      </aside>
+
+      <p class="ask-teacher">
+        Unclear? Ask — “Should loading be fake with setTimeout?”, “How do I
+        type fetch errors?”, or “Is empty vs no-match the same UI?”
+      </p>
+
+      <footer class="lesson-footer">
+        Next:
+        <a href="0011-nextjs-routing.html">Next.js routing</a>
+        (side-project task 0010), then
+        <a href="0012-mobx-filter-store.html">MobX filter store (08b)</a>
+        on <code>/rides</code>.
+      </footer>
+    </article>
+    <script src="../assets/quiz.js"></script>
+  </body>
+</html>

@@ -1,0 +1,93 @@
+/**
+ * Mock API data — static vehicle catalog.
+ * Separated from fetch logic so we can swap fetchVehicles for a real API later.
+ */
+import type { Vehicle } from "@/components/VehicleCard";
+
+// TS: Vehicle[] — every object must match the Vehicle type shape
+export const MOCK_VEHICLES: Vehicle[] = [
+  {
+    id: "std-sedan",
+    title: "Standard Sedan",
+    subtitle: "Corolla, Toyota Prius or similar",
+    price: 39,
+    seats: 3,
+    luggage: 2,
+    features: "Free Cancellation up to 24 hours, Meet & Greet",
+    image: "/std-sed_en.webp", // paths under public/ are served from site root
+    carClass: "Standard",
+    carType: "Sedan",
+    hasFreeCancellation: true,
+    hasMeetAndGreet: true,
+  },
+  {
+    id: "mini-van",
+    title: "Mini Van",
+    subtitle: "Toyota Innova or similar",
+    price: 49,
+    seats: 6,
+    luggage: 4,
+    features: "Free Cancellation up to 24 hours, Meet & Greet",
+    image: "/mini-van.png",
+    carClass: "Economy",
+    carType: "Van",
+    hasFreeCancellation: true,
+    hasMeetAndGreet: false, // filter uses this boolean, not the features string
+  },
+  {
+    id: "premium-sedan",
+    title: "Premium Sedan",
+    subtitle: "Camry, Sonata or similar",
+    price: 55,
+    seats: 3,
+    luggage: 2,
+    features: "Free Cancellation up to 24 hours, Meet & Greet",
+    image: "/premium-sedan.png",
+    carClass: "Premium",
+    carType: "Sedan",
+    hasFreeCancellation: true,
+    hasMeetAndGreet: true,
+  },
+  {
+    id: "economy-van",
+    title: "Economy Van",
+    subtitle: "H1, Carnival or similar",
+    price: 59,
+    seats: 9,
+    luggage: 6,
+    features: "Free Cancellation up to 24 hours",
+    image: "/economy-van.png",
+    carClass: "Economy",
+    carType: "Van",
+    hasFreeCancellation: true,
+    hasMeetAndGreet: false,
+  },
+  {
+    id: "premium-suv",
+    title: "Premium SUV",
+    subtitle: "Explorer, Patrol or similar",
+    price: 65,
+    seats: 5,
+    luggage: 4,
+    features: "Free Cancellation up to 24 hours, Meet & Greet",
+    image: "/premium-suv.png",
+    carClass: "Premium",
+    carType: "SUV",
+    hasFreeCancellation: false,
+    hasMeetAndGreet: true,
+  },
+  {
+    id: "luxury-sedan",
+    title: "Luxury Sedan",
+    subtitle: "S-Class, A8 or similar",
+    price: 168,
+    seats: 3,
+    luggage: 2,
+    features: "Meet & Greet",
+    image: "/luxury-sedan.png",
+    carClass: "Luxury",
+    carType: "Sedan",
+    hasFreeCancellation: false,
+    hasMeetAndGreet: true,
+  },
+];

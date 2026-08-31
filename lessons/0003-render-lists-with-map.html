@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lesson 0003 — Render a list with .map()</title>
+    <link rel="stylesheet" href="../assets/lesson.css" />
+  </head>
+  <body>
+    <article class="lesson">
+      <header class="lesson-header">
+        <p class="lesson-eyebrow">Lesson 0003 · React foundations</p>
+        <h1>Render a list with .map()</h1>
+        <p class="lede">
+          Six vehicles on the page, but you should never type
+          <code>&lt;VehicleCard /&gt;</code> six times. Drive it from an array instead.
+        </p>
+      </header>
+
+      <p class="mission-tie">
+        Mission tie-in: in
+        <a href="0002-configure-with-props.html">Lesson 0002</a> you configured one
+        <code>VehicleCard</code> by hand-writing its props twice. Today the vehicles
+        live in a plain JS array — the shape mock data will actually arrive in — and
+        the six cards come from that array, not from six lines you wrote yourself.
+      </p>
+
+      <h2>The problem with writing it by hand</h2>
+      <p>
+        This works, but it doesn't scale — and it can't respond to real data:
+      </p>
+
+      <pre><code>&lt;VehicleCard title="Standard Sedan" price={39} /&gt;
+&lt;VehicleCard title="Luxury Sedan" price={168} /&gt;
+&lt;VehicleCard title="SUV" price={89} /&gt;
+&lt;VehicleCard title="Minivan" price={74} /&gt;
+&lt;VehicleCard title="Pickup" price={95} /&gt;
+&lt;VehicleCard title="Compact" price={45} /&gt;</code></pre>
+
+      <p>
+        If the vehicle list came back from an API tomorrow with eight vehicles instead
+        of six, this code wouldn't change to match it. You need the JSX to come
+        <em>from</em> the data.
+      </p>
+
+      <h2>Array in, elements out</h2>
+      <p>
+        Official React docs:
+        <a href="https://react.dev/learn/rendering-lists">use JavaScript's array
+        <code>.map()</code></a> to turn an array of data into an array of components.
+        <code>.map()</code> isn't a React feature — it's plain JavaScript that runs a
+        function over every item and collects the results into a new array. React is
+        happy rendering an array of JSX elements exactly like it renders one.
+      </p>
+
+      <pre><code>const vehicles = [
+  { id: "v1", title: "Standard Sedan", price: 39 },
+  { id: "v2", title: "Luxury Sedan", price: 168 },
+  { id: "v3", title: "SUV", price: 89 },
+];
+
+function ResultsList() {
+  return (
+    &lt;div&gt;
+      {vehicles.map((vehicle) =&gt; (
+        &lt;VehicleCard
+          key={vehicle.id}
+          title={vehicle.title}
+          price={vehicle.price}
+        /&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+      <p>
+        Add a vehicle to the <code>vehicles</code> array and a new card appears.
+        Nothing about <code>ResultsList</code> or <code>VehicleCard</code> changes —
+        exactly the scaling problem above, solved.
+      </p>
+
+      <h2>Why <code>key</code> is not optional</h2>
+      <p>
+        Each element in the array needs a
+        <a href="https://react.dev/learn/rendering-lists#keeping-list-items-in-order-with-key"><code>key</code></a>
+        — a value stable and unique among its siblings. React uses it to tell items
+        apart across re-renders: which one moved, which one was removed, which one is
+        new. Without it, React can only guess by position, and guessing by position
+        breaks the moment the list is filtered, sorted, or reordered.
+      </p>
+
+      <div class="callout">
+        <strong>Rule to remember.</strong>
+        Prefer a stable id from the data (<code>vehicle.id</code>) over the array
+        index. An index looks fine today, but you're about to build filtering and
+        sorting in this exact list (lesson 08a) — the moment sorting reorders the
+        array, index-as-key silently mismatches cards to the wrong data.
+      </div>
+
+      <h2>Skill check</h2>
+      <p>
+        Answer from memory — do not scroll up. Feedback is immediate; wrong answers
+        still teach.
+      </p>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — .map() builds a new array; here, an array of VehicleCard elements."
+        data-bad="Re-read the ResultsList example. .map() always returns a new array — here, one JSX element per vehicle."
+      >
+        <h3>Check 1</h3>
+        <p class="prompt">
+          Given
+          <code>vehicles.map((v) =&gt; &lt;VehicleCard key={v.id} title={v.title} /&gt;)</code>,
+          what does this expression evaluate to?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">An array of elements</button>
+          <button type="button" class="choice" data-index="1">A single JSX element</button>
+          <button type="button" class="choice" data-index="2">The original vehicles array</button>
+          <button type="button" class="choice" data-index="3">Undefined, always and forever</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Correct — key is how React matches list items across renders, not a styling or syntax requirement."
+        data-bad="It's not about the browser or JSX syntax. key exists so React can tell which item is which when the list changes."
+      >
+        <h3>Check 2</h3>
+        <p class="prompt">Why does each item in a list need a unique key prop?</p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">So React tracks items across list changes</button>
+          <button type="button" class="choice" data-index="1">So browsers can paint pixels more quickly</button>
+          <button type="button" class="choice" data-index="2">So JSX syntax requires a closing tag</button>
+          <button type="button" class="choice" data-index="3">So arrays sort themselves in ascending order</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — a stable id from the data survives filtering and sorting; array position does not."
+        data-bad="Think ahead to lesson 08a: once the list can be sorted, array position no longer identifies the same vehicle. A stable id does."
+      >
+        <h3>Check 3</h3>
+        <p class="prompt">
+          Which of these keys is still safe once this list can be filtered or sorted?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">key={vehicle.id}, a stable id</button>
+          <button type="button" class="choice" data-index="1">key={index}, the array position</button>
+          <button type="button" class="choice" data-index="2">key={vehicle.title}, the display text</button>
+          <button type="button" class="choice" data-index="3">No key prop at all</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <aside class="primary-source">
+        <h2>Primary source (read next)</h2>
+        <p>
+          Read §1.5 of your
+          <a href="file:///Users/daniel.varghese/Desktop/Almosafer/Almosafer/07%20Learning%20Block/Study/React%20Mastery%20Guide.md"
+            >React Mastery Guide</a
+          >
+          — Rendering Lists (and the Truth About <code>key</code>). Cross-reference
+          with <a href="https://react.dev/learn/rendering-lists">Rendering
+          Lists</a> on react.dev if anything's unclear.
+        </p>
+      </aside>
+
+      <p class="ask-teacher">
+        Unclear on anything? Ask me in chat — I'm your teacher for this mission. Good
+        follow-ups: "What if two vehicles have the same id by mistake?", "Can I map
+        over an array of arrays?", or "Show me ResultsList with all six mock
+        vehicles."
+      </p>
+
+      <footer class="lesson-footer">
+        Next up (when you're ready):
+        <a href="0004-type-the-vehicle-model.html">TypeScript</a> — giving that
+        <code>vehicles</code> array and <code>VehicleCard</code>'s props a real
+        <code>Vehicle</code> type, so a typo like <code>pryce</code> is caught before
+        you ever run the page.
+      </footer>
+    </article>
+    <script src="../assets/quiz.js"></script>
+  </body>
+</html>

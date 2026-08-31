@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lesson 0006 — Read a real .types.ts file</title>
+    <link rel="stylesheet" href="../assets/lesson.css" />
+  </head>
+  <body>
+    <article class="lesson">
+      <header class="lesson-header">
+        <p class="lesson-eyebrow">Lesson 0006 · TypeScript basics — the last mile</p>
+        <h1>Read a real <code>.types.ts</code> file</h1>
+        <p class="lede">
+          Your glossary was built from three <em>component</em> files. This one finishes
+          the job with the four <em>type</em> files in
+          <code>packages/sdk/src/types/</code> — the files that define what a "ride"
+          actually is in ct-web-transport. Five constructs, one landmine, and you can
+          read any type file in the repo end to end.
+        </p>
+      </header>
+
+      <p class="mission-tie">
+        Mission tie-in: your dashboard task says these are "the best single file to read
+        to learn what a ride actually is in code." They're also where every future ticket
+        starts — you cannot review a change to
+        <code>BookingLocation</code> without being able to read
+        <code>BookingLocation</code>. Everything below is anchored to a real line you can
+        go open right now.
+      </p>
+
+      <h2>The four files, and why they're the right four</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>File</th>
+              <th>What it teaches</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>sort.types.ts</code> — 4 lines</td>
+              <td>The smallest possible <code>type</code> alias. Read this first.</td>
+            </tr>
+            <tr>
+              <td><code>filters.types.ts</code> — 37 lines</td>
+              <td><code>interface</code>, arrays of named types, and a type that refers to itself.</td>
+            </tr>
+            <tr>
+              <td><code>transport.types.ts</code> — 65 lines</td>
+              <td>Enums, and unions with <code>null</code> — the nullability story.</td>
+            </tr>
+            <tr>
+              <td><code>index.ts</code> — 5 lines</td>
+              <td>The barrel. Why App imports from the package root, never deep paths.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>1. <code>interface</code> — and why this repo uses both</h2>
+      <p>
+        You already know <code>type</code> from
+        <a href="0004-type-the-vehicle-model.html">Lesson 0004</a>. Here's the thing that
+        confuses people opening this repo: <code>filters.types.ts</code> is entirely
+        <code>interface</code>, and <code>home-page.types.ts</code> is entirely
+        <code>type</code> — same package, same week, both styles.
+      </p>
+
+      <pre><code>// filters.types.ts
+export interface PriceFilterData {
+  min: number;
+  max: number;
+}
+
+// home-page.types.ts
+export type HomePageSnapshot = {
+  flow: TransportFlow;
+  passengers: number;
+};</code></pre>
+
+      <div class="callout">
+        <strong>For reading purposes, these are the same thing.</strong>
+        Both describe an object shape; both are erased at compile time. The differences
+        (<code>interface</code> can be re-opened and <code>extends</code>-ed;
+        <code>type</code> can express unions and tuples, which <code>interface</code>
+        cannot) only matter when you're <em>writing</em> one. When you're reading, treat
+        <code>interface X {</code> and <code>type X = {</code> as interchangeable and
+        move on.
+      </div>
+      <p>
+        <em>Source: TypeScript Field Guide, §1.8 — "Consistency matters more than the
+        specific choice."</em> Worth noting in review: this repo isn't consistent, so
+        don't read meaning into which one a file picked.
+      </p>
+
+      <h2>2. <code>T[]</code> — an array of a named type</h2>
+      <p>
+        A <code>[]</code> after any type means "a list of those." It composes with the
+        names you've already defined:
+      </p>
+      <pre><code>export interface FilterData {
+  price: PriceFilterData;      // exactly one
+  city: CityFilterItem[];      // a list of them
+  tag: TagFilterItem[];
+  cancellation: toggleFilterItem;
+}</code></pre>
+      <p>
+        Read <code>city: CityFilterItem[]</code> as "the <code>city</code> key holds an
+        array, and every element in it must have the <code>CityFilterItem</code> shape."
+        This is how the whole filter sidebar is described in one screen of code.
+        <em>(Field Guide §1.4.)</em>
+      </p>
+
+      <h2>3. A type can refer to itself</h2>
+      <p>
+        The last interface in <code>filters.types.ts</code> does something that looks
+        illegal the first time you see it:
+      </p>
+      <pre><code>export interface CategoryFilterItem {
+  id: number;
+  totalCount: number;
+  selected?: boolean;
+  hasSubCategories: boolean;
+  categories?: CategoryFilterItem[];  // ← itself
+}</code></pre>
+      <p>
+        That's a <strong>recursive type</strong>, and it's completely valid. It's how a
+        category filter models nesting to any depth: a category may contain categories,
+        which may contain categories. The <code>?</code> is what stops it being infinite —
+        a leaf category simply omits <code>categories</code>.
+      </p>
+
+      <h2>4. Unions — <code>string | null</code></h2>
+      <p>
+        The <code>|</code> reads as <strong>or</strong>. A union says the value may be any
+        one of the listed types. <code>transport.types.ts</code> is full of them:
+      </p>
+      <pre><code>export interface BookingLocation {
+  id: string;                              // must be a string
+  city?: string | null;                    // string, null, or absent
+  terminals?: AirportSearchTerminal[] | null;
+}</code></pre>
+
+      <p>
+        <code>?</code> and <code>| null</code> answer two <em>different</em> questions,
+        and this is the distinction that trips up every reviewer new to the file:
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Written</th>
+              <th>Legal values</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>city: string</code></td>
+              <td>A string. The key must be present.</td>
+            </tr>
+            <tr>
+              <td><code>city?: string</code></td>
+              <td>A string, or the key is left out entirely.</td>
+            </tr>
+            <tr>
+              <td><code>city: string | null</code></td>
+              <td>A string or <code>null</code>. The key must still be present.</td>
+            </tr>
+            <tr class="kept">
+              <td><code>city?: string | null</code></td>
+              <td>A string, <code>null</code>, <em>or</em> left out. Three states.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Look at <code>Destination</code> vs <code>BookingLocation</code> in the real file:
+        <code>Destination.city</code> is <code>string</code>, but
+        <code>BookingLocation.city</code> is <code>string | null</code>. That difference is
+        the author telling you the API can hand back an explicit null on one and not the
+        other — signal worth reading, not noise.
+      </p>
+
+      <h2>The landmine: this repo has <code>strict: false</code></h2>
+      <p>
+        Everything above describes what those annotations <em>mean</em>. Here is what the
+        compiler actually <em>enforces</em> in ct-web-transport — and they are not the
+        same thing.
+      </p>
+      <pre><code>// packages/sdk/tsconfig.json  AND  packages/app/tsconfig.json
+"strict": false,</code></pre>
+      <p>
+        <code>strict: false</code> leaves <code>strictNullChecks</code> off, and the
+        official docs are blunt about the consequence: <code>null</code> and
+        <code>undefined</code> are
+        <a href="https://www.typescriptlang.org/tsconfig/strictNullChecks.html"
+          >"effectively ignored by the language… This can lead to unexpected errors at
+          runtime."</a
+        >
+      </p>
+      <p>I ran this through the repo's own TypeScript (4.9.5) to confirm rather than assume:</p>
+      <pre><code>function label(loc: BookingLocation) {
+  return loc.city.toUpperCase();   // city is `string | null`
+}
+
+$ tsc --noEmit --strict false probe.ts
+exit=0                             ← compiles clean
+
+$ tsc --noEmit --strict true  probe.ts
+probe.ts(9,10): error TS18049: 'loc.city' is possibly 'null' or 'undefined'.</code></pre>
+
+      <div class="callout">
+        <strong>The review rule.</strong>
+        In this repo, the type files tell you the truth about <em>shape</em> but the
+        compiler will not enforce <em>nullability</em>. A <code>| null</code> or a
+        <code>?</code> is a note from the author to you — not a guardrail. So when you
+        review a diff that reads <code>loc.city.toUpperCase()</code> and the type says
+        <code>string | null</code>, that is a real crash waiting, and nothing but a human
+        will catch it. That is your job on this codebase.
+      </div>
+
+      <p>
+        Don't over-correct, though — <code>strict: false</code> does not mean "checking is
+        off." Verified with the same compiler, all four of these still error:
+        a missing required property, a <code>string</code> where a <code>number</code>
+        belongs, an unknown extra key on a fresh literal (the excess property check from
+        <a href="0004c-object-types-and-structural-typing.html">Lesson 0004c</a>), and a
+        wrong element type in an array. Only the null/undefined checking is switched off.
+        <em>(Field Guide §4.1 lists exactly which flags <code>strict</code> bundles.)</em>
+      </p>
+
+      <h2>5. The barrel — <code>export * from</code></h2>
+      <pre><code>// packages/sdk/src/types/index.ts — the entire file
+export * from './api';
+export * from './filters.types';
+export * from './home-page.types';
+export * from './sort.types';
+export * from './transport.types';</code></pre>
+      <p>
+        <code>export * from './x'</code> re-exports everything <code>x</code> exports, as
+        if this file had declared it. Five lines collapse four files into one import
+        surface, which is why App code writes one import from the package root instead of
+        four deep paths. The <code>@/</code> you see in
+        <code>import type { Airport } from '@/types/transport.types'</code> is a
+        <strong>path alias</strong>, configured in <code>tsconfig.json</code>
+        (<code>"paths": { "@/*": ["./*"] }</code>) — it means "from this package's
+        <code>src</code>," not a node_modules package.
+      </p>
+
+      <h2>Skill check</h2>
+      <p>Each one is a small code review. Answer from memory — don't scroll up.</p>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — the ? and the | null stack. The ? permits the key to be absent; the | null permits an explicit null when it is present. Three legal states."
+        data-bad="The ? and the | null are answering two separate questions. Count how many distinct states the two markers permit when they're combined on one property."
+      >
+        <h3>Check 1</h3>
+        <p class="prompt">
+          <code>terminal?: string | null;</code> — what may <code>terminal</code> be?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">string, null, or left out</button>
+          <button type="button" class="choice" data-index="1">string or null, never omitted</button>
+          <button type="button" class="choice" data-index="2">string or omitted, never null</button>
+          <button type="button" class="choice" data-index="3">string only, both markers redundant</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Correct, and this is the whole lesson. With strict off, the compiler ignores the | null entirely — it compiles, ships, and throws at runtime the first time the API returns a null city."
+        data-bad="Check the tsconfig line again. strictNullChecks is off in both packages, which means the compiler is not looking at that | null at all."
+      >
+        <h3>Check 2</h3>
+        <p class="prompt">
+          With <code>city?: string | null</code> and this repo's config, does
+          <code>loc.city.toUpperCase()</code> compile?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">Yes — and it can crash</button>
+          <button type="button" class="choice" data-index="1">No — the compiler flags it</button>
+          <button type="button" class="choice" data-index="2">Yes — null is impossible here</button>
+          <button type="button" class="choice" data-index="3">No — optional chaining is required</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — strict: false only switches off null/undefined checking. Shape checking is untouched, so a missing required property is still a compile error."
+        data-bad="strict: false is narrower than it sounds. It disables the null/undefined family of checks — it does not stop TypeScript from checking that an object has the properties its type requires."
+      >
+        <h3>Check 3</h3>
+        <p class="prompt">
+          <code>const c: CityFilterItem = { id: 1 };</code> — <code>totalCount</code> is
+          required and missing. With <code>strict: false</code>, this…
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">errors — shape is still checked</button>
+          <button type="button" class="choice" data-index="1">compiles — all checking is disabled</button>
+          <button type="button" class="choice" data-index="2">errors — but only in app</button>
+          <button type="button" class="choice" data-index="3">compiles — missing counts as undefined</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Correct — that's the point of a barrel. Everything the four files export becomes reachable from the package root, so App never reaches into deep internal paths."
+        data-bad="Look at what export * actually does: it re-exports another file's exports as if they were declared here. Ask what that gives the code doing the importing."
+      >
+        <h3>Check 4</h3>
+        <p class="prompt">
+          <code>export * from './filters.types';</code> inside
+          <code>types/index.ts</code> exists so that…
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">importers use one package root</button>
+          <button type="button" class="choice" data-index="1">each type needs its own import</button>
+          <button type="button" class="choice" data-index="2">the types survive into runtime</button>
+          <button type="button" class="choice" data-index="3">deep file paths become mandatory</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <aside class="primary-source">
+        <h2>Primary source (read next)</h2>
+        <p>
+          Read §1.4 (Arrays), §1.7 (Union &amp; Intersection Types), and especially §4.1
+          (<code>tsconfig.json</code> Essentials) of your
+          <a
+            href="file:///Users/daniel.varghese/Desktop/Almosafer/Almosafer/07%20Learning%20Block/Study/TypeScript%20Field%20Guide.md"
+            >TypeScript Field Guide</a
+          >. §4.1 has the flag-by-flag table for what <code>strict</code> turns on, and
+          names <code>strictNullChecks</code>-off as "the #1 cause of runtime crashes" —
+          which is precisely the situation you're working in. Then open the four real
+          files in
+          <code>packages/sdk/src/types/</code> and read them top to bottom in the order in
+          the table above.
+        </p>
+      </aside>
+
+      <p class="ask-teacher">
+        Unclear on anything? Ask me in chat — I'm your teacher for this mission. Good
+        follow-ups: "Walk me through <code>transport.types.ts</code> line by line," "Show
+        me a real diff in this repo where the missing null check would have shipped," or
+        "What would break if someone turned <code>strict: true</code> on tomorrow?"
+      </p>
+
+      <footer class="lesson-footer">
+        Reference: your
+        <a href="../notes/ts-glossary.html">TypeScript Field Notes glossary</a> now covers
+        every construct in these four files. Next up:
+        <code>useState</code> — making the vehicle page actually respond to a click.
+      </footer>
+    </article>
+    <script src="../assets/quiz.js"></script>
+  </body>
+</html>

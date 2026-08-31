@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lesson 0009 — Lifting state up</title>
+    <link rel="stylesheet" href="../assets/lesson.css" />
+  </head>
+  <body>
+    <article class="lesson">
+      <header class="lesson-header">
+        <p class="lesson-eyebrow">Lesson 0009 · React foundations · pivotal</p>
+        <h1>Lifting state up — filters actually filter</h1>
+        <p class="lede">
+          Your sidebar already has local <code>useState</code>. The list cannot
+          see it. To make Free Cancellation / chips / luggage change which cards
+          show, that state must live in the <em>common parent</em> and flow down
+          as props. The visible list is then <strong>derived</strong> — computed
+          from full data + filter state — not stored as a second copy.
+        </p>
+      </header>
+
+      <p class="mission-tie">
+        Mission tie-in: side-project task <strong>0008</strong> (dashboard
+        “Lifting state up”). File number is <strong>0009</strong> because
+        <a href="0008-usestate-filter-sidebar.html">lesson 0008</a> already
+        taught local <code>useState</code>. This is the pivotal React move —
+        the same idea the Rides filter store solves at work, first without MobX.
+      </p>
+
+      <h2>The one idea</h2>
+      <div class="callout">
+        <strong>When two children must stay in sync, lift the shared state to
+        their closest common parent.</strong>
+        Remove it from the children, hold it in the parent, pass the value
+        <em>and</em> the setters (or handlers) down as props. Official docs:
+        <a href="https://react.dev/learn/sharing-state-between-components"
+          >Sharing State Between Components</a
+        >.
+      </div>
+
+      <pre><code>// BEFORE — list cannot see this
+function FilterToggle() {
+  const [on, setOn] = useState(false); // trapped here
+}
+
+// AFTER — page owns it; both sides receive props
+function Home() {
+  const [freeCancel, setFreeCancel] = useState(false);
+  const visible = vehicles.filter(/* use freeCancel, chips, luggage, sort */);
+
+  return (
+    &lt;&gt;
+      &lt;FiltersPanel
+        freeCancel={freeCancel}
+        onFreeCancelChange={setFreeCancel}
+        /* …other filter props */
+      /&gt;
+      {visible.map((v) =&gt; &lt;VehicleCard key={v.id} {…v} /&gt;)}
+    &lt;/&gt;
+  );
+}</code></pre>
+
+      <h2>Three steps (same as the docs)</h2>
+      <ol>
+        <li>
+          <strong>Remove</strong> local <code>useState</code> from
+          <code>FilterToggle</code> / chips / stepper (they become controlled).
+        </li>
+        <li>
+          <strong>Pass</strong> the current value as a prop
+          (<code>on={freeCancel}</code>).
+        </li>
+        <li>
+          <strong>Pass</strong> a handler so the child can ask the parent to
+          update (<code>onChange={setFreeCancel}</code> or
+          <code>onToggle={() =&gt; setFreeCancel(!freeCancel)}</code>).
+        </li>
+      </ol>
+
+      <h2>Derived, not stored</h2>
+      <p>
+        Keep the full <code>vehicles</code> array as the source of truth. Do
+        <em>not</em> also keep a <code>visibleVehicles</code> state that you
+        update in event handlers. On each render:
+      </p>
+      <pre><code>const visible = vehicles
+  .filter((v) =&gt; /* matches current filters */)
+  .sort(/* by current sort */);</code></pre>
+      <p>
+        Filter state changes → React re-renders → <code>visible</code> is
+        recalculated. One source of truth for the data; filters are just knobs.
+      </p>
+
+      <h2>Controlled vs uncontrolled (quick)</h2>
+      <p>
+        A chip group with its own <code>useState</code> is
+        <strong>uncontrolled</strong> from the page’s point of view. Once
+        <code>selected</code> and <code>onSelectedChange</code> come from props,
+        it is <strong>controlled</strong> — the parent decides. Same vocabulary
+        as form inputs.
+      </p>
+
+      <h2>Skill check</h2>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — local state in FiltersPanel (or its children) is invisible to the list. Lift to the common parent (page) and pass props both ways."
+        data-bad="Ask who owns the boolean today, and who needs to read it. If ownership and need sit in different siblings, lift."
+      >
+        <h3>Check 1</h3>
+        <p class="prompt">
+          Toggle flips in the sidebar but all six cards stay. What’s the fix?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">Lift filter state to the page parent</button>
+          <button type="button" class="choice" data-index="1">Add a second useState inside VehicleCard</button>
+          <button type="button" class="choice" data-index="2">Replace Emotion with plain CSS classes</button>
+          <button type="button" class="choice" data-index="3">Delete keys from the vehicles .map()</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Correct — derive with filter/sort from the full array plus current knobs. Storing a second list duplicates truth and drifts."
+        data-bad="Think about what happens when filters change. Do you want to remember a copied list, or recompute from the same vehicles array?"
+      >
+        <h3>Check 2</h3>
+        <p class="prompt">
+          Where should the “cards currently on screen” list live?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">Derived each render from vehicles + filters</button>
+          <button type="button" class="choice" data-index="1">A second useState updated in every click</button>
+          <button type="button" class="choice" data-index="2">Hardcoded JSX with six VehicleCards</button>
+          <button type="button" class="choice" data-index="3">Inside LuggageStepper next to count</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — the child calls the handler prop; the parent’s setter runs; state lives only in the parent."
+        data-bad="Children cannot assign to a parent’s const. They need a function the parent passed down."
+      >
+        <h3>Check 3</h3>
+        <p class="prompt">
+          After lifting, how does FilterToggle change <code>freeCancel</code>?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">It calls an onChange handler from props</button>
+          <button type="button" class="choice" data-index="1">It imports setFreeCancel from page.tsx</button>
+          <button type="button" class="choice" data-index="2">It mutates a global freeCancel variable</button>
+          <button type="button" class="choice" data-index="3">It writes into document.cookie each click</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <aside class="primary-source">
+        <h2>Primary source (read next)</h2>
+        <p>
+          <a href="https://react.dev/learn/sharing-state-between-components"
+            >Sharing State Between Components</a
+          >
+          on react.dev — especially the “Filtering a list” challenge. Prefer your
+          <a href="file:///Users/daniel.varghese/Desktop/Almosafer/Almosafer/07%20Learning%20Block/Study/React%20Mastery%20Guide.md"
+            >React Mastery Guide</a
+          >
+          if it covers lifting / single source of truth in your own words.
+        </p>
+      </aside>
+
+      <p class="ask-teacher">
+        Unclear? Ask in chat — good follow-ups: “Which filters should I wire
+        first?”, “How do I type the props after lifting?”, or “Where does sort
+        state live?”
+      </p>
+
+      <footer class="lesson-footer">
+        Next:
+        <a href="0010-useeffect-edge-states.html"
+          >useEffect and the states nobody designs</a
+        >
+        (side-project task 0009). MobX twin (08b) comes after you can lift in
+        plain React.
+      </footer>
+    </article>
+    <script src="../assets/quiz.js"></script>
+  </body>
+</html>

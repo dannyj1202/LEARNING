@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lesson 0002 — Configure components with props</title>
+    <link rel="stylesheet" href="../assets/lesson.css" />
+  </head>
+  <body>
+    <article class="lesson">
+      <header class="lesson-header">
+        <p class="lesson-eyebrow">Lesson 0002 · React foundations</p>
+        <h1>Configure components with props</h1>
+        <p class="lede">
+          One <code>VehicleCard</code> function, six different vehicles on the page.
+          Props are how the same component shows different data each time it's used.
+        </p>
+      </header>
+
+      <p class="mission-tie">
+        Mission tie-in: in
+        <a href="0001-see-the-page-as-components.html">Lesson 0001</a> you named
+        <code>VehicleCard</code> as one reusable piece. Today you learn how it shows
+        “Standard Sedan / USD 39” in one place and “Luxury Sedan / USD 168” in another
+        — without writing the card twice.
+      </p>
+
+      <h2>What a prop is</h2>
+      <p>
+        Official React docs:
+        <a href="https://react.dev/learn/passing-props-to-a-component"
+          >a parent component passes data to a child through props</a
+        > — the same way an HTML tag takes attributes. In JSX, whatever you write as
+        attributes on a component becomes a single object argument inside the function.
+      </p>
+
+      <pre><code>function VehicleCard({ title, price }) {
+  return (
+    &lt;article&gt;
+      &lt;h2&gt;{title}&lt;/h2&gt;
+      &lt;p&gt;USD {price}&lt;/p&gt;
+    &lt;/article&gt;
+  );
+}</code></pre>
+
+      <p>Now the same function renders two different cards:</p>
+
+      <pre><code>&lt;VehicleCard title="Standard Sedan" price={39} /&gt;
+&lt;VehicleCard title="Luxury Sedan" price={168} /&gt;</code></pre>
+
+      <div class="callout">
+        <strong>Rule to remember.</strong>
+        Quotes (<code>title="Standard Sedan"</code>) pass a string. Curly braces
+        (<code>price={168}</code>) pass a JavaScript value — a number, variable, or
+        expression. Mixing them up is the most common first prop bug.
+      </div>
+
+      <h2>Props flow one way</h2>
+      <p>
+        Data flows parent → child only. <code>VehicleCard</code> can read
+        <code>title</code> and <code>price</code>, but it cannot change the values it
+        was given — those belong to whoever rendered it
+        (<a href="https://react.dev/learn/passing-props-to-a-component#recap"
+          >react.dev recap</a
+        >). If a value needs to change over time — like a stepper count — that's a
+        different tool (state), which is a later lesson, not props.
+      </p>
+
+      <h2>Your target, reused six times</h2>
+      <p>
+        Look back at the
+        <a href="../assets/vehicle-results-target.png">reference screenshot</a>: every
+        card is the same <code>VehicleCard</code> component. Only the props differ —
+        image, title, capacity, features, price. That's the whole trick behind six
+        visually distinct cards from one function.
+      </p>
+
+      <h2>Skill check</h2>
+      <p>
+        Answer from memory — do not scroll up. Feedback is immediate; wrong answers
+        still teach.
+      </p>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Yes — whatever text is passed as the title prop is what renders inside the h2."
+        data-bad="Re-read the two-card example. The h2 shows exactly the title prop that instance received."
+      >
+        <h3>Check 1</h3>
+        <p class="prompt">
+          Given <code>&lt;VehicleCard title="Luxury Sedan" price={168} /&gt;</code>,
+          what renders inside the <code>h2</code>?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">Luxury Sedan</button>
+          <button type="button" class="choice" data-index="1">Standard Sedan</button>
+          <button type="button" class="choice" data-index="2">One Hundred</button>
+          <button type="button" class="choice" data-index="3">VehicleCard</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Correct — curly braces pass a real JavaScript number, not text."
+        data-bad="Quotes pass a string. To pass an actual number, you need curly braces around it."
+      >
+        <h3>Check 2</h3>
+        <p class="prompt">Which JSX correctly passes the number 168 as the price prop?</p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">price={168}</button>
+          <button type="button" class="choice" data-index="1">price="168"</button>
+          <button type="button" class="choice" data-index="2">price=(168)</button>
+          <button type="button" class="choice" data-index="3">price:168</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — props are read-only from the receiving component's side."
+        data-bad="Think about who owns the data. The component that renders VehicleCard owns title and price, not VehicleCard itself."
+      >
+        <h3>Check 3</h3>
+        <p class="prompt">
+          Inside <code>VehicleCard</code>, can the component change the
+          <code>price</code> value it received?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">No, props are read-only inside</button>
+          <button type="button" class="choice" data-index="1">Yes, just reassign it directly</button>
+          <button type="button" class="choice" data-index="2">Yes, but only price props</button>
+          <button type="button" class="choice" data-index="3">No, but only for strings</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <aside class="primary-source">
+        <h2>Primary source (read next)</h2>
+        <p>
+          Read §1.3 of your
+          <a href="file:///Users/daniel.varghese/Desktop/Almosafer/Almosafer/07%20Learning%20Block/Study/React%20Mastery%20Guide.md"
+            >React Mastery Guide</a
+          >
+          — Passing Props. Cross-reference with
+          <a href="https://react.dev/learn/passing-props-to-a-component">Passing
+          Props to a Component</a> on react.dev if anything's unclear.
+        </p>
+      </aside>
+
+      <p class="ask-teacher">
+        Unclear on anything? Ask me in chat — I'm your teacher for this mission. Good
+        follow-ups: “What if I forget the curly braces around a number?”, “Can a prop
+        be another component?”, or “Show me FilterChip with label and active props.”
+      </p>
+
+      <footer class="lesson-footer">
+        Next up (when you're ready):
+        <a href="0003-render-lists-with-map.html">rendering a list</a> — turning an
+        array of vehicle data into six <code>VehicleCard</code> instances with
+        <code>.map()</code>.
+      </footer>
+    </article>
+    <script src="../assets/quiz.js"></script>
+  </body>
+</html>

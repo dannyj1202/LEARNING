@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lesson 0004 — Type the Vehicle model</title>
+    <link rel="stylesheet" href="../assets/lesson.css" />
+  </head>
+  <body>
+    <article class="lesson">
+      <header class="lesson-header">
+        <p class="lesson-eyebrow">Lesson 0004 · React foundations</p>
+        <h1>Type the Vehicle model</h1>
+        <p class="lede">
+          A typo in a prop name shouldn't wait until the page is open in a browser to
+          be discovered. TypeScript catches it while you're still typing.
+        </p>
+      </header>
+
+      <p class="mission-tie">
+        Mission tie-in: in
+        <a href="0003-render-lists-with-map.html">Lesson 0003</a> the
+        <code>vehicles</code> array was plain JavaScript — nothing stopped you from
+        writing <code>proce</code> instead of <code>price</code>, or passing a string
+        where a number belonged. Today that array gets a real shape, and mistakes
+        against that shape become errors you see immediately, not bugs you find later.
+      </p>
+
+      <h2>A type is a shape you can check against</h2>
+      <p>
+        Official docs:
+        <a href="https://www.typescriptlang.org/docs/handbook/2/objects.html">object
+        types describe the shape of an object</a> — which properties exist and what
+        type each one is. Define the shape once, then every value claimed to be that
+        shape gets checked against it.
+      </p>
+
+      <pre><code>type Vehicle = {
+  id: string;
+  title: string;
+  price: number;
+};
+
+const vehicles: Vehicle[] = [
+  { id: "v1", title: "Standard Sedan", price: 39 },
+  { id: "v2", title: "Luxury Sedan", price: 168 },
+];</code></pre>
+
+      <p>
+        <code>Vehicle[]</code> means "an array of things shaped like <code>Vehicle</code>."
+        If any object in that array is missing a field, has an extra one, or has the
+        wrong type for a field, TypeScript flags it — in your editor, before the code
+        ever runs.
+      </p>
+
+      <div class="callout">
+        <strong>Rule to remember.</strong>
+        This checking happens at <em>edit/compile time</em>, reading your code — not
+        at <em>run time</em>, executing it. TypeScript never watches your program run;
+        it reads the shapes and flags mismatches before a single line executes. That's
+        a different bug-catching moment than anything JavaScript itself can do.
+      </div>
+
+      <h2>The same shape types the component's props</h2>
+      <p>
+        Reuse <code>Vehicle</code> to type what <code>VehicleCard</code> is allowed to
+        receive — the same way
+        <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html">
+        Everyday Types</a> annotates a function's parameters:
+      </p>
+
+      <pre><code>function VehicleCard({ title, price }: Vehicle) {
+  return (
+    &lt;article&gt;
+      &lt;h2&gt;{title}&lt;/h2&gt;
+      &lt;p&gt;USD {price}&lt;/p&gt;
+    &lt;/article&gt;
+  );
+}</code></pre>
+
+      <p>
+        Now <code>&lt;VehicleCard title="SUV" price="89" /&gt;</code> — price as a
+        string — is a red squiggle in your editor, not a bug someone notices in the
+        rendered page three weeks from now.
+      </p>
+
+      <h2>Skill check</h2>
+      <p>
+        Each of these is a small code review. Answer from memory — do not scroll up.
+      </p>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — proce isn't a field on Vehicle, and price is missing entirely. TypeScript flags the object for not matching the shape."
+        data-bad="Compare the object's keys against the Vehicle type above, letter by letter. One field is misspelled, and as a result, price is missing."
+      >
+        <h3>Check 1</h3>
+        <p class="prompt">
+          Given <code>type Vehicle = { id: string; title: string; price: number };</code>
+          and <code>const v: Vehicle = { id: "v1", title: "SUV", proce: 89 };</code> —
+          TypeScript flags an error. Why?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">proce is misspelled; missing price</button>
+          <button type="button" class="choice" data-index="1">id must be a number type</button>
+          <button type="button" class="choice" data-index="2">SUV is not a valid string</button>
+          <button type="button" class="choice" data-index="3">89 must be written as text</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Correct — TypeScript reads your code and checks shapes before anything executes. JavaScript alone has no such check; it would just leave price as undefined at runtime."
+        data-bad="Think about when TypeScript looks at your code — while you're writing it, or while it's running? That's the difference from plain JavaScript here."
+      >
+        <h3>Check 2</h3>
+        <p class="prompt">
+          Why does TypeScript catch the <code>proce</code> typo, but plain JavaScript
+          running the same object would not?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">TS checks shapes before code runs</button>
+          <button type="button" class="choice" data-index="1">JS always throws on any typo</button>
+          <button type="button" class="choice" data-index="2">TS silently renames misspelled keys</button>
+          <button type="button" class="choice" data-index="3">JS requires a special typo linter</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — this is a type mismatch caught in your editor, before the page ever runs. Nothing here throws at runtime."
+        data-bad="This isn't a runtime crash. VehicleCard's price parameter is typed as number — a string argument is flagged where you wrote the JSX, before you ever open the browser."
+      >
+        <h3>Check 3</h3>
+        <p class="prompt">
+          <code>function VehicleCard({ title, price }: Vehicle)</code> is called as
+          <code>&lt;VehicleCard title="SUV" price="89" /&gt;</code>. What actually
+          happens?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">TypeScript flags price as wrong type</button>
+          <button type="button" class="choice" data-index="1">React silently converts the string</button>
+          <button type="button" class="choice" data-index="2">Nothing — strings equal numbers here</button>
+          <button type="button" class="choice" data-index="3">The component throws at run time</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <aside class="primary-source">
+        <h2>Primary source (read next)</h2>
+        <p>
+          Work through
+          <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html"
+            >Everyday Types</a
+          >, then
+          <a href="https://www.typescriptlang.org/docs/handbook/2/objects.html"
+            >Object Types</a
+          >
+          on the TypeScript Handbook — both are the canonical text this lesson
+          compresses.
+        </p>
+      </aside>
+
+      <p class="ask-teacher">
+        Unclear on anything? Ask me in chat — I'm your teacher for this mission. Good
+        follow-ups: "What if a field is optional, like a discount?", "What's the
+        difference between type and interface?", or "Show me what error message
+        TypeScript actually prints for the proce typo."
+      </p>
+
+      <footer class="lesson-footer">
+        Next up (when you're ready):
+        <a href="0004b-everyday-types.html">Everyday types</a> — tuples and function
+        types, two shapes you'll meet immediately in <code>useState</code> and the
+        sort dropdown. Then <a href="0004c-object-types-and-structural-typing.html"
+        >object types and structural typing</a> before Emotion.
+      </footer>
+    </article>
+    <script src="../assets/quiz.js"></script>
+  </body>
+</html>

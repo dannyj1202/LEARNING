@@ -1,0 +1,10 @@
+# Lessons 0004b/0004c cleared — tuples and function-type checking solid; structural typing's "freshness" rule needed a full re-teach
+
+User correctly spotted a tuple per-position type violation and a function-type return-type mismatch (`SortFn` expecting `number`, given a function returning `boolean`) on the first try — both genuine, unprompted recall. `readonly` vs. `const` was also explained correctly (property-level immutability independent of variable-level `const`).
+
+The excess-property-check "freshness" rule (from Lesson 0004c, itself an extension of the Q1 misconception in [[0007-lesson-04-typescript-excess-property-and-runtime-erasure]]) did not land from the lesson or from a first explanation with real examples. User answered a fresh-literal-as-function-argument case using pure structural typing reasoning ("has the properties, so it's accepted") and missed that literal-directness (not just "assigned to a variable or not") is what triggers the check. A second, example-heavy explanation with actual compiler error text still didn't land — user explicitly said "it made it worse" when comparing two examples that looked contradictory. What worked: stripping to the smallest possible pair (`type T = { a: number }` with a same-data literal-vs.-variable contrast, no functions/arrays/domain objects at all), plus a literal "point at the `{ }` and ask: is a type being forced directly here, or is this just a name" test. User confirmed understanding after that minimal version.
+
+## Implications
+- This rule took three passes to land (lesson → annotated real examples → stripped minimal pair). Treat it as **fragile**, not solid — re-probe with a fresh example before relying on it in a later lesson, don't assume one confirmation generalizes.
+- General lesson for teaching this user TypeScript's stranger rules: when an explanation "with more examples" doesn't work, the fix is usually fewer moving parts (strip domain objects, functions, arrays down to a two-field anonymous type), not more examples of the same complexity.
+- Tuples and function-types-as-values are solid floor for Lesson 0005 (Emotion) and beyond — no gaps there.

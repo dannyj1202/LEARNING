@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lesson 0008 — useState: the filter sidebar comes alive</title>
+    <link rel="stylesheet" href="../assets/lesson.css" />
+  </head>
+  <body>
+    <article class="lesson">
+      <header class="lesson-header">
+        <p class="lesson-eyebrow">Lesson 0008 · React foundations</p>
+        <h1><code>useState</code> — the filter sidebar comes alive</h1>
+        <p class="lede">
+          Props flow <em>down</em> from a parent. State is data a component
+          <em>owns</em> and can change over time — a toggle flipped, a chip
+          selected, a luggage count stepped up. That is what makes the sidebar
+          feel alive.
+        </p>
+      </header>
+
+      <p class="mission-tie">
+        Mission tie-in: side-project task <strong>0007</strong>. Your
+        <a href="0005-style-with-emotion.html">Emotion cards</a> already look
+        like results. The filter sidebar on the
+        <a href="../assets/vehicle-results-target.png">target screenshot</a>
+        must respond to clicks. Today each control keeps its own state. Making
+        those clicks actually filter the list is the next lesson (lift state) —
+        do not skip ahead.
+      </p>
+
+      <h2>The one idea</h2>
+      <div class="callout">
+        <strong>State is memory that survives a re-render because you asked
+        React to keep it.</strong>
+        A normal variable resets every time the function runs. <code>useState</code>
+        returns a value React remembers, plus a setter that schedules an update
+        and re-runs the component with the new value.
+        <em>(react.dev —
+        <a href="https://react.dev/reference/react/useState">useState</a>.)</em>
+      </div>
+
+      <pre><code>import { useState } from "react";
+
+function FilterToggle() {
+  const [on, setOn] = useState(false);
+
+  return (
+    &lt;button type="button" onClick={() =&gt; setOn(!on)}&gt;
+      Free Cancellation: {on ? "On" : "Off"}
+    &lt;/button&gt;
+  );
+}</code></pre>
+
+      <p>Read the line left to right:</p>
+      <ul>
+        <li>
+          <code>useState(false)</code> — start with <code>false</code> on the
+          first render.
+        </li>
+        <li>
+          <code>on</code> — the current value (this render).
+        </li>
+        <li>
+          <code>setOn</code> — call this to change it; React re-renders.
+        </li>
+      </ul>
+
+      <h2>Three shapes you'll use in the sidebar</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Control</th>
+              <th>State type</th>
+              <th>Typical update</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Free Cancellation toggle</td>
+              <td><code>boolean</code></td>
+              <td><code>setOn(!on)</code></td>
+            </tr>
+            <tr>
+              <td>Service / class chips</td>
+              <td><code>string | null</code> or a <code>Set</code>-like array</td>
+              <td>select / deselect a key</td>
+            </tr>
+            <tr>
+              <td>Luggage stepper</td>
+              <td><code>number</code></td>
+              <td><code>setCount(count + 1)</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        Emotion from lesson 0005 still applies: a chip can take an
+        <code>active</code> prop driven by state —
+        <code>&lt;Chip active={selected === "meet-greet"}&gt;</code>.
+        State decides; styled components display.
+      </p>
+
+      <h2>Hard boundary (do not blur this)</h2>
+      <div class="callout">
+        <strong>Local state only changes that component's UI.</strong>
+        Flipping Free Cancellation in <code>FilterToggle</code> does
+        <em>not</em> hide vehicles in the list — the list cannot see that
+        state. Shared filter → results wiring is
+        <strong>lifting state up</strong> (side-project task 0008). If you
+        try to reach into the list from a child today, you're inventing the
+        next lesson early and usually getting it wrong.
+      </div>
+
+      <h2>Skill check</h2>
+      <p>Answer from memory — do not scroll up.</p>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — useState keeps the value across re-renders and setOn asks React to render again with the new value. A plain let dies when the function exits."
+        data-bad="Think about what happens after the click: the function runs again. A normal variable starts fresh; only useState's value is restored by React."
+      >
+        <h3>Check 1</h3>
+        <p class="prompt">
+          Why use <code>useState</code> instead of <code>let on = false</code>
+          inside the component?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">React keeps it and re-renders on set</button>
+          <button type="button" class="choice" data-index="1">TypeScript forbids plain booleans</button>
+          <button type="button" class="choice" data-index="2">let cannot be read inside JSX at all</button>
+          <button type="button" class="choice" data-index="3">useState runs only on the server</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Correct — that state lives inside FilterToggle. ResultsList never received it as a prop, so it cannot react. Lifting state is how you share it later."
+        data-bad="Ask who owns the boolean. If only the toggle called useState, the list has no subscription to that memory."
+      >
+        <h3>Check 2</h3>
+        <p class="prompt">
+          You flip Free Cancellation on. The vehicle list still shows all six
+          cards. Is that a bug in today's lesson?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">No — local state does not reach the list</button>
+          <button type="button" class="choice" data-index="1">Yes — useState always filters siblings</button>
+          <button type="button" class="choice" data-index="2">Yes — Emotion blocks list updates</button>
+          <button type="button" class="choice" data-index="3">No — because the list uses keys wrong</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-quiz
+        data-answer="0"
+        data-ok="Right — count is the current number; setCount is how you change it. Plus should call setCount with the next number, not mutate count directly."
+        data-bad="useState returns a pair: the value for this render, and the setter. Which name would you put in the JSX label vs the onClick?"
+      >
+        <h3>Check 3</h3>
+        <p class="prompt">
+          <code>const [count, setCount] = useState(0)</code> — what should the
+          steppers + button call?
+        </p>
+        <div class="choices">
+          <button type="button" class="choice" data-index="0">setCount(count + 1)</button>
+          <button type="button" class="choice" data-index="1">count = count + 1</button>
+          <button type="button" class="choice" data-index="2">useState(count + 1)</button>
+          <button type="button" class="choice" data-index="3">setCount = count + 1</button>
+        </div>
+        <p class="feedback" aria-live="polite"></p>
+      </div>
+
+      <aside class="primary-source">
+        <h2>Primary source (read next)</h2>
+        <p>
+          <a href="https://react.dev/reference/react/useState">useState — React docs</a>
+          (canonical API). For the mental model of why the UI updates, also skim
+          <a href="https://react.dev/learn/state-a-components-memory"
+            >State: A Component's Memory</a
+          >
+          on react.dev. Your React Mastery Guide covers the same idea if you
+          prefer the field-guide wording.
+        </p>
+      </aside>
+
+      <p class="ask-teacher">
+        Unclear on anything? Ask in chat — good follow-ups: "Why does the setter
+        need a new value instead of mutating?", "Can two components share one
+        useState?", or "Where should luggage count live if the card must show
+        it too?"
+      </p>
+
+      <footer class="lesson-footer">
+        Next up:
+        <a href="0009-lifting-state-up.html"
+          >Lifting state up — filters actually filter, sort actually sorts</a
+        >
+        (side-project task 0008 · pivotal).
+      </footer>
+    </article>
+    <script src="../assets/quiz.js"></script>
+  </body>
+</html>
