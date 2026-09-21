@@ -1,0 +1,50 @@
+flowchart TB
+    subgraph widgetA ["Search widget - unchanged from Variant B"]
+        planTrip["PlanYourTripDrawer"]
+        pickupTime["PickupDateTimeDrawer"]
+        confirmA["ConfirmBookingDrawer"]
+        planTrip --> pickupTime --> confirmA
+    end
+
+    subgraph srpA ["SRP - unchanged from control"]
+        vehicleCard["VehicleCard"]
+        selectA["handleVehicleSelect"]
+        vehicleCard --> selectA
+    end
+
+    subgraph guestA ["Guest page - the only changed surface"]
+        summaryA["TransportSummary"]
+        contactA["ContactDetails"]
+        flightField["FlightNumberField - NEW"]
+        addOnsA["AddOns"]
+        stickyA["PriceSummary sticky CTA"]
+        summaryA --> contactA --> flightField --> addOnsA --> stickyA
+    end
+
+    subgraph formA ["react-final-form"]
+        formState[("values.contact.flightNumber")]
+        submitA["handleFormSubmit"]
+        formState --> submitA
+    end
+
+    subgraph apiA ["SDK and BFF"]
+        saleStoreA[("SaleStore.updateSaleInfo")]
+        saleClientA["SaleClient.updateSaleInfo"]
+        patchA["PATCH contact-additional-info"]
+        saleStoreA --> saleClientA --> patchA
+    end
+
+    beDerive["BE derives airline and terminal from the number"]
+
+    confirmA -->|"Search cars"| vehicleCard
+    selectA -->|"createSale then hard navigate"| summaryA
+    flightField -->|"useField, no validator"| formState
+    stickyA -->|"submitFormRef"| submitA
+    submitA -->|"contact plus extras plus flightNumber"| saleStoreA
+    patchA -.-> beDerive
+
+    style widgetA fill:#F5F5F5,stroke:#999999
+    style srpA fill:#F5F5F5,stroke:#999999
+    style guestA fill:#D2F0D2,stroke:#6FBF6F
+    style formA fill:#DCCCFF,stroke:#874FFF
+    style apiA fill:#FFECBD,stroke:#FFC943

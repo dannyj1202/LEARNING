@@ -1,0 +1,29 @@
+sequenceDiagram
+    title Variant A - flight number captured on guest details
+    participant User
+    participant SearchWidget
+    participant SRP
+    participant GuestPage
+    participant FinalForm
+    participant SaleStore
+    participant BFF
+
+    User->>SearchWidget: pickup, destination, date, time, pax
+    SearchWidget->>BFF: search async without flightNumber
+    BFF-->>SRP: vehicle results
+    User->>SRP: taps a VehicleCard
+    SRP->>SaleStore: createSale sId and optionId
+    SaleStore->>BFF: POST sale
+    BFF-->>SRP: saleId
+    SRP-->>GuestPage: hard navigate to guest saleId
+    GuestPage->>BFF: GET sale
+    BFF-->>GuestPage: cart, vehicle, contact, extras
+    User->>GuestPage: types flight number in the optional field
+    GuestPage->>FinalForm: useField contact.flightNumber
+    User->>GuestPage: taps the sticky CTA
+    GuestPage->>FinalForm: submitFormRef handleSubmit
+    FinalForm->>SaleStore: updateSaleInfo contact, extras, flightNumber
+    SaleStore->>BFF: PATCH contact-additional-info
+    BFF-->>SaleStore: updated sale with flightDetails
+    SaleStore-->>GuestPage: success
+    GuestPage-->>User: hard navigate to checkout

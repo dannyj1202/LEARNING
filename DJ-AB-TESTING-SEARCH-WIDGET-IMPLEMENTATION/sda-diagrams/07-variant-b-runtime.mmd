@@ -1,0 +1,35 @@
+sequenceDiagram
+    title Variant B - flight search after car selection, on the SRP
+    participant User
+    participant SearchWidget
+    participant SRP
+    participant AddFlightSheet
+    participant FlightStore
+    participant SaleStore
+    participant SessionStorage
+    participant GuestPage
+    participant BFF
+
+    User->>SearchWidget: pickup, destination, date, time, pax
+    SearchWidget->>BFF: search async without flightNumber
+    BFF-->>SRP: vehicle results
+    User->>SRP: taps a VehicleCard
+    SRP->>SaleStore: createSale sId and optionId
+    SaleStore->>BFF: POST sale
+    BFF-->>SRP: saleId
+    SRP->>AddFlightSheet: open instead of navigating
+    AddFlightSheet-->>User: add your flight for terminal and tracking
+    User->>AddFlightSheet: types a flight number or airline
+    AddFlightSheet->>FlightStore: useFlightSearch debounced fetch
+    FlightStore->>BFF: GET flight query and departuredate
+    BFF-->>FlightStore: airlines or segments
+    FlightStore-->>AddFlightSheet: viewState carriers or results
+    User->>AddFlightSheet: selects a flight segment
+    AddFlightSheet->>SessionStorage: saveFlightSession selectedFlight
+    AddFlightSheet->>SaleStore: updateSaleInfo with flight details
+    SaleStore->>BFF: PATCH contact-additional-info
+    BFF-->>SaleStore: sale with flightDetails and terminal
+    AddFlightSheet-->>GuestPage: hard navigate to guest saleId
+    GuestPage->>SessionStorage: loadFlightSession
+    SessionStorage-->>GuestPage: selectedFlight
+    GuestPage-->>User: FlightInfoCard rendered in the summary

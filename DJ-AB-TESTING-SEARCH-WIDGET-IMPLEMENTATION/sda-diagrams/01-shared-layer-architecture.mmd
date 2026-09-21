@@ -1,0 +1,80 @@
+flowchart TB
+    subgraph ssr ["SSR - getServerSideProps"]
+        appMw["appMiddleware"]
+        homeProps["setUpHomePageProps"]
+        srpProps["setUpSearchResultsPageProps"]
+        guestProps["setUpGuestPageProps"]
+    end
+
+    subgraph pagesLayer ["mweb pages"]
+        homePage["transportation-home"]
+        srpPage["transports search"]
+        guestPage["transport guest saleId"]
+    end
+
+    subgraph containersLayer ["App containers"]
+        searchWidget["SearchWidget"]
+        srpContainer["SearchResultsPage"]
+        guestContainer["GuestPage"]
+    end
+
+    subgraph hooksLayer ["App hooks - MobX to React bridge"]
+        useSearchPage["useStateOfTransportSearchPage"]
+        useFetchResults["useFetchSearchResults"]
+        useFlight["useFlightSearch"]
+        useGuest["useStateOfGuestPage"]
+    end
+
+    subgraph storesLayer ["SDK MobX stores"]
+        homeStore[("HomePageStore")]
+        srpStore[("SearchResultsPageStore")]
+        flightStore[("FlightStore")]
+        saleStore[("SaleStore")]
+    end
+
+    subgraph clientsLayer ["SDK clients"]
+        searchClient["TransportSearchClient"]
+        flightClient["FlightClient"]
+        saleClient["SaleClient"]
+    end
+
+    subgraph bffLayer ["BFF api transport"]
+        searchApi["search async plus poll"]
+        flightApi["GET flight"]
+        saleApi["POST sale and PATCH contact-additional-info"]
+    end
+
+    appMw --> homeProps & srpProps & guestProps
+    homeProps --> homePage
+    srpProps --> srpPage
+    guestProps --> guestPage
+
+    homePage --> searchWidget
+    srpPage --> srpContainer
+    guestPage --> guestContainer
+
+    searchWidget --> useSearchPage
+    searchWidget --> useFlight
+    srpContainer --> useFetchResults
+    guestContainer --> useGuest
+
+    useSearchPage --> homeStore
+    useFlight --> flightStore
+    useFetchResults --> srpStore
+    useGuest --> saleStore
+
+    srpStore --> searchClient
+    flightStore --> flightClient
+    saleStore --> saleClient
+
+    searchClient --> searchApi
+    flightClient --> flightApi
+    saleClient --> saleApi
+
+    style ssr fill:#FFECBD,stroke:#FFC943
+    style pagesLayer fill:#C2E5FF,stroke:#3DADFF
+    style containersLayer fill:#D2F0D2,stroke:#6FBF6F
+    style hooksLayer fill:#DCCCFF,stroke:#874FFF
+    style storesLayer fill:#FFD9CC,stroke:#FF8A5C
+    style clientsLayer fill:#F5F5F5,stroke:#999999
+    style bffLayer fill:#E8E8E8,stroke:#666666
