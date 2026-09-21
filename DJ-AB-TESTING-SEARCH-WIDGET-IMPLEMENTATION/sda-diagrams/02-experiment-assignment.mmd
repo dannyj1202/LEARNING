@@ -1,0 +1,21 @@
+sequenceDiagram
+    title Variant resolved once per SSR request, shared across the whole funnel
+    participant Browser
+    participant NextSSR
+    participant AppMiddleware
+    participant AmplitudeExperiment
+    participant InitialStore
+    participant ReactTree
+
+    Browser->>NextSSR: GET any rides page
+    NextSSR->>AppMiddleware: appMiddleware(ctx)
+    AppMiddleware->>AppMiddleware: parseCookies AMP_device_id and AMP_user_id
+    AppMiddleware->>AmplitudeExperiment: fetchV2 with user properties
+    AmplitudeExperiment-->>AppMiddleware: variants map
+    AppMiddleware->>AppMiddleware: getMultiVariant rides_flight_capture
+    AppMiddleware-->>NextSSR: activeTreatment off or variantA or variantB
+    NextSSR->>InitialStore: AppMiddlewareValues carries experiments
+    InitialStore->>ReactTree: hydrate with the assigned arm
+    ReactTree->>ReactTree: selectFlowStepMap picks the step map
+    ReactTree->>ReactTree: AvoParams stamps variant on every event
+    ReactTree-->>Browser: first paint already in the assigned arm

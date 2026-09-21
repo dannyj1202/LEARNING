@@ -1,0 +1,35 @@
+stateDiagram-v2
+    direction LR
+
+    state "Control - flight captured before search" as controlArm {
+        state "Plan your trip" as cPlan
+        state "Flight departure date" as cDate
+        state "Search flight" as cFlight
+        state "Terminal selection" as cTerminal
+        state "Pickup date and time" as cPickup
+        state "Confirm booking" as cConfirm
+
+        [*] --> cPlan
+        cPlan --> cDate
+        cDate --> cFlight
+        cFlight --> cConfirm: flight selected
+        cFlight --> cTerminal: skipped, no flight number
+        cTerminal --> cPickup
+        cPickup --> cConfirm
+        cConfirm --> [*]
+    }
+
+    state "Variant A and Variant B - identical widget" as variantArm {
+        state "Plan your trip" as vPlan
+        state "Pickup date and time" as vPickup
+        state "Confirm booking" as vConfirm
+
+        [*] --> vPlan
+        vPlan --> vPickup
+        vPickup --> vConfirm
+        vConfirm --> [*]
+    }
+
+    state "Search cars" as searchCars
+    controlArm --> searchCars
+    variantArm --> searchCars

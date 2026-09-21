@@ -1,0 +1,58 @@
+flowchart TB
+    subgraph widgetB ["Search widget - identical to Variant A"]
+        planTripB["PlanYourTripDrawer"]
+        pickupTimeB["PickupDateTimeDrawer"]
+        confirmB["ConfirmBookingDrawer"]
+        planTripB --> pickupTimeB --> confirmB
+    end
+
+    subgraph srpB ["SRP - the changed surface"]
+        vehicleCardB["VehicleCard"]
+        selectB["handleVehicleSelect"]
+        sheet["AddFlightSheet - NEW"]
+        skipB{"Add flight or skip"}
+        vehicleCardB --> selectB --> sheet --> skipB
+    end
+
+    subgraph searchB ["Reused flight search"]
+        useFlightB["useFlightSearch"]
+        resultsB["FlightResultsList and FlightResultCard"]
+        emptyB["SearchEmptyState"]
+        useFlightB --> resultsB
+        useFlightB --> emptyB
+    end
+
+    subgraph storeB ["SDK"]
+        flightStoreB[("FlightStore")]
+        saleStoreB[("SaleStore")]
+    end
+
+    subgraph apiB ["BFF api transport"]
+        flightApiB["GET flight query and departuredate"]
+        saleApiB["POST sale then PATCH contact-additional-info"]
+    end
+
+    handoff[("sessionStorage transport.confirmFlightSession")]
+
+    subgraph guestB ["Guest page - read only"]
+        summaryB["TransportSummary"]
+        flightCard["FlightInfoCard - existing"]
+        summaryB --> flightCard
+    end
+
+    confirmB -->|"Search cars"| vehicleCardB
+    selectB -->|"createSale first, hold navigation"| saleStoreB
+    sheet --> useFlightB
+    useFlightB --> flightStoreB --> flightApiB
+    resultsB -->|"selectFlight"| handoff
+    resultsB -->|"PATCH flight onto sale"| saleStoreB
+    saleStoreB --> saleApiB
+    skipB -->|"confirm or skip, then navigate"| summaryB
+    handoff -.->|"loadFlightSession"| flightCard
+
+    style widgetB fill:#F5F5F5,stroke:#999999
+    style srpB fill:#D2F0D2,stroke:#6FBF6F
+    style searchB fill:#DCCCFF,stroke:#874FFF
+    style storeB fill:#FFD9CC,stroke:#FF8A5C
+    style apiB fill:#FFECBD,stroke:#FFC943
+    style guestB fill:#C2E5FF,stroke:#3DADFF
